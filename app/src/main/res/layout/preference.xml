@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <PreferenceCategory android:title="@string/userCheckbox">
+        <EditTextPreference
+            android:key="userCheckboxString"
+            android:title="@string/userCheckboxTitle"
+            android:summary="@string/userCheckboxSummary"
+            android:dialogTitle="@string/userCheckboxTitle"
+        />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/backgroundPreferences">
+        <EditTextPreference
+            android:key="backgroundUri"
+            android:title="@string/backgroundViewTitle"
+            android:summary="@string/backgroundViewSummary"
+            android:dialogTitle="@string/backgroundViewTitle"
+        />
+        <EditTextPreference
+            android:key="backgroundColor"
+            android:title="@string/backgroundColorTitle"
+            android:summary="@string/backgroundColorSummary"
+            android:dialogTitle="@string/backgroundColorTitle"
+        />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/parameterTitle">
+        <ListPreference
+            android:key="objectPrintData"
+            android:title="@string/objectPrintData_title"
+            android:summary="@string/objectPrintData_summary"
+            android:dialogTitle="@string/objectPrintData_title"
+            android:entries="@array/printData_entries"
+            android:entryValues="@array/printData_entryvalues" />
+        <ListPreference
+            android:key="operationMode"
+            android:title="@string/operationMode_title"
+            android:summary="@string/operationMode_summary"
+            android:dialogTitle="@string/operationMode_title"
+            android:entries="@array/operationMode_entries"
+            android:entryValues="@array/operationMode_entryvalues" />
+    </PreferenceCategory>
+</PreferenceScreen>

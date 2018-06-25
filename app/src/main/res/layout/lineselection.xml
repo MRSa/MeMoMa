@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/selectline_dialog"
+    >
+<!-- android:background="#000040"  -->
+    
+<ScrollView
+    android:id="@+id/lineSelectView"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    >
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView  
+    android:id="@+id/lineThicknessLabel"
+    android:textSize="8pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:text="@string/labelLineThickness"
+    android:visibility="visible"
+    />
+<ImageButton
+    android:id="@+id/btnLineThicknessThin"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:contentDescription="@string/blank"
+    android:layout_below="@id/lineThicknessLabel"
+    android:background="@drawable/btn_line_thin"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineThicknessMiddle"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineThicknessThin"
+    android:layout_toEndOf="@id/btnLineThicknessThin"
+    android:layout_below="@id/lineThicknessLabel"
+    android:contentDescription="@string/blank"
+    android:background="@drawable/btn_line_middle"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineThicknessHeavy"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineThicknessMiddle"
+    android:layout_toEndOf="@id/btnLineThicknessMiddle"
+    android:layout_below="@id/lineThicknessLabel"
+    android:contentDescription="@string/blank"
+    android:background="@drawable/btn_line_heavy"
+    android:text="@string/blank"
+    />
+<ImageView
+    android:id="@+id/spacerLineSelection"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:contentDescription="@string/blank"
+    android:layout_below="@id/btnLineThicknessThin"
+     >
+</ImageView>
+<TextView  
+    android:id="@+id/lineShapeSelectionLabel"
+    android:textSize="8pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/spacerLineSelection"
+    android:text="@string/labelLineShapeSelection"
+    android:visibility="visible"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeStraight"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_straight"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeTree"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeStraight"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_tree"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeCurve"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeTree"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_curve"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeStraightDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeCurve"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_straight_dash"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeTreeDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeStraightDash"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_tree_dash"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeCurveDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeTreeDash"
+    android:layout_below="@id/lineShapeSelectionLabel"
+    android:background="@drawable/btn_curve_dash"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnLineShapeStraightRarrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:background="@drawable/btn_straight_rarrow"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeTreeRarrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeStraightRarrow"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:background="@drawable/btn_tree_rarrow"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeCurveRarrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeTreeRarrow"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:background="@drawable/btn_curve_rarrow"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeStraightRarrowDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeCurveRarrow"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:background="@drawable/btn_straight_rarrow_dash"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeTreeRarrowDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeStraightRarrowDash"
+    android:layout_toEndOf="@id/btnLineShapeStraightRarrowDash"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:contentDescription="@string/blank"
+    android:background="@drawable/btn_tree_rarrow_dash"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnLineShapeCurveRarrowDash"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnLineShapeTreeRarrowDash"
+    android:layout_toEndOf="@id/btnLineShapeTreeRarrowDash"
+    android:contentDescription="@string/blank"
+    android:layout_below="@id/btnLineShapeStraight"
+    android:background="@drawable/btn_curve_rarrow_dash"
+    android:text="@string/blank"
+    />
+
+<!--
+<TextView  
+    android:id="@+id/setTextColorLabel"
+    android:textSize="8pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/descriptionInputArea"
+    android:text="@string/labelTextColor"
+    android:visibility="visible"
+    />
+
+<TextView
+    android:id="@+id/textColorArea"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/setTextColorLabel"
+    android:layout_alignTop="@id/setTextColorLabel"
+    android:background="#ffffff" 
+    android:maxHeight="32dp"
+    android:maxWidth="32dp"
+    android:layout_width="32dp" 
+    android:layout_height="32dp" 
+    >
+</TextView>
+
+<SeekBar
+    android:id="@+id/textColorSelectionBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:max="63"
+    android:progress="63"
+    android:layout_alignTop="@id/textColorArea"
+    android:layout_toRightOf="@id/textColorArea"
+    />
+-->
+<!--
+<TextView  
+    android:id="@+id/setBorderColorLabel"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:textSize="7pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="32dp" 
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    android:text="@string/labelBorderColor"
+    android:background="@xml/bordershape"
+    android:maxHeight="32dp"
+    android:visibility="visible"
+    />
+
+<TextView
+    android:id="@+id/borderColorArea"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/setBorderColorLabel"
+    android:layout_alignTop="@id/setBorderColorLabel"
+    android:background="#004000"
+    android:maxHeight="32dp"
+    android:maxWidth="32dp"
+    android:layout_width="32dp" 
+    android:layout_height="32dp" 
+    android:gravity="center"
+    >
+</TextView>
+
+<SeekBar
+    android:id="@+id/borderColorSelectionBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:max="63"
+    android:progress="63"
+    android:layout_alignTop="@id/borderColorArea"
+    android:layout_toRightOf="@id/borderColorArea"
+    />
+
+<CheckBox
+    android:id="@+id/checkBoldText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/labelBoldText"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageView
+    android:id="@+id/spacerCheck"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/checkBoldText"
+    android:layout_below="@id/borderColorArea"
+     >
+</ImageView>
+
+<CheckBox
+    android:id="@+id/checkFillObject"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/labelFillBorder"
+    android:layout_toRightOf="@id/spacerCheck"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageView
+    android:id="@+id/spacerCheck2"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/checkFillObject"
+    android:layout_below="@id/borderColorArea"
+     >
+</ImageView>
+
+<CheckBox
+    android:id="@+id/checkUserCheckbox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/userCheckboxString"
+    android:layout_toRightOf="@id/spacerCheck2"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectRectangle"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_rectangle"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectRoundRect"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectRectangle"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_roundrect"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectCircle"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectRoundRect"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_circle"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectOval"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectCircle"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_oval"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectDiamond"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectOval"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_diamond"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectHexagonal"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDiamond"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_hexagonal"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectLoopStart"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectHexagonal"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_trapezoidy_up"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectLoopEnd"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectLoopStart"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_trapezoidy_down"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectParallelogram"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_parallelogram"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectKeyboard"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectParallelogram"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_keyboard"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectPaper"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectKeyboard"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_paper"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectDrum"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectPaper"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_drum"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectNoRegion"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDrum"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_noregion"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectLeftArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectNoRegion"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_left"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectDownArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectLeftArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_down"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectUpArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDownArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_up"
+    android:text="@string/blank"
+    />    
+<ImageButton
+    android:id="@+id/btnObjectRightArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectUpArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_right"
+    android:text="@string/blank"
+    />    
+-->
+</RelativeLayout>
+</ScrollView>
+</LinearLayout>

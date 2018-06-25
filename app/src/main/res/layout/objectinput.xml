@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/objectinput_dialog"
+    >
+<!-- android:background="#000040"  -->
+    
+<ScrollView
+    android:id="@+id/objectInputView"
+    android:layout_width="wrap_content"
+    android:layout_height="fill_parent"
+    >
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<!--
+<Button
+    android:id="@+id/objectInputCancel"
+    android:textSize="11pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:text="@string/confirmNo"
+    >
+</Button>
+
+<Button
+    android:id="@+id/objectInputAccept"
+    android:textSize="11pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_toLeftOf="@id/objectInputCancel"
+    android:layout_alignParentBottom="true"
+    android:text="@string/confirmYes"
+    >
+</Button>
+-->
+
+<ImageView
+    android:id="@+id/iconArea"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:maxHeight="48dp"
+    android:maxWidth="48dp"
+    android:layout_width="36dp" 
+    android:layout_height="36dp" 
+    >
+</ImageView>
+    
+<EditText
+    android:id="@+id/labelInputArea"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:layout_toRightOf="@id/iconArea"
+    android:layout_alignTop="@id/iconArea"
+    android:hint="@string/hintMessageLabel"
+    android:singleLine="true"
+    android:gravity="top"
+    android:lines="1"
+/>
+
+<ImageView
+    android:id="@+id/cameraView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_below="@id/labelInputArea"
+    android:layout_alignParentLeft="true"
+    >
+</ImageView>
+
+<EditText
+    android:id="@+id/descriptionInputArea"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/cameraView"
+    android:hint="@string/hintMessageInput"
+    android:gravity="top"
+    android:lines="5"
+/>
+<!--
+<TextView  
+    android:id="@+id/setTextColorLabel"
+    android:textSize="8pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/descriptionInputArea"
+    android:text="@string/labelTextColor"
+    android:visibility="visible"
+    />
+
+<TextView
+    android:id="@+id/textColorArea"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/setTextColorLabel"
+    android:layout_alignTop="@id/setTextColorLabel"
+    android:background="#ffffff" 
+    android:maxHeight="32dp"
+    android:maxWidth="32dp"
+    android:layout_width="32dp" 
+    android:layout_height="32dp" 
+    >
+</TextView>
+
+<SeekBar
+    android:id="@+id/textColorSelectionBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:max="63"
+    android:progress="63"
+    android:layout_alignTop="@id/textColorArea"
+    android:layout_toRightOf="@id/textColorArea"
+    />
+-->
+<TextView  
+    android:id="@+id/setBorderColorLabel"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:textSize="7pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="32dp" 
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/descriptionInputArea"
+    android:text="@string/labelBorderColor"
+    android:background="@xml/bordershape"
+    android:maxHeight="32dp"
+    android:visibility="visible"
+    />
+
+<TextView
+    android:id="@+id/borderColorArea"
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/setBorderColorLabel"
+    android:layout_alignTop="@id/setBorderColorLabel"
+    android:background="#004000"
+    android:maxHeight="32dp"
+    android:maxWidth="32dp"
+    android:layout_width="32dp" 
+    android:layout_height="32dp" 
+    android:gravity="center"
+    >
+</TextView>
+
+<SeekBar
+    android:id="@+id/borderColorSelectionBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:max="63"
+    android:progress="63"
+    android:layout_alignTop="@id/borderColorArea"
+    android:layout_toRightOf="@id/borderColorArea"
+    />
+
+<CheckBox
+    android:id="@+id/checkBoldText"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/labelBoldText"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageView
+    android:id="@+id/spacerCheck"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/checkBoldText"
+    android:layout_below="@id/borderColorArea"
+     >
+</ImageView>
+
+<CheckBox
+    android:id="@+id/checkFillObject"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/labelFillBorder"
+    android:layout_toRightOf="@id/spacerCheck"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageView
+    android:id="@+id/spacerCheck2"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/checkFillObject"
+    android:layout_below="@id/borderColorArea"
+     >
+</ImageView>
+
+<CheckBox
+    android:id="@+id/checkUserCheckbox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/userCheckboxString"
+    android:layout_toRightOf="@id/spacerCheck2"
+    android:layout_below="@id/borderColorArea"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectRectangle"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_rectangle"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectRoundRect"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectRectangle"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_roundrect"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectCircle"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectRoundRect"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_circle"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectOval"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectCircle"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_oval"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectDiamond"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectOval"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_diamond"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectHexagonal"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDiamond"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_hexagonal"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectLoopStart"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectHexagonal"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_trapezoidy_up"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectLoopEnd"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectLoopStart"
+    android:layout_below="@id/checkBoldText"
+    android:background="@drawable/btn_trapezoidy_down"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectParallelogram"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_alignParentLeft="true"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_parallelogram"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectKeyboard"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectParallelogram"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_keyboard"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectPaper"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectKeyboard"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_paper"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectDrum"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectPaper"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_drum"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectNoRegion"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDrum"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_noregion"
+    android:text="@string/blank"
+    />
+
+<ImageButton
+    android:id="@+id/btnObjectLeftArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectNoRegion"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_left"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectDownArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectLeftArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_down"
+    android:text="@string/blank"
+    />
+<ImageButton
+    android:id="@+id/btnObjectUpArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectDownArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_up"
+    android:text="@string/blank"
+    />    
+<ImageButton
+    android:id="@+id/btnObjectRightArrow"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_gravity="center_vertical"
+    android:layout_toRightOf="@id/btnObjectUpArrow"
+    android:layout_below="@id/btnObjectRectangle"
+    android:background="@drawable/btn_arrow_right"
+    android:text="@string/blank"
+    />    
+</RelativeLayout>
+</ScrollView>
+</LinearLayout>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:layout_alignParentTop="true"
+    android:background="#000040"
+    android:orientation="vertical">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gokigenMeMoMaView"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:background="@color/mybackground_color">
+
+        <TextView
+            android:id="@+id/MeMoMaInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/blank"
+            android:textSize="9pt"
+            android:visibility="gone" />
+        <!--
+<ImageButton
+    android:id="@+id/SelectButton"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:background="@xml/circlebuttonstyle"
+    android:text="@string/blank"
+    android:visibility="gone"
+    >
+</ImageButton>
+-->
+        <ImageButton
+            android:id="@+id/HomeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:background="@drawable/home"
+            android:contentDescription="@string/blank"
+            android:text="@string/blank"
+            android:textSize="9pt"
+            android:visibility="visible"></ImageButton>
+        <!--
+<ImageView
+    android:id="@+id/spacerMain1"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/HomeButton"
+    android:layout_alignTop="@id/HomeButton"
+     >
+</ImageView>
+-->
+        <ImageButton
+            android:id="@+id/CreateObjectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/HomeButton"
+            android:layout_toRightOf="@id/HomeButton"
+            android:background="@drawable/btn_create"
+            android:visibility="visible"></ImageButton>
+        <!--
+<ImageView
+    android:id="@+id/spacerMain2"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/CreateObjectButton"
+    android:layout_alignTop="@id/HomeButton"
+     >
+</ImageView>
+-->
+        <ImageButton
+            android:id="@+id/DeleteObjectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/HomeButton"
+            android:layout_toRightOf="@id/CreateObjectButton"
+            android:background="@drawable/btn_delete"
+            android:visibility="visible"></ImageButton>
+        <!--
+<Button
+    android:id="@+id/ModeButton"
+    android:textSize="9pt"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:layout_toRightOf="@id/HomeButton"
+    android:layout_alignTop="@id/HomeButton"
+    android:background="@drawable/btn_noregion"
+    android:text="@string/blank"
+    android:visibility="visible"
+    >
+</Button>
+
+<ImageButton
+    android:id="@+id/ObjectStyleButton"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content" 
+    android:background="@drawable/btn_noregion"
+    android:layout_toRightOf="@id/ModeButton"
+    android:layout_alignTop="@id/HomeButton"
+    android:visibility="visible"
+    >
+</ImageButton>
+-->
+        <!--
+<ImageView
+    android:id="@+id/spacerMain3"
+    android:layout_width="12dp" 
+    android:layout_height="12dp" 
+    android:adjustViewBounds = "true"
+    android:scaleType="fitCenter"
+    android:layout_toRightOf="@id/DeleteObjectButton"
+    android:layout_alignTop="@id/HomeButton"
+     >
+</ImageView>
+-->
+        <ImageButton
+            android:id="@+id/LineStyleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/HomeButton"
+            android:layout_toRightOf="@id/DeleteObjectButton"
+            android:background="@drawable/btn_straight"
+            android:visibility="visible"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/ExpandButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/HomeButton"
+            android:layout_toRightOf="@id/LineStyleButton"
+            android:background="@drawable/btn_sheet"
+            android:visibility="visible"></ImageButton>
+
+        <ImageButton
+            android:id="@+id/SaveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:background="@xml/savebuttonstyle"
+            android:text="@string/blank"
+            android:textSize="9pt"
+            android:visibility="visible"></ImageButton>
+
+        <TextView
+            android:id="@+id/ZoomRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/SaveButton"
+            android:layout_toLeftOf="@id/SaveButton"
+            android:text="@string/defaultZoom"
+            android:textSize="9pt"
+            android:visibility="visible" />
+
+        <SeekBar
+            android:id="@+id/ZoomInOut"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/ExpandButton"
+            android:layout_toLeftOf="@id/ZoomRate"
+            android:layout_toStartOf="@id/ZoomRate"
+            android:layout_toRightOf="@id/ExpandButton"
+            android:layout_toEndOf="@id/ExpandButton"
+            android:max="100"
+            android:progress="50" />
+
+        <jp.sourceforge.gokigen.memoma.GokigenSurfaceView
+            android:id="@+id/GraphicView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/SaveButton"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@id/MeMoMaInfo" />
+    </RelativeLayout>
+</LinearLayout>
+
