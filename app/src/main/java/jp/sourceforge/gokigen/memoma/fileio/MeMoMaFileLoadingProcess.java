@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.io.File;
 import java.io.FileReader;
@@ -11,6 +11,10 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Xml;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)

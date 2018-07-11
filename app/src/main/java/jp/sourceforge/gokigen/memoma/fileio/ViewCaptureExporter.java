@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,6 +12,9 @@ import android.graphics.Bitmap.CompressFormat;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -29,7 +32,7 @@ import android.view.View;
 public class ViewCaptureExporter extends AsyncTask<String, Integer, String>
 {
 	private ICaptureExporter receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;	
+	private ExternalStorageFileUtility fileUtility = null;
 	private String exportedFileName = null;
 
 	private ProgressDialog savingDialog = null;
@@ -85,10 +88,8 @@ public class ViewCaptureExporter extends AsyncTask<String, Integer, String>
     
     /**
      *    ビットマップデータを(PNG形式で)保管する。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
+     *
+	 *
      */
     private String exportToFile(String fileName)
     {

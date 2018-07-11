@@ -22,6 +22,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.CompoundButton;
 
+import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+
 /**
  *   オブジェクトのデータを入力するダイアログを表示する
  * 
@@ -44,7 +47,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
 	private SeekBar borderColorView = null;
     private CheckBox  fillObjectView = null;
     private GradientDrawable backgroundShape = null;
-    private int backgroundColor = MeMoMaCanvasDrawer.BACKGROUND_COLOR_DEFAULT;	
+    private int backgroundColor = MeMoMaCanvasDrawer.BACKGROUND_COLOR_DEFAULT;
     private int currentObjectDrawStyle = MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE;
     private float textFontSize = 6.0f;
 	
@@ -265,11 +268,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     
     /**
      *    オブジェクトにデータを設定する
-     * @param label
-     * @param detail
-     * @param labelColor
-     * @param borderColor
-     * @param size
+     *
      */
     public void setObjectData(String label, String detail, int progress, boolean boldText, boolean fillObject, boolean userCheck, int drawStyle)
     {

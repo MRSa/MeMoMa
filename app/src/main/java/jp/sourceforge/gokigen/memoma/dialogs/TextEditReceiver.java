@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.dialogs;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -13,9 +13,9 @@ import android.widget.TextView;
  */
 public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
 {
-	Activity parent = null;
-	String textId = null;
-	int     textResId = -1;
+	private Activity parent;
+	private String  textId;
+	private int     textResId;
 	
     /**
      *    コンストラクタ
@@ -44,12 +44,12 @@ public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(textId, message);
-        editor.commit();
+        editor.apply();
 
         if (textResId != 0)
         {
             // 画面表示の更新
-        	final TextView infoText = (TextView) parent.findViewById(textResId);
+        	final TextView infoText = parent.findViewById(textResId);
         	infoText.setText(message);
         }
         else

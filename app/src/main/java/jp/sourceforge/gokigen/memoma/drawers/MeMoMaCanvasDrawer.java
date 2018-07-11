@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.drawers;
 
 import java.util.Enumeration;
 import android.app.Activity;
@@ -19,13 +19,23 @@ import android.view.ScaleGestureDetector;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import jp.sourceforge.gokigen.memoma.GokigenSurfaceView;
+import jp.sourceforge.gokigen.memoma.IObjectSelectionReceiver;
+import jp.sourceforge.gokigen.memoma.fileio.ImageLoader;
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder;
+
 /**
  *    メモまの描画クラス
  *    
  * @author MRSa
  *
  */
-public class MeMoMaCanvasDrawer implements  ICanvasDrawer,  GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestureListener, SeekBar.OnSeekBarChangeListener
+public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestureListener, SeekBar.OnSeekBarChangeListener
 {
 	public static final float OBJECTLABEL_MARGIN = 8.0f;
 	public static final float OBJECTLABEL_MARGIN_WIDTH = 24.0f;
@@ -553,7 +563,7 @@ public class MeMoMaCanvasDrawer implements  ICanvasDrawer,  GestureDetector.OnGe
         else   // オブジェクト非選択時の表示
         {
     		int data = selectionReceiver.touchedVacantArea();
-    		if (data ==OperationModeHolder.OPERATIONMODE_MOVE)
+    		if (data == OperationModeHolder.OPERATIONMODE_MOVE)
     		{
                 // 移動モードのとき... （表示領域を移動させる）
     			drawTransX = (tempPosX - downPosX);
@@ -577,10 +587,7 @@ public class MeMoMaCanvasDrawer implements  ICanvasDrawer,  GestureDetector.OnGe
 
     /**
      *    オブジェクト（１個）を表示する
-     * 
-     * @param canvas
-     * @param paint
-     * @param pos
+     *
      */
     private void drawObject(Canvas canvas, MeMoMaObjectHolder.PositionObject object, boolean isMoving, float offsetX, float offsetY)
     {

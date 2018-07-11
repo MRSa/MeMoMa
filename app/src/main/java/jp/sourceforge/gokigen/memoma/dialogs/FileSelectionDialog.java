@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,6 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  *    ファイル選択ダイアログ

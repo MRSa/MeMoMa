@@ -8,6 +8,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import jp.sourceforge.gokigen.memoma.drawers.ICanvasDrawer;
+
 /**
  *  描画するくらす
  * 

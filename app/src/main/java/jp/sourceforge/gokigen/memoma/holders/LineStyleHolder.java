@@ -1,8 +1,10 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.holders;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  *    線の形状を保持するクラス
@@ -165,8 +167,7 @@ public class LineStyleHolder
 
 	  /**
 	   *    接続する線の太さ を設定する
-	   * 
-	   * @param shape
+	   *
 	   */
 	  public void setLineThickness(int thickness)
 	  {

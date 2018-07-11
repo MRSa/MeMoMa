@@ -1,8 +1,11 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.holders;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
 import android.util.Log;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
 
 
 /**

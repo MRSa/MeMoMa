@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,6 +9,15 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import jp.sourceforge.gokigen.memoma.GokigenSurfaceView;
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.MeMoMaListener;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.SharedIntentInvoker;
+import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingStatusHolder, MeMoMaFileSavingProcess.IResultReceiver, MeMoMaFileLoadingProcess.IResultReceiver,  ActionBar.OnNavigationListener, ObjectLayoutCaptureExporter.ICaptureLayoutExporter
 {

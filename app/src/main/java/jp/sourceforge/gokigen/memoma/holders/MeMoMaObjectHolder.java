@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.holders;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -8,6 +8,9 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Log;
 import android.widget.Toast;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  *   表示オブジェクトの情報を保持するクラス
@@ -284,8 +287,7 @@ public class MeMoMaObjectHolder
 
     /**
      *   オブジェクトのサイズを拡大する
-     * 
-     * @param key
+     *
      */
     public void expandObjectSize(Integer key)
     {

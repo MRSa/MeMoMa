@@ -26,8 +26,7 @@ public class ItemSelectionDialog
 
 	/**
 	 *  クラスの準備
-	 * @param receiver
-	 * @param initialMessage
+     *
 	 */
 	public void prepare(ISelectionItemReceiver receiver, ISelectionItemHolder holder,  String titleMessage)
 	{

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -6,6 +6,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)

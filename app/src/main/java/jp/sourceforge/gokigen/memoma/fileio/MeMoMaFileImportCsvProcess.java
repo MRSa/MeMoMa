@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -9,6 +9,10 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -25,7 +29,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
 {	
 	private Context parent = null;
 	private IResultReceiver receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;	
+	private ExternalStorageFileUtility fileUtility = null;
 	private String targetFileName = null;
     private String fileSavedResult = "";
 	private ProgressDialog importingDialog = null;

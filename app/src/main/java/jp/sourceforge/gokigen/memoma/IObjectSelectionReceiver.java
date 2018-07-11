@@ -9,10 +9,9 @@ package jp.sourceforge.gokigen.memoma;
  */
 public interface IObjectSelectionReceiver
 {
-	public abstract int touchedVacantArea();
-	public abstract int touchUppedVacantArea();
-	public abstract void objectCreated();
-    public abstract boolean objectSelected(Integer key);
-    public abstract void objectSelectedContext(Integer key);
-	
+	int touchedVacantArea();
+	int touchUppedVacantArea();
+	void objectCreated();
+    boolean objectSelected(Integer key);
+    void objectSelectedContext(Integer key);
 }

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.extension;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,6 +20,19 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
+import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog;
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
+import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileExportCsvProcess;
+import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileImportCsvProcess;
+import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileLoadingProcess;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.SharedIntentInvoker;
+import jp.sourceforge.gokigen.memoma.SymbolListArrayAdapter;
+import jp.sourceforge.gokigen.memoma.SymbolListArrayItem;
 
 /**
  *    リスト形式で表示・エクスポート
@@ -112,9 +125,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
     /**
      *    詳細データを表示する。
-     * 
-     * @param title
-     * @param url
+     *
      */
     private void showDetailData(String first, String second, String third)
     {

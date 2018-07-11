@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 
+import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
+
 /**
  *   接続線の形状を選択するダイアログを表示する
  * 

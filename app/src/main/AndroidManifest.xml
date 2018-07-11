@@ -16,7 +16,7 @@
         </activity>
         <activity android:name=".Preference" android:label="@string/preference_name">
         </activity>
-        <activity android:name=".ExtensionActivity"
+        <activity android:name=".extension.ExtensionActivity"
             android:label="@string/extent_name"
             android:screenOrientation="landscape">
             <intent-filter>

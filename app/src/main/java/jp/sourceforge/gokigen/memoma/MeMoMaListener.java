@@ -25,6 +25,17 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 
+import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog;
+import jp.sourceforge.gokigen.memoma.dialogs.CreditDialog;
+import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog;
+import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
+import jp.sourceforge.gokigen.memoma.extension.ExtensionActivity;
+import jp.sourceforge.gokigen.memoma.fileio.MeMoMaDataInOutManager;
+import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder;
+
 /**
  *   メモま！ のメイン画面処理
  *   

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import android.os.Environment;
 import android.util.Log;
@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import jp.sourceforge.gokigen.memoma.Main;
 
 /**
  *  外部ストレージにデータを記録するために使うユーティリティ

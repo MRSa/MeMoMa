@@ -1,10 +1,12 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.holders;
 
 import java.io.File;
 import java.io.FilenameFilter;
 
 import android.content.Context;
 import android.widget.ArrayAdapter;
+
+import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
 
 /**
  *    めもまのデータファイル名を保持するクラス　（ArrayAdapterを拡張）

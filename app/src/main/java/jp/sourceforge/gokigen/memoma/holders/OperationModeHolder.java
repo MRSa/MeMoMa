@@ -1,8 +1,10 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.holders;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  * 

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.drawers;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -6,6 +6,9 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+
+import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *   めもまのオブジェクト・ライン・ラベルを描画するメソッド群
@@ -250,7 +253,7 @@ public class ObjectShapeDrawer
 	   * @param paint
 	   * @param x1
 	   * @param y1
-	   * @param checkVaule
+	   * @param checkValue
 	   * @param isXaxis
 	   */
 	static public void drawArrowTree(Canvas canvas, Paint paint, float x1, float y1, float checkValue, boolean isXaxis)
@@ -341,6 +344,7 @@ public class ObjectShapeDrawer
 	        }
 	        
 	        // 文字をちょっと影付きにする
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
 	        paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
 	        
 	        // ユーザチェックの描画

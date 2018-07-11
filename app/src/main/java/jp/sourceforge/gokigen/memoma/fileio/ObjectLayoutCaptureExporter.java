@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +16,11 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Display;
+
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -40,7 +45,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
 	
 	private Activity parent = null;
 	private ICaptureLayoutExporter receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;	
+	private ExternalStorageFileUtility fileUtility = null;
 	private String exportedFileName = null;	
 	private MeMoMaObjectHolder objectHolder = null;
 	private MeMoMaCanvasDrawer canvasDrawer = null;

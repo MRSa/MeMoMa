@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.extension;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  * 
@@ -170,7 +172,6 @@ public class ExtensionActivity extends  Activity
     protected void onPrepareDialog(int id, Dialog dialog)
     {
     	listener.onPrepareDialog(id, dialog);
-    	return;
     }
     
     /**

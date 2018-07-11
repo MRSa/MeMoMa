@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 
+import jp.sourceforge.gokigen.memoma.fileio.MeMoMaDataInOutManager;
+
 /**
  *   メイン画面の処理
  * 

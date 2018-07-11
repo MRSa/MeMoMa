@@ -8,6 +8,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+
 /**
  *  オブジェクトの位置を整列するクラス (非同期処理を実行)
  *  
