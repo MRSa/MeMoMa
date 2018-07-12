@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -42,27 +43,32 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
 	
 	private static final int MINIMUM_WIDTH = 800;
 	private static final int MINIMUM_HEIGHT = 600;
-	
-	private Activity parent = null;
-	private ICaptureLayoutExporter receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
+
+	private ICaptureLayoutExporter receiver;
+	private ExternalStorageFileUtility fileUtility;
 	private String exportedFileName = null;	
-	private MeMoMaObjectHolder objectHolder = null;
-	private MeMoMaCanvasDrawer canvasDrawer = null;
-	private ProgressDialog savingDialog = null;
+	private MeMoMaObjectHolder objectHolder;
+	private MeMoMaCanvasDrawer canvasDrawer;
+	private ProgressDialog savingDialog;
 	private float offsetX = 0.0f;
 	private float offsetY = 0.0f;
+	private int displayWidth;
+	private int displayHeight;
 
 	/**
 	 *   コンストラクタ
 	 */
-    public ObjectLayoutCaptureExporter(Activity context, ExternalStorageFileUtility utility,  MeMoMaObjectHolder holder, MeMoMaCanvasDrawer drawer, ICaptureLayoutExporter resultReceiver)
+	ObjectLayoutCaptureExporter(Activity context, ExternalStorageFileUtility utility,  MeMoMaObjectHolder holder, MeMoMaCanvasDrawer drawer, ICaptureLayoutExporter resultReceiver)
     {
     	receiver = resultReceiver;
     	fileUtility = utility;
     	objectHolder = holder;
     	canvasDrawer = drawer;
-    	parent = context;
+
+        // 現在の画面サイズを取得
+        Display display = context.getWindowManager().getDefaultDisplay();
+        displayWidth = display.getWidth();
+        displayHeight = display.getHeight();
 
         //  プログレスダイアログ（「保存中...」）を表示する。
     	savingDialog = new ProgressDialog(context);
@@ -72,9 +78,12 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     	savingDialog.setCancelable(false);
     	savingDialog.show();
 
-    	/** ファイルをバックアップするディレクトリを作成する **/
+    	// ファイルをバックアップするディレクトリを作成する
     	File dir = new File(fileUtility.getGokigenDirectory() + "/exported");
-    	dir.mkdir();
+    	if (!dir.mkdir())
+        {
+            Log.v(Main.APP_IDENTIFIER, "mkdir is failed.");
+        }
     }
 	
     /**
@@ -89,10 +98,8 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     
     /**
      *    ビットマップデータを(PNG形式で)保管する。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
+     *
+     *
      */
     private String exportToFile(String fileName, Bitmap targetBitmap)
     {
@@ -107,7 +114,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         	
         	// エクスポートするファイル名を決定する
             Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
             exportedFileName = fileName + "_" + outFormat.format(calendar.getTime()) + ".png";
 
             // PNG形式でファイル出力を行う。
@@ -128,7 +135,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     /**
      *    キャンバスの大きさがどれくらい必要か、チェックする。
      * 
-     * @return
+     *
      */
     private Rect checkCanvasSize()
     {
@@ -166,26 +173,26 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         canvasSize.sort();
 
         // 現在の画面サイズを取得
-        Display display = parent.getWindowManager().getDefaultDisplay();
-        int width = display.getWidth();
-        int height = display.getHeight();
-        if (width < MINIMUM_WIDTH)
+        //Display display = parent.getWindowManager().getDefaultDisplay();
+        //int width = display.getWidth();
+        //int height = display.getHeight();
+        if (displayWidth < MINIMUM_WIDTH)
         {
-        	width = MINIMUM_WIDTH;
+            displayWidth = MINIMUM_WIDTH;
         }
-        if (height < MINIMUM_HEIGHT)
+        if (displayHeight < MINIMUM_HEIGHT)
         {
-        	height = MINIMUM_HEIGHT;
+            displayHeight = MINIMUM_HEIGHT;
         }        
 
         // 出力の最小サイズを(表示画面サイズに)設定
-        if (canvasSize.width() < width)
+        if (canvasSize.width() < displayWidth)
         {
-        	canvasSize.right = canvasSize.left + width;
+        	canvasSize.right = canvasSize.left + displayWidth;
         }
-        if (canvasSize.height() < height)
+        if (canvasSize.height() < displayHeight)
         {
-        	canvasSize.bottom = canvasSize.top + height;
+        	canvasSize.bottom = canvasSize.top + displayHeight;
         }
         
         
@@ -206,21 +213,27 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     @Override
     protected String doInBackground(String... datas)
     {
-    	Rect canvasSize = checkCanvasSize();
-    	Bitmap targetBitmap = Bitmap.createBitmap(canvasSize.width(), canvasSize.height(), Bitmap.Config.RGB_565);
-    	Canvas targetCanvas = new Canvas(targetBitmap);
-    	
-    	// オブジェクトをビットマップの中に書き込む
-    	canvasDrawer.drawOnBitmapCanvas(targetCanvas, offsetX, offsetY);
+    	String result = "";
+    	try
+        {
+            Rect canvasSize = checkCanvasSize();
+            Bitmap targetBitmap = Bitmap.createBitmap(canvasSize.width(), canvasSize.height(), Bitmap.Config.RGB_565);
+            Canvas targetCanvas = new Canvas(targetBitmap);
 
-    	// ファイル名の設定 ... (拡張子なし)
-    	String fileName = fileUtility.getGokigenDirectory() + "/exported/" + datas[0];
+            // オブジェクトをビットマップの中に書き込む
+            canvasDrawer.drawOnBitmapCanvas(targetCanvas, offsetX, offsetY);
 
-    	// データを保管する
-        String result = exportToFile(fileName, targetBitmap);
+            // ファイル名の設定 ... (拡張子なし)
+            String fileName = fileUtility.getGokigenDirectory() + "/exported/" + datas[0];
 
+            // データを保管する
+            result = exportToFile(fileName, targetBitmap);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+        }
         System.gc();
-
         return (result);
     }
 
@@ -257,7 +270,6 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     	{
             savingDialog.dismiss();
     	}
-    	return;
     }     
  
     /**
@@ -268,7 +280,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
      */
     public interface ICaptureLayoutExporter
     {
-        /**  保存結果の報告 **/
-        public abstract void onCaptureLayoutExportedResult(String exportedFileName, String detail);
+        //  保存結果の報告
+        void onCaptureLayoutExportedResult(String exportedFileName, String detail);
     }
 }

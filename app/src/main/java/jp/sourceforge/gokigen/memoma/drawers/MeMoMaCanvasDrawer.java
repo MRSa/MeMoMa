@@ -307,6 +307,12 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	    		// タイトルとめもまのアイコンを表示する : 文字の色は黒でいいのかな...
 	    		Bitmap bitmap = BitmapFactory.decodeResource(parent.getResources(), R.drawable.icon1);
 	    		canvas.drawBitmap(bitmap, 2.0f, 2.0f, paint);
+
+                // 文字をライトグレー、ちょっと影付きにする
+                paint.setColor(Color.LTGRAY);
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+
 	    		canvas.drawText(objectHolder.getDataTitle(), (bitmap.getWidth() + 10.0f), 32.0f, paint);
 
 	    	}

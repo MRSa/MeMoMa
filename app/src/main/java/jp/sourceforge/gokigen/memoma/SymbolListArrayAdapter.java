@@ -3,6 +3,8 @@ package jp.sourceforge.gokigen.memoma;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +14,9 @@ import android.widget.TextView;
 
 public class SymbolListArrayAdapter extends ArrayAdapter<SymbolListArrayItem>
 {
-    private LayoutInflater inflater = null;
-    private int textViewResourceId = 0;
-    private List<SymbolListArrayItem> listItems = null;
+    private final LayoutInflater inflater;
+    private final int textViewResourceId;
+    private final List<SymbolListArrayItem> listItems;
     
     /**
      * コンストラクタ
@@ -35,9 +37,9 @@ public class SymbolListArrayAdapter extends ArrayAdapter<SymbolListArrayItem>
      * 
      */
     @Override
-    public View getView(int position, View convertView, ViewGroup parent)
+    public @NonNull View getView(int position, View convertView, @NonNull ViewGroup parent)
     {
-        View view = null;
+        View view;
         if(convertView != null)
         {
             view = convertView;
@@ -49,26 +51,28 @@ public class SymbolListArrayAdapter extends ArrayAdapter<SymbolListArrayItem>
 
         SymbolListArrayItem item = listItems.get(position);
         
-        ImageView imageView = (ImageView) view.findViewWithTag("icon");
+        ImageView imageView = view.findViewWithTag("icon");
         imageView.setImageResource(item.getIconResource());
 
         int subIcon = item.getSubIconResource();
         //if (subIcon != 0)
         {
-            ImageView subImage = (ImageView) view.findViewWithTag("subIcon");
+            ImageView subImage = view.findViewWithTag("subIcon");
             subImage.setImageResource(subIcon);
         }            
 
-        TextView titleView = (TextView)view.findViewWithTag("title");
+        TextView titleView = view.findViewWithTag("title");
+        titleView.setTextColor(Color.LTGRAY);
         titleView.setText(item.getTextResource1st());
 
-        TextView detailView = (TextView)view.findViewWithTag("detail");
+        TextView detailView = view.findViewWithTag("detail");
+        detailView.setTextColor(Color.LTGRAY);
         detailView.setText(item.getTextResource2nd());
 
-        /**
-        TextView optionView = (TextView)view.findViewWithTag("option");
+        /*
+        TextView optionView = view.findViewWithTag("option");
         optionView.setText(item.getTextResource3rd());
-        **/
+        */
         return (view);
     }
 }

@@ -1,5 +1,6 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -31,16 +32,16 @@ public class ExtensionActivity extends  Activity
     {
           super.onCreate(savedInstanceState);
 
-          /** リスナクラスを生成する **/
-          listener = new ExtensionActivityListener((Activity) this);
+          // リスナクラスを生成する
+          listener = new ExtensionActivityListener(this);
 
-          /** レイアウトを設定する **/
-          setContentView(R.layout.extensionview);
+        // レイアウトを設定する
+        setContentView(R.layout.extensionview);
 
-          /** リスナクラスの準備 **/
-          listener.prepareExtraDatas(getIntent());
-          listener.prepareListener(); 
-     }
+        // リスナクラスの準備
+        listener.prepareExtraDatas(getIntent());
+        listener.prepareListener();
+    }
 
     /**
      *  メニューの生成
@@ -48,7 +49,7 @@ public class ExtensionActivity extends  Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-    	menu = listener.onCreateOptionsMenu(menu);
+        menu = listener.onCreateOptionsMenu(menu);
     	return (super.onCreateOptionsMenu(menu));
     }
     

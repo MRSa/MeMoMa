@@ -5,14 +5,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
@@ -42,27 +43,27 @@ import jp.sourceforge.gokigen.memoma.SymbolListArrayItem;
  */
 public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLoadingProcess.IResultReceiver, MeMoMaFileExportCsvProcess.IResultReceiver, FileSelectionDialog.IResultReceiver, MeMoMaFileImportCsvProcess.IResultReceiver
 {
-    public final int MENU_ID_EXPORT= (Menu.FIRST + 1);
-    public final int MENU_ID_SHARE = (Menu.FIRST + 2);
-    public final int MENU_ID_IMPORT = (Menu.FIRST + 3);
+    private final int MENU_ID_EXPORT= (Menu.FIRST + 1);
+    private final int MENU_ID_SHARE = (Menu.FIRST + 2);
+    private final int MENU_ID_IMPORT = (Menu.FIRST + 3);
 
-    private final String EXTENSION_DIRECTORY = "/exported";
+    private static final String EXTENSION_DIRECTORY = "/exported";
     
-    private ExternalStorageFileUtility fileUtility = null;
-	private MeMoMaObjectHolder objectHolder = null;
+    private ExternalStorageFileUtility fileUtility;
+	private MeMoMaObjectHolder objectHolder;
 	private FileSelectionDialog fileSelectionDialog = null;
 	
 	private boolean isShareExportedData = false;
 
 	private List<SymbolListArrayItem> listItems = null;
     
-    private Activity parent = null;  // 親分
+    private final Activity parent;  // 親分
 	
 	/**
      *  コンストラクタ
-     * @param argument
+     * @param argument parent activity
      */
-    public ExtensionActivityListener(Activity argument)
+	ExtensionActivityListener(Activity argument)
     {
         parent = argument;
         fileUtility = new ExternalStorageFileUtility(Main.APP_BASEDIR);
@@ -71,7 +72,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     /**
      *  起動時にデータを準備する
      * 
-     * @param myIntent
+     * @param myIntent intent information
      */
     public void prepareExtraDatas(Intent myIntent)
     {
@@ -97,7 +98,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     public void prepareListener()
     {
         // フィルタ設定ボタン
-        final ImageButton filterButton = (ImageButton) parent.findViewById(R.id.SetFilterButton);
+        final ImageButton filterButton = parent.findViewById(R.id.SetFilterButton);
         filterButton.setOnClickListener(this);
 
     }
@@ -117,7 +118,15 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     {
 		Log.v(Main.APP_IDENTIFIER, "ExtensionActivityListener::prepareToStart() : "  + objectHolder.getDataTitle());
 
-		// ファイルをロードする！
+		//  アクションバーを表示する
+        ActionBar bar = parent.getActionBar();
+        if (bar != null)
+        {
+            bar.show();
+            bar.setTitle(objectHolder.getDataTitle());
+        }
+
+        // ファイルをロードする！
 		// (AsyncTaskを使ってデータを読み込む)
 		MeMoMaFileLoadingProcess asyncTask = new MeMoMaFileLoadingProcess(parent, fileUtility, this);
         asyncTask.execute(objectHolder);
@@ -142,13 +151,13 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     
     /**
      *  他画面から戻ってきたとき...
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     *
+     *
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         // なにもしない...
+        Log.v(Main.APP_IDENTIFIER, "rc: " + requestCode + " rs: " + resultCode + " it: "  + data.getDataString());
     }
 
     /**
@@ -160,25 +169,28 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         if (id == R.id.SetFilterButton)
         {
         	 // フィルタ設定ボタンが押された！
+            Log.v(Main.APP_IDENTIFIER, "Selected Filter");
         }
     }
     
-    /**
+/*
+    **
      *   触られたときの処理
-     * 
-     */
+     *
+     *
     public boolean onTouch(View v, MotionEvent event)
     {
+        Log.v(Main.APP_IDENTIFIER, " " + v.toString() + " " + event.toString());
         // int id = v.getId();
         // int action = event.getAction();
 
         return (false);
     }
+*/
 
     /**
      *   メニューへのアイテム追加
-     * @param menu
-     * @return
+     *
      */
     public Menu onCreateOptionsMenu(Menu menu)
     {
@@ -199,26 +211,22 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     
     /**
      *   メニュー表示前の処理
-     * @param menu
-     * @return
+     *
      */
     public void onPrepareOptionsMenu(Menu menu)
     {
     	menu.findItem(MENU_ID_SHARE).setVisible(true);
     	menu.findItem(MENU_ID_EXPORT).setVisible(true);
     	menu.findItem(MENU_ID_IMPORT).setVisible(true);
-
-    	return;
     }
 
     /**
      *   メニューのアイテムが選択されたときの処理
-     * @param item
-     * @return
+     *
      */
     public boolean onOptionsItemSelected(MenuItem item)
     {
-    	boolean result = false;
+    	boolean result;
     	switch (item.getItemId())
     	{
           case MENU_ID_EXPORT:
@@ -244,6 +252,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     	}
     	return (result);
     }
+
 
     /**
      *   CSV形式でデータをインポートする
@@ -280,13 +289,13 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     		return (fileSelectionDialog.getDialog());
     	}
 
-/**
+      /*
     	if (id == R.id.info_about_gokigen)
     	{
     		CreditDialog dialog = new CreditDialog(parent);
     		return (dialog.getDialog());
     	}
-**/
+      */
    	    return (null);
     }
 
@@ -296,7 +305,15 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     private void prepareFileSelectionDialog(Dialog dialog)
     {
-    	fileSelectionDialog.prepare("", EXTENSION_DIRECTORY);
+        try
+        {
+            Log.v(Main.APP_IDENTIFIER, " " + dialog.toString());
+            fileSelectionDialog.prepare("", EXTENSION_DIRECTORY);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -309,7 +326,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         {
         	// CSVインポートダイアログを準備する
         	prepareFileSelectionDialog(dialog);
-        	return;
         }
     }
 
@@ -323,7 +339,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 		{
 	        // リストに表示するアイテムを生成する
 	        listItems = null;
-	        listItems = new ArrayList<SymbolListArrayItem>();
+	        listItems = new ArrayList<>();
 
 	        // TODO: 何らかの法則に従って並べ替えをする。
 
@@ -337,7 +353,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 	            int objectStyleIcon = MeMoMaObjectHolder .getObjectDrawStyleIcon(pos.drawStyle);
 	            
 	            // ユーザチェックの有無表示
-	            int userCheckedIcon = (pos.userChecked == true) ? R.drawable.btn_checked : R.drawable.btn_notchecked;
+	            int userCheckedIcon = (pos.userChecked) ? R.drawable.btn_checked : R.drawable.btn_notchecked;
 
 	            // TODO: アイテム選択時の情報エリアは(ArrayItem側には)用意しているが未使用。
 	            SymbolListArrayItem listItem = new SymbolListArrayItem(userCheckedIcon, pos.label, pos.detail, "", objectStyleIcon);
@@ -382,7 +398,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 		String outputMessage = parent.getString(R.string.export_csv) + " " + objectHolder.getDataTitle() + " " + detail;
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
         
-        if (isShareExportedData == true)
+        if (isShareExportedData)
         {
         	// エクスポートしたファイルを共有する
             shareContent(exportedFileName);
@@ -398,7 +414,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     	try
     	{
     		// リストアダプターを生成し、設定する
-            ListView listView = (ListView) parent.findViewById(R.id.ExtensionView);
+            ListView listView = parent.findViewById(R.id.ExtensionView);
             ListAdapter adapter = new SymbolListArrayAdapter(parent,  R.layout.listarrayitems, listItems);
             listView.setAdapter(adapter);
 
@@ -425,7 +441,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     /**
      *    エクスポートしたファイルを共有する
      * 
-     * @param fileName
+     *
      */
     private void shareContent(String fileName)
     {
@@ -434,7 +450,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         {
         	// 現在の時刻を取得する
             Calendar calendar = Calendar.getInstance();
-    		SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    		SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
             String date =  outFormat.format(calendar.getTime());
 
             // メールタイトル
@@ -450,7 +466,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         }
         catch (Exception ex)
         {
-        	
+            ex.printStackTrace();
         }
     }
     
@@ -468,8 +484,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
     /**
      *    インポート結果の受信
-     * 
-     * @param detail
+     *
      */
     public void onImportedResult(String detail)
     {
