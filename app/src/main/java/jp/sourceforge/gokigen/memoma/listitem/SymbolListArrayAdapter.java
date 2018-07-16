@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.listitem;
 
 import java.util.List;
 

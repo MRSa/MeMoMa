@@ -2,7 +2,12 @@ package jp.sourceforge.gokigen.memoma.fileio;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -118,8 +123,8 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	/**
 	 *    データファイルのフルパスを応答する
 	 * 
-	 * @param dataTitle
-	 * @return
+	 *
+	 *
 	 */
 	public String getDataFileFullPath(String dataTitle, String extension)
 	{
@@ -161,7 +166,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
 
     	// 画面を再描画する
-    	final GokigenSurfaceView surfaceview = (GokigenSurfaceView) parent.findViewById(R.id.GraphicView);
+    	final GokigenSurfaceView surfaceview = parent.findViewById(R.id.GraphicView);
     	surfaceview.doDraw();
     }
 
@@ -177,7 +182,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     /**
      *    ファイルからデータを読み込む。
      * 
-     * @param dataTitle
+     *
      */
     public void loadFile(String dataTitle)
     {
@@ -188,7 +193,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     /**
      *   ファイルからのデータ読み込み処理
      * 
-     * @param dataTitle
+     *
      */
 	private void loadFileWithName(String dataTitle)
 	{
@@ -210,7 +215,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	/**
 	 *    アクションバーを更新する...
 	 * 
-	 * @param bar
+	 *
 	 */
 	private void prepareActionBar(ActionBar bar)
 	{
@@ -228,7 +233,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	/**
 	 *    ファイルを保存する...同期型で。
 	 * 
-	 * @return
+	 *
 	 */
 	private String saveFileSynchronous()
 	{
@@ -237,8 +242,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     	String backgroundUri = preferences.getString("backgroundUri","");
     	String userCheckboxString = preferences.getString("userCheckboxString","");
     	MeMoMaFileSavingEngine saveEngine = new MeMoMaFileSavingEngine(fileUtility, backgroundUri, userCheckboxString);
-    	String message = saveEngine.saveObjects(objectHolder);
-        return (message);		
+    	return (saveEngine.saveObjects(objectHolder));
 	}
 	
 	
@@ -263,7 +267,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("MeMoMaInfo", data);
-        editor.commit();
+        editor.apply();
 
 		// 選択したアイテムをロードする！
         loadFileWithName(data);
@@ -295,28 +299,46 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 		// エクスポートしたことを伝達する
 		String outputMessage = parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail;
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-        
-        if (isShareExportedData == true)
+
+        if (isShareExportedData)
         {
-        	// エクスポートしたファイルを共有する
-        	shareContent(exportedFileName);
+            // ギャラリーに受信したファイルを登録し、エクスポートしたファイルを共有する
+            try {
+                long now = System.currentTimeMillis();
+                ContentValues values = new ContentValues();
+                ContentResolver resolver = parent.getContentResolver();
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.DATA, exportedFileName);
+                values.put(MediaStore.Images.Media.DATE_ADDED, now);
+                values.put(MediaStore.Images.Media.DATE_TAKEN, now);
+                values.put(MediaStore.Images.Media.DATE_MODIFIED, now);
+                Uri insertedImage = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                if (insertedImage != null)
+                {
+                    shareContent(insertedImage);
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
         }
     	isShareExportedData = false;
     }
 
     /**
      *    エクスポートしたファイルを共有する
-     * 
-     * @param fileName
+     *
      */
-    private void shareContent(String fileName)
+    private void shareContent(Uri imageName)
     {
     	String message = "";
         try
         {
         	// 現在の時刻を取得する
             Calendar calendar = Calendar.getInstance();
-    		SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    		SimpleDateFormat outFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
             String date =  outFormat.format(calendar.getTime());
 
             // メールタイトル
@@ -328,7 +350,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
             message = message + "number of objects : " + objectHolder.getCount() + "\n";
 
             // Share Intentを発行する。
-            SharedIntentInvoker.shareContent(parent, MeMoMaListener.MENU_ID_SHARE, title, message,  fileName, "image/png");
+            SharedIntentInvoker.shareContent(parent, MeMoMaListener.MENU_ID_SHARE, title, message,  imageName, "image/png");
         }
         catch (Exception ex)
         {

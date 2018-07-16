@@ -22,33 +22,35 @@ public class SharedIntentInvoker
      * @param id          Intentが呼び出し元Activityに戻った時に、呼ばれていたのは何か識別するID
      * @param mailTitle         共有データタイトル
      * @param mailMessage   共有データ本文
-     * @param fileName         添付データファイル名称
+     * @param contentUri         添付データファイルのURI
      * @param fileType           添付データファイルの形 (text/plain とか  image/* とか ...)
      */
-    static public void shareContent(Activity parent, int id, String mailTitle, String mailMessage, String fileName, String fileType)
+    static public void shareContent(Activity parent, int id, String mailTitle, String mailMessage, Uri contentUri, String fileType)
     {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         try
         {
+            Log.v(IDENTIFIER, "Share Content... " + contentUri);
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_SUBJECT, mailTitle);
             intent.putExtra(Intent.EXTRA_TEXT, mailMessage);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try
             {
-            	if ((fileName.isEmpty() == false)&&(fileType.isEmpty() == false))
+            	if ((contentUri != null)&&(!fileType.isEmpty()))
             	{
-                	// ファイルを添付する
+                	// ファイル類を添付する
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); 
                     intent.setType(fileType);
-                    intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + fileName));
-                    Log.v(IDENTIFIER, "Attached :" + fileName);
+                    intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                    Log.v(IDENTIFIER, "Attached :" + contentUri);
             	}
             }
             catch (Exception ee)
             {
             	// 
-                Log.v(IDENTIFIER, "attach failure : " + fileName + "  " + ee.toString() + " " + ee.getMessage());
+                Log.v(IDENTIFIER, "attach failure : " + contentUri + "  " + ee.toString() + " " + ee.getMessage());
             }
             parent.startActivityForResult(intent, id);          	
         }
@@ -60,6 +62,7 @@ public class SharedIntentInvoker
         catch (Exception e)
         {
             Log.v(IDENTIFIER, "xxx : " + e.toString() + " " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

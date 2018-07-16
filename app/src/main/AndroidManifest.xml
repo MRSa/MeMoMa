@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Preference" android:label="@string/preference_name">
+        <activity android:name=".preference.Preference" android:label="@string/preference_name">
         </activity>
         <activity android:name=".extension.ExtensionActivity"
             android:label="@string/extent_name"
@@ -25,6 +25,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="jp.sourceforge.gokigen.memoma.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"
+                />
+        </provider>
         <meta-data android:name="android.max_aspect" android:value="ratio_float"/>
     </application>
 </manifest>

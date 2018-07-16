@@ -1,9 +1,11 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+
+import jp.sourceforge.gokigen.memoma.R;
 
 
 /**

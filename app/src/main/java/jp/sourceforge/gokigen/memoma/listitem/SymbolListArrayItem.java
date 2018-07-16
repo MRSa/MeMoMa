@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.listitem;
 
 public class SymbolListArrayItem
 {
@@ -10,8 +10,7 @@ public class SymbolListArrayItem
 
     /**
      *  コンストラクタ
-     * @param iconId
-     * @param textId
+     *
      */
     public SymbolListArrayItem(int iconId1, String textData1, String textData2, String textData3, int iconId2)
     {

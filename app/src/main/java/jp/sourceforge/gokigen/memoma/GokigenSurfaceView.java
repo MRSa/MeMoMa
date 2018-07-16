@@ -22,31 +22,29 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 	
 	/**
      *  コンストラクタ
-     * @param context
+     *
      */
 	public GokigenSurfaceView(Context context)
     {
     	super(context);
-    	initializeSelf(context, null);
+    	initializeSelf();
     }
 
 	/**
 	 *  コンストラクタ
-	 * @param context
-	 * @param attrs
+     *
 	 */
 	public GokigenSurfaceView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
-		initializeSelf(context, attrs);
+		initializeSelf();
 	}
 
     /**
      *   クラスの初期化処理
-     * @param context
-     * @param attrs
+     *
      */
-    private void initializeSelf(Context context, AttributeSet attrs)
+    private void initializeSelf()
     {
     	SurfaceHolder holder = getHolder();
         holder.addCallback(this);
@@ -54,8 +52,8 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     /**
      *  データ書き込みクラスの設定
-     * 
-     * @param drawer
+     *
+     *
      */
     public void setCanvasDrawer(ICanvasDrawer drawer)
     {
@@ -93,15 +91,24 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     	if (canvasDrawer != null)
     	{
     	    ret = canvasDrawer.onTouchEvent(event);
-    	    if (ret == true)
+    	    if (ret)
     	    {
     	    	doDraw();
     	    }
     	}
+    	else
+        {
+            super.performClick();
+        }
         return (ret);
     }
 
-    
+    @Override
+    public boolean performClick()
+    {
+        return (super.performClick());
+    }
+
     /**
      *  サーフェイス変更イベントの処理
      * 
@@ -130,14 +137,9 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
      */
     public void surfaceDestroyed(SurfaceHolder aHolder)
     {
-        try
-        {
-            //            
-        }
-        catch (Exception ex)
-        {
-            //            
-        }        
+        //
+        //
+        //
     }
 
     /**

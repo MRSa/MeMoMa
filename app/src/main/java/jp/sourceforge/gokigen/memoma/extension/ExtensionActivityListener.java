@@ -1,5 +1,6 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +12,8 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,8 +35,8 @@ import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileLoadingProcess;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.SharedIntentInvoker;
-import jp.sourceforge.gokigen.memoma.SymbolListArrayAdapter;
-import jp.sourceforge.gokigen.memoma.SymbolListArrayItem;
+import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayAdapter;
+import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayItem;
 
 /**
  *    リスト形式で表示・エクスポート
@@ -462,10 +465,12 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             message = message + "number of objects : " + objectHolder.getCount() + "\n";
 
             // Share Intentを発行する。
-            SharedIntentInvoker.shareContent(parent, MENU_ID_SHARE, title, message,  fileName, "text/plain");
+            Uri fileURI = FileProvider.getUriForFile(parent,"jp.sourceforge.gokigen.memoma.fileprovider", new File(fileName));
+            SharedIntentInvoker.shareContent(parent, MENU_ID_SHARE, title, message, fileURI, "text/plain");
         }
         catch (Exception ex)
         {
+            Log.v(Main.APP_IDENTIFIER, "shareContent (fileName : " + fileName + ")");
             ex.printStackTrace();
         }
     }

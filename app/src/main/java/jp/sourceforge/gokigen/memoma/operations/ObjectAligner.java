@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.operations;
 
 
 import java.util.Enumeration;
@@ -8,6 +8,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**

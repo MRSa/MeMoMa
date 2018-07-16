@@ -27,6 +27,7 @@ import android.widget.SeekBar;
 
 import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog;
 import jp.sourceforge.gokigen.memoma.dialogs.CreditDialog;
+import jp.sourceforge.gokigen.memoma.dialogs.ItemSelectionDialog;
 import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.extension.ExtensionActivity;
@@ -35,6 +36,12 @@ import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder;
+import jp.sourceforge.gokigen.memoma.operations.IObjectSelectionReceiver;
+import jp.sourceforge.gokigen.memoma.operations.ObjectAligner;
+import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog;
+import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder;
+import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog;
+import jp.sourceforge.gokigen.memoma.preference.Preference;
 
 /**
  *   メモま！ のメイン画面処理
@@ -713,7 +720,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	        try
 	        {
 	            // 設定画面を呼び出す
-	            Intent prefIntent = new Intent(parent,jp.sourceforge.gokigen.memoma.Preference.class);
+	            Intent prefIntent = new Intent(parent,Preference.class);
 	            parent.startActivityForResult(prefIntent, MENU_ID_PREFERENCES);
 	        }
 	        catch (Exception e)

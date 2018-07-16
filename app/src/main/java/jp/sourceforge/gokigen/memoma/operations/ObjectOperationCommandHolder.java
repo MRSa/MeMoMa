@@ -1,6 +1,9 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.operations;
 
 import android.content.Context;
+
+import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.dialogs.ItemSelectionDialog;
 
 /**
  * 

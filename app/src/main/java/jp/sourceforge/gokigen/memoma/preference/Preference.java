@@ -1,9 +1,11 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.preference;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+
+import jp.sourceforge.gokigen.memoma.R;
 
 /**
  *    Androidの設定画面

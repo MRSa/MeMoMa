@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.operations;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,6 +22,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.CompoundButton;
 
+import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 

@@ -19,6 +19,7 @@ import jp.sourceforge.gokigen.memoma.Main;
  */
 public class ExternalStorageFileUtility 
 {
+    private final String TAG = toString();
 	private final int COPY_BUFFER_SIZE = 32768;
 	private final int BUFFER_MARGIN    = 4;
 
@@ -30,8 +31,11 @@ public class ExternalStorageFileUtility
      */
     public ExternalStorageFileUtility(String offsetDir)
     {
-        /** ベースディレクトリの作成 (あれば何もしない) **/
-        prepareBaseDirectory(offsetDir);
+        //  ベースディレクトリの作成 (あれば何もしない)
+        if (!prepareBaseDirectory(offsetDir))
+        {
+            Log.v(TAG, " prepareBaseDirectory : error");
+        }
     }
     
     /**
@@ -41,29 +45,27 @@ public class ExternalStorageFileUtility
     private boolean prepareBaseDirectory(String offsetDir)
     {
         String gokigenDirectory = Environment.getExternalStorageDirectory().getPath() + "/Gokigen";
+        Log.v(TAG, "DIR : " + gokigenDirectory);
         try
         {
             File baseDir = new File(gokigenDirectory);
-            if (baseDir.exists() == false)
+            if (!baseDir.exists())
             {
-                if (baseDir.mkdirs() == false)
+                if (!baseDir.mkdirs())
                 {
                     // ベースディレクトリ作成失敗...終了する
                     baseDirectory = Environment.getExternalStorageDirectory().getPath();
-                    baseDir = null;
                     return (false);
                 }
             }
             gokigenDirectory = gokigenDirectory + offsetDir;
-            baseDir = null;
             baseDir = new File(gokigenDirectory);
-            if (baseDir.exists() == false)
+            if (!baseDir.exists())
             {
-                if (baseDir.mkdirs() == false)
+                if (!baseDir.mkdirs())
                 {
                     // ベースディレクトリ作成失敗...終了する
                     baseDirectory = Environment.getExternalStorageDirectory().getPath() + "/Gokigen";
-                    baseDir = null;
                     return (false);                    
                 }
             }

@@ -20,7 +20,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import jp.sourceforge.gokigen.memoma.GokigenSurfaceView;
-import jp.sourceforge.gokigen.memoma.IObjectSelectionReceiver;
+import jp.sourceforge.gokigen.memoma.operations.IObjectSelectionReceiver;
 import jp.sourceforge.gokigen.memoma.fileio.ImageLoader;
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
