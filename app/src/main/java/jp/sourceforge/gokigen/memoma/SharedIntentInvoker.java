@@ -41,7 +41,8 @@ public class SharedIntentInvoker
             	if ((contentUri != null)&&(!fileType.isEmpty()))
             	{
                 	// ファイル類を添付する
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); 
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.setType(fileType);
                     intent.putExtra(Intent.EXTRA_STREAM, contentUri);
                     Log.v(IDENTIFIER, "Attached :" + contentUri);
