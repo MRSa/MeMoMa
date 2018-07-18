@@ -18,6 +18,12 @@
             android:summary="@string/backgroundViewSummary"
             android:dialogTitle="@string/backgroundViewTitle"
         />
+<!--
+        <PreferenceScreen
+            android:key="backgroundUri"
+            android:title="@string/backgroundViewTitle"
+            android:summary="@string/backgroundViewSummary" />
+-->
         <EditTextPreference
             android:key="backgroundColor"
             android:title="@string/backgroundColorTitle"

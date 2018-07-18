@@ -1,5 +1,6 @@
 package jp.sourceforge.gokigen.memoma;
 
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,8 @@ import android.view.MenuItem;
 import android.view.Window;
 
 import jp.sourceforge.gokigen.memoma.fileio.MeMoMaDataInOutManager;
+
+import static android.os.Build.VERSION_CODES.KITKAT;
 
 /**
  *   メイン画面の処理
@@ -52,12 +55,26 @@ public class Main extends  AppCompatActivity
         setContentView(R.layout.main);
 
         // 外部メモリアクセス権のオプトイン
-        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    },
-                    REQUEST_NEED_PERMISSIONS);
+        if (((ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))||
+            (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_DOCUMENTS) != PackageManager.PERMISSION_GRANTED))
+        {
+            if (Build.VERSION.SDK_INT >= KITKAT)
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.MANAGE_DOCUMENTS,
+                        },
+                        REQUEST_NEED_PERMISSIONS);
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        },
+                        REQUEST_NEED_PERMISSIONS);
+            }
         }
 
         try
