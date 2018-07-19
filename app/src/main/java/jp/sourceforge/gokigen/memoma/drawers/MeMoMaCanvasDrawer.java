@@ -137,7 +137,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
 	  /**
 	   * 
-	   * @param uri
+	   *
 	   */
 	  public void updateBackgroundBitmap(String uri, int width, int height)
 	  {
@@ -147,7 +147,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  // とりあえず、背景画像をクリアしてガベコレする。
 		  backgroundBitmap = null;
 		  System.gc();
-		  if (uri.isEmpty() == true)
+		  if (uri.isEmpty())
 		  {
 			  // 背景画像の指定がなかったので、ここでリターンする。
 			  return;
@@ -167,8 +167,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 			  backgroundBitmap = null;
 			  backgroundBitmapUri = "";
 			  System.gc();
-		  }	
-		  return;
+		  }
 	  }	  
 	  
 	  /**

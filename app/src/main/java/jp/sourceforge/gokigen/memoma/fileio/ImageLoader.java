@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.InputStream;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -23,8 +25,8 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class ImageLoader
 {
-    ProgressDialog loadingDialog = null;
-    Context  parent = null;
+    ProgressDialog loadingDialog;
+    Context  parent;
 
     // 画像を表示する
     String imageFile = null;
@@ -71,17 +73,14 @@ public class ImageLoader
 
     /**
 	 *  URIから変換
-	 * 
-	 * @param imageFile
-	 * @return
+	 *
 	 */
 	public static Uri parseUri(String imageFile)
 	{
-	    if (imageFile.startsWith("content://") == true)
+	    if (imageFile.startsWith("content://"))
 	    {
 	    	return (Uri.parse(imageFile));
 	    }
-
     	File picFile = new File(imageFile);
     	return (Uri.fromFile(picFile));	
 	}
@@ -93,10 +92,10 @@ public class ImageLoader
 	public static void setImage(Context context, ImageView view, String imageFile)
     {
     	// 画像を表示する
-		Bitmap bitmap = null;
+		Bitmap bitmap;
 		int width = view.getWidth();
 		int height = view.getHeight();
-        if (imageFile.startsWith("content://") == true)
+        if (imageFile.startsWith("content://"))
         {
         	// URIから画像を設定する...OutOfMemory対策付き
         	bitmap = getBitmapFromUri(context, Uri.parse(imageFile), width, height);
@@ -129,18 +128,15 @@ public class ImageLoader
         imageBitmap = null;
         imageWidth = view.getWidth();
         imageHeight = view.getHeight();        
-        
-        /**
-         *  ダイアログ表示中の処理
-         * 
-         */
+
+        // ダイアログ表示中の処理
         Thread thread = new Thread(new Runnable()
         {  
             public void run()
             {
             	try
             	{            		
-            		if (imageFile.startsWith("content://") == true)
+            		if (imageFile.startsWith("content://"))
                     {
                     	// URIから画像を設定する...OutOfMemory対策付き
                     	imageBitmap = getBitmapFromUri(parent, Uri.parse(imageFile), imageWidth, imageHeight);
@@ -155,6 +151,7 @@ public class ImageLoader
                 catch (Exception ex)
             	{
             		handler.sendEmptyMessage(0);
+                    ex.printStackTrace();
             	}
             }
 
@@ -178,7 +175,6 @@ public class ImageLoader
                     imageHeight = 1;
 
                 	loadingDialog.dismiss();
-                
                 }
             };   
         });
@@ -188,18 +184,13 @@ public class ImageLoader
         }
         catch (Exception ex)
         {
-
+            ex.printStackTrace();
         }
     }
 	
 	/**
 	 *   URI経由でビットマップデータを取得する
 	 * 
-	 * @param context
-	 * @param uri
-	 * @param width
-	 * @param height
-	 * @return
 	 */
     public static Bitmap getBitmapFromUri(Context context, Uri uri, int width, int height)
     {
@@ -214,14 +205,22 @@ public class ImageLoader
 
         InputStream input = null; 
         try
-        { 
-            input = context.getContentResolver().openInputStream(uri); 
-            BitmapFactory.decodeStream(input, null, opt); 
-            input.close();
+        {
+            if (Build.VERSION.SDK_INT >= 19)
+            {
+                context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            input = context.getContentResolver().openInputStream(uri);
+            if (input != null)
+            {
+                BitmapFactory.decodeStream(input, null, opt);
+                input.close();
+            }
         }
         catch (Exception ex)
         {
-        	Log.v(Main.APP_IDENTIFIER, "Ex(1): " + ex.toString());
+        	Log.v(Main.APP_IDENTIFIER, "Ex(1): " + ex.toString() + " URI : " + uri);
+        	ex.printStackTrace();
         	if (input != null)
         	{
         		try
@@ -231,6 +230,7 @@ public class ImageLoader
         		catch (Exception e)
         		{
         			//
+                    e.printStackTrace();
         		}
         	}
         }
@@ -272,18 +272,17 @@ public class ImageLoader
         		catch (Exception e)
         		{
         			//
+                    e.printStackTrace();
         		}
         	}
+        	ex.printStackTrace();
         }
         return (retBitmap);
     }        
     
     /**
      *   ビットマップデータを取得する
-     * 
-     * @param pictureString
-     * @param width
-     * @param height
+     *
      * @return ビットマップデータ
      */
     public static Bitmap getBitmap(String pictureString, int width, int height)

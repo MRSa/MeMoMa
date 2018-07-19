@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -225,9 +226,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    
 	    /**
 	     *  他画面から戻ってきたとき...
-	     * @param requestCode
-	     * @param resultCode
-	     * @param data
+		 *
 	     */
 	    public void onActivityResult(int requestCode, int resultCode, Intent data)
 	    {
@@ -238,13 +237,25 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	            	// 取得したuri を preferenceに記録する
 	    	    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
 	                Uri backgroundUri = data.getData();
-	                SharedPreferences.Editor editor = preferences.edit();
-	                editor.putString("backgroundUri", backgroundUri.toString());
-	                editor.commit();
-	                
-	                // 背景画像イメージの更新処理
-	            	updateBackgroundImage(backgroundUri.toString());
-	                
+	                if (backgroundUri != null)
+	                {
+	                    try
+                        {
+                            if (Build.VERSION.SDK_INT >= 19) {
+                                final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                parent.getContentResolver().takePersistableUriPermission(backgroundUri, takeFlags);
+                            }
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("backgroundUri", backgroundUri.toString());
+                            editor.apply();
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+						// 背景画像イメージの更新処理
+						updateBackgroundImage(backgroundUri.toString());
+					}
 	          	    System.gc();
 	            }
 	            catch (Exception ex)
@@ -514,7 +525,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    		break;
 
 	    	  case android.R.id.home:
-	    		/** アイコンが押された時の処理... **/
+	    		// アイコンが押された時の処理...
 		        // テキスト編集ダイアログを表示する
 	            showInfoMessageEditDialog();
 			    result = true;
@@ -533,16 +544,24 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	     */
 	    private void insertPicture()
 	    {
-	    	Intent intent = new Intent();
-	    	intent.setType("image/*");
-	    	intent.setAction(Intent.ACTION_GET_CONTENT);
+	        Intent intent;
+            if (Build.VERSION.SDK_INT >= 19) {
+                intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                //intent.setAction(Intent.ACTION_GET_CONTENT);
+            } else {
+                intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+            }
 	        parent.startActivityForResult(intent, MENU_ID_INSERT_PICTURE);
 	    }
 
 	    /**
 	     *    画面キャプチャの実施
 	     * 
-	     * @param isShare
+	     *
 	     */
 	    private void doCapture(boolean isShare)
 	    {
@@ -692,7 +711,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    /**
 	     *   アイテム選択ダイアログの表示を準備する
 	     * 
-	     * @param dialog
+	     *
 	     */
 	    private void prepareItemSelectionDialog(Dialog dialog)
 	    {
@@ -726,6 +745,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	        catch (Exception e)
 	        {
 	             // 例外発生...なにもしない。
+				e.printStackTrace();
 	        	 //updater.showMessage("ERROR", MainUpdater.SHOWMETHOD_DONTCARE);
 	        }
 	    }
@@ -778,7 +798,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    /**
 	     *    オブジェクトを本当に削除して良いか確認した後に、オブジェクトを削除する。
 	     * 
-	     * @param key
+	     *
 	     */
 	    private void removeObject(Integer key)
 	    {
@@ -830,14 +850,12 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	         // ダイアログを表示する
 	         AlertDialog alertDialog = alertDialogBuilder.create();
 	         alertDialog.show();
-
-	         return;
 	    }
 
 	    /**
 	     *    オブジェクトを複製する
 	     * 
-	     * @param key
+	     *
 	     */
 	    private void duplicateObject(Integer key)
 	    {
@@ -851,7 +869,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    /**
 	     *    オブジェクトを拡大する
 	     * 
-	     * @param key
+	     *
 	     */
 	    private void expandObject(Integer key)
 	    {
@@ -864,7 +882,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	    /**
 	     *    オブジェクトを縮小する
 	     * 
-	     * @param key
+	     *
 	     */
 	    private void shrinkObject(Integer key)
 	    {
@@ -880,7 +898,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 	      	try
 	      	{
 	              BitmapDrawable btnBackgroundShape = (BitmapDrawable)button.getBackground();
-	              if (isHighlight == true)
+	              if (isHighlight)
 	              {
 //	                 	btnBackgroundShape.setColorFilter(Color.rgb(51, 181, 229), Mode.LIGHTEN);
 	              	btnBackgroundShape.setColorFilter(Color.BLUE, Mode.LIGHTEN);
