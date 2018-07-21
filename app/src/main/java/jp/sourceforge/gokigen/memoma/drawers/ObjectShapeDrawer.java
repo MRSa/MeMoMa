@@ -6,8 +6,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
-
-import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
@@ -248,19 +246,13 @@ public class ObjectShapeDrawer
     }
 	  /**
 	   *    矢印を描画する処理 (ツリー表示時)
-	   * 
-	   * @param canvas
-	   * @param paint
-	   * @param x1
-	   * @param y1
-	   * @param checkValue
-	   * @param isXaxis
+	   *
 	   */
 	static public void drawArrowTree(Canvas canvas, Paint paint, float x1, float y1, float checkValue, boolean isXaxis)
     {
 		float margin = 8.0f;
-	  	float direction = 1.0f;
-	  	if (isXaxis == true)
+	  	float direction;
+	  	if (isXaxis)
         {
 	  	    direction = (checkValue < x1) ? -1.0f : 1.0f;
             canvas.drawLine(x1, y1, (x1 + direction * margin), (y1 - margin), paint);
@@ -275,13 +267,7 @@ public class ObjectShapeDrawer
     }
 	  /**
 	   *    矢印を描画する処理
-	   * 
-	   * @param canvas
-	   * @param paint
-	   * @param x1
-	   * @param y1
-	   * @param x2
-	   * @param y2
+	   *
 	   */
 	  static public void drawArrow(Canvas canvas, Paint paint, float x1, float y1, float x2, float y2)
 	  {
@@ -316,10 +302,7 @@ public class ObjectShapeDrawer
 
 	  /**
 	     *    オブジェクトのラベルを表示する
-	     * 
-	     * @param canvas
-	     * @param paint
-	     * @param pos
+	     *
 	     */
 	    public static void drawTextLabel(Canvas canvas, Paint paint, MeMoMaObjectHolder.PositionObject pos, RectF region, int displayObjectInformation, float offsetX, float offsetY)
 	    {
@@ -330,7 +313,7 @@ public class ObjectShapeDrawer
             	float width = region.width() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN_WIDTH;
                 int textLen = paint.breakText(pos.label, true, width, null);  // 省略文字を追加するから、そのぶん減らす
             	labelToShow = labelToShow.substring(0, textLen);
-            	if (labelToShow != pos.label)
+            	if (!labelToShow.equals(pos.label))
             	{
             		// truncate した場合には、省略文字を出す。
             		labelToShow = labelToShow + "...";
@@ -345,10 +328,10 @@ public class ObjectShapeDrawer
 	        
 	        // 文字をちょっと影付きにする
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-	        paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+	        paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY);
 	        
 	        // ユーザチェックの描画
-	        if (pos.userChecked == true)
+	        if (pos.userChecked)
 	        {
 	        	canvas.drawText("*", region.centerX(), region.top + (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2.0f), paint);
 	       }

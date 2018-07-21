@@ -2,11 +2,11 @@ package jp.sourceforge.gokigen.memoma.listitem;
 
 public class SymbolListArrayItem
 {
-    private int iconResource = 0;
-    private int subIconResource = 0;
-    private String textResource1st = "";
-    private String textResource2nd = "";
-    private String textResource3rd = "";
+    private int iconResource;
+    private int subIconResource;
+    private String textResource1st;
+    private String textResource2nd;
+    private String textResource3rd;
 
     /**
      *  コンストラクタ

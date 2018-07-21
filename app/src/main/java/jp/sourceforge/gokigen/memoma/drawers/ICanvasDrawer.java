@@ -5,11 +5,8 @@ import android.view.MotionEvent;
 
 public interface ICanvasDrawer
 {	
-    public abstract void prepareToStart(int width, int height);
-    public abstract void changedScreenProperty(int format, int width, int height);
-
-    public abstract void drawOnCanvas(Canvas canvas);
-    
-    public abstract boolean onTouchEvent(MotionEvent event);
-
+    void prepareToStart(int width, int height);
+    void changedScreenProperty(int format, int width, int height);
+    void drawOnCanvas(Canvas canvas);
+    boolean onTouchEvent(MotionEvent event);
 }
