@@ -19,9 +19,10 @@ import android.view.ScaleGestureDetector;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import jp.sourceforge.gokigen.memoma.GokigenSurfaceView;
+import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 import jp.sourceforge.gokigen.memoma.operations.IObjectSelectionReceiver;
-import jp.sourceforge.gokigen.memoma.fileio.ImageLoader;
+import jp.sourceforge.gokigen.memoma.io.ImageLoader;
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
@@ -43,7 +44,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	public static final int BACKGROUND_COLOR_DEFAULT = 0xff004000;
 	private int backgroundColor = BACKGROUND_COLOR_DEFAULT;
 	
-	private MeMoMaObjectHolder.PositionObject selectedPosition = null;
+	private PositionObject selectedPosition = null;
 	private float tempPosX = Float.MIN_VALUE;
 	private float tempPosY = Float.MIN_VALUE;
 	private float downPosX = Float.MIN_VALUE;
@@ -52,7 +53,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	// 以下の値は、MeMoMaListenerで初期値を設定する
 	private int objectStyle = MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE;
 	
-	private LineStyleHolder lineStyleHolder = null;
+	private LineStyleHolder lineStyleHolder;
 
 	private float drawScale = 1.0f;    // 表示の倍率
 	private float drawTransX  = 0.0f;   // 並行移動距離 (X)
@@ -70,14 +71,14 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	private String backgroundBitmapUri = null;
 	private Bitmap backgroundBitmap = null;
 
-	private MeMoMaObjectHolder objectHolder = null;
-	private MeMoMaConnectLineHolder lineHolder = null;
-	private IObjectSelectionReceiver selectionReceiver = null;
+	private MeMoMaObjectHolder objectHolder;
+	private MeMoMaConnectLineHolder lineHolder;
+	private IObjectSelectionReceiver selectionReceiver;
 
-	private GestureDetector gestureDetector = null;
-	private ScaleGestureDetector scaleGestureDetector = null;
+	private GestureDetector gestureDetector;
+	private ScaleGestureDetector scaleGestureDetector;
 
-	private Activity parent = null;
+	private Activity parent;
 	
 	/**
       *   コンストラクタ
@@ -103,7 +104,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   *   オブジェクトの形状を変更する
 	   *   (ここで指定された形状のチェックを行っておく。)
 	   * 
-	   * @param style
+	   *
 	   */
 	  public void setObjectStyle(int style)
 	  {
@@ -173,7 +174,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *   背景画像を設定する
 	   *   
-	   * @param uri
+	   *
 	   */
 	  public void setBackgroundUri(String uri)
 	  {
@@ -183,7 +184,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *   背景色を(文字列で)設定する
 	   * 
-	   * @param colorString
+	   *
 	   */
 	  public void setBackgroundColor(String colorString)
 	  {
@@ -264,8 +265,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
                 // オブジェクトをすべて表示
 	    		drawObjects(canvas, 0.0f, 0.0f);
 
-                /**  移動中かどうかのチェックを行う。 **/
-	    		if (isFlicking(canvas) == true)
+                //  移動中かどうかのチェックを行う。
+	    		if (isFlicking(canvas))
 	    		{
                     // 移動中の場合、フリック時の軌跡と現在位置を表示する
 		            drawTrackAndPositions(canvas);
@@ -325,7 +326,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *    オブジェクト間の接続線を表示する
 	   * 
-	   * @param canvas
+	   *
 	   */
 	  private void drawConnectionLines(Canvas canvas, float offsetX, float offsetY)
 	  {
@@ -345,8 +346,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	        while (keys.hasMoreElements())
 	        {
 	            Integer key = keys.nextElement();
-	            MeMoMaConnectLineHolder.ObjectConnector line = lineHolder.getLine(key);
-	            if (line.key > 0)
+	            ObjectConnector line = lineHolder.getLine(key);
+	            if (line.getKey() > 0)
 	            {
                     // 実際にラインを引く
 	            	drawLine(canvas, paint, dashLinePaint, line, offsetX, offsetY);
@@ -362,11 +363,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /** 
 	   *    接続する線を引く
        *
-	   * @param canvas
-	   * @param paint
-	   * @param line
 	   */
-	  public void drawLine(Canvas canvas, Paint paint, Paint dashPaint, MeMoMaConnectLineHolder.ObjectConnector line, float offsetX, float offsetY)
+	  private void drawLine(Canvas canvas, Paint paint, Paint dashPaint, ObjectConnector line, float offsetX, float offsetY)
 	  {
 		  try
 		  {
@@ -376,8 +374,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 				  return;
 			  }
 
-			  MeMoMaObjectHolder.PositionObject from = objectHolder.getPosition(line.fromObjectKey);
-			  MeMoMaObjectHolder.PositionObject to = objectHolder.getPosition(line.toObjectKey);
+			  PositionObject from = objectHolder.getPosition(line.getFromObjectKey());
+			  PositionObject to = objectHolder.getPosition(line.getToObjectKey());
 			  if ((from == null)||(to == null))
 			  {
 				  // なにもしない
@@ -385,66 +383,69 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 			  }
 
 			  // ラインの太さを設定する。
-			  paint.setStrokeWidth((float) line.lineThickness);
+			  paint.setStrokeWidth((float) line.getLineThickness());
 
 			  // ラインの太さを設定する。
-			  dashPaint.setStrokeWidth((float) line.lineThickness);
+			  dashPaint.setStrokeWidth((float) line.getLineThickness());
 
 			  // ラインのスタイル(連続線 or 点線)を設定する
-			  Paint linePaint = (line.lineShape == LineStyleHolder.LINESHAPE_DASH) ? dashPaint : paint;
+			  Paint linePaint = (line.getLineShape() == LineStyleHolder.LINESHAPE_DASH) ? dashPaint : paint;
 			  
 			  // 初期値として、各オブジェクトの中心座標を設定する
-			  float startX = from.rect.centerX() + offsetX;
-			  float endX = to.rect.centerX() + offsetX;
-			  float startY = from.rect.centerY() + offsetY;
-			  float endY = to.rect.centerY() + offsetY;
+			  RectF fromRect = from.getRect();
+			  RectF toRect = to.getRect();
+			  float startX = fromRect.centerX() + offsetX;
+			  float endX = toRect.centerX() + offsetX;
+			  float startY = fromRect.centerY() + offsetY;
+			  float endY = toRect.centerY() + offsetY;
 			  
 			  // Y座標の線の位置を補正する
-			  if (from.rect.bottom < to.rect.top)
+			  if (fromRect.bottom < toRect.top)
 			  {
-                  startY = from.rect.bottom + offsetY;
-                  endY = to.rect.top + offsetY;
+                  startY = fromRect.bottom + offsetY;
+                  endY = toRect.top + offsetY;
 			  }
-			  else if (from.rect.top > to.rect.bottom)
+			  else if (fromRect.top > toRect.bottom)
 			  {
-                  startY = from.rect.top + offsetY;
-                  endY = to.rect.bottom + offsetY;
+                  startY = fromRect.top + offsetY;
+                  endY = toRect.bottom + offsetY;
 			  }
 
 			  // X座標の線の位置を補正する (Y座標が補正されていないとき)
-              if ((startY != (from.rect.top + offsetY))&&(startY != (from.rect.bottom + offsetY)))
+              if ((startY != (fromRect.top + offsetY))&&(startY != (fromRect.bottom + offsetY)))
 			  {
-    			  if (from.rect.right < to.rect.left)
+    			  if (fromRect.right < toRect.left)
     			  {
-                      startX = from.rect.right + offsetX;
-                      endX = to.rect.left + offsetX;
+                      startX = fromRect.right + offsetX;
+                      endX = toRect.left + offsetX;
     			  }
-    			  else if (from.rect.left > to.rect.right)
+    			  else if (fromRect.left > toRect.right)
     			  {
-                      startX = from.rect.left + offsetX;
-                      endX = to.rect.right + offsetX; 
+                      startX = fromRect.left + offsetX;
+                      endX = toRect.right + offsetX;
     			  }
 			  }
 
-			  if ((line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_NO_ARROW)||
-					  (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)||
-					  (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW))
+			  int lineStyle = line.getLineStyle();
+			  if ((lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_NO_ARROW)||
+					  (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)||
+					  (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW))
 			  {
 				  // ツリー形式のように接続する ... 
-				  if (startX == (from.rect.centerX() + offsetX))
+				  if (startX == (fromRect.centerX() + offsetX))
 				  {
 					  float middleY = (startY + endY) / 2;
 				      canvas.drawLine(startX, startY, startX, middleY, linePaint);
 				      canvas.drawLine(startX, middleY, endX, middleY, linePaint);
 				      canvas.drawLine(endX, middleY, endX, endY, linePaint);
 				      
-				      /**  やじるしをつける処理 **/
-				      if (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)
+				      // やじるしをつける処理
+				      if (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)
 				      {
 				    	  // 始点に矢印をつける
 				    	  ObjectShapeDrawer.drawArrowTree(canvas, paint, startX,startY, middleY, false);
 				      }
-				      else if (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW)
+				      else if (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW)
 				      {
 				    	  // 終点に矢印をつける
 				    	  ObjectShapeDrawer.drawArrowTree(canvas, paint, endX, endY, middleY, false);
@@ -457,43 +458,41 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 				      canvas.drawLine(middleX, startY, middleX, endY, linePaint);
 				      canvas.drawLine(middleX, endY, endX, endY, linePaint);
 
-				      /**  やじるし(三角形)をつける処理 **/
-				      if (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)
+				      // やじるし(三角形)をつける処理
+				      if (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW)
 				      {
 				    	  // 始点に矢印をつける
 				    	  ObjectShapeDrawer.drawArrowTree(canvas, paint, startX, startY, middleX, true);
 				      }
-				      else if (line.lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW)
+				      else if (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW)
 				      {
 				    	  // 終点に矢印をつける
 				    	  ObjectShapeDrawer.drawArrowTree(canvas, paint, endX,endY, middleX, true);
 				      }
 				  }
 			  }
-			  else if ((line.lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_NO_ARROW)||
-					  (line.lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_L_ARROW)||
-					  (line.lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_R_ARROW))
+			  else if ((lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_NO_ARROW)||
+					  (lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_L_ARROW)||
+					  (lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_R_ARROW))
 			  {
                   // 曲線で接続する
 				  float middleX = (startX + endX) / 2;
 				  float middleY = (startY + endY) / 2;
 				  float x1 = (startX + middleX) / 2;
-				  float y1 = middleY;
 				  float x2 = (middleX + endX) / 2;
-				  float y2 = middleY;
 				  
 			      Path pathLine = new Path();
 			      pathLine.moveTo(startX, startY);
-			      pathLine.cubicTo(x1, y1, x2, y2, endX, endY);
+			      pathLine.cubicTo(x1, middleY, x2, middleY, endX, endY);
 			      canvas.drawPath(pathLine, linePaint);
 
-			      /**  やじるしをつける処理 **/
-			      if (line.lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_L_ARROW)
+			      //  やじるしをつける処理
+			      if (lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_L_ARROW)
 			      {
 			    	  // 始点に矢印をつける
 			    	  ObjectShapeDrawer.drawArrow(canvas, paint, startX, startY, endX, endY);
 			      }
-			      else if (line.lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_R_ARROW)
+			      else if (lineStyle == LineStyleHolder.LINESTYLE_CURVESTYLE_R_ARROW)
 			      {
 			    	  // 終点に矢印をつける
 			    	  ObjectShapeDrawer.drawArrow(canvas, paint, endX, endY, startX, startY);
@@ -504,13 +503,13 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 			      // 直線で接続する
 			      canvas.drawLine(startX, startY, endX, endY, linePaint);
 			      
-			      /**  やじるしをつける処理 **/
-			      if (line.lineStyle == LineStyleHolder.LINESTYLE_STRAIGHT_L_ARROW)
+			      //  やじるしをつける処理
+			      if (lineStyle == LineStyleHolder.LINESTYLE_STRAIGHT_L_ARROW)
 			      {
 			    	  // 始点に矢印をつける
 			    	  ObjectShapeDrawer.drawArrow(canvas, paint, startX, startY, endX, endY);
 			      }
-			      else if (line.lineStyle == LineStyleHolder.LINESTYLE_STRAIGHT_R_ARROW)
+			      else if (lineStyle == LineStyleHolder.LINESTYLE_STRAIGHT_R_ARROW)
 			      {
 			    	  // 終点に矢印をつける
 			    	  ObjectShapeDrawer.drawArrow(canvas, paint, endX, endY, startX, startY);
@@ -527,24 +526,18 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     /**
      *   オブジェクトを動かしている最中かどうかの判定を行う。
      * 
-     * @param canvas
+     *
      * @return  trueなら、動かしている最中
      */
     private boolean isFlicking(Canvas canvas)
     {
-        //int width = canvas.getWidth();
-        //int height = canvas.getHeight();
-        if ((tempPosX == Float.MIN_VALUE)||(tempPosY == Float.MIN_VALUE))
-        {
-            return (false);
-        }
-        return (true);
+        return (!((tempPosX == Float.MIN_VALUE)||(tempPosY == Float.MIN_VALUE)));
     }
 
     /**
      *   フリック時の軌跡と現在地点を表示する
      * 
-     * @param canvas
+     *
      */
     private void drawTrackAndPositions(Canvas canvas)
     {
@@ -557,9 +550,10 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
         paint.setColor(Color.GRAY);
         if (selectedPosition != null)
         {
-        	float objX = (selectedPosition.rect.right - selectedPosition.rect.left) / 2;
-        	float objY = (selectedPosition.rect.bottom - selectedPosition.rect.top) / 2;
-    	    canvas.drawLine(selectedPosition.rect.centerX(), selectedPosition.rect.centerY(), x, y, paint);
+            RectF objRect = selectedPosition.getRect();
+        	float objX = (objRect.right - objRect.left) / 2;
+        	float objY = (objRect.bottom - objRect.top) / 2;
+    	    canvas.drawLine(objRect.centerX(), objRect.centerY(), x, y, paint);
             canvas.drawRect((x - objX), (y - objY), (x + objX), (y + objY), paint);
 
             // 現在地点の表示
@@ -579,7 +573,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     	        SharedPreferences.Editor editor = preferences.edit();
     	        editor.putFloat("drawTransX", drawTransX);
     	        editor.putFloat("drawTransY", drawTransY);
-    	        editor.commit();    		
+    	        editor.apply();
     		}
     		else
     		{
@@ -594,114 +588,115 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
      *    オブジェクト（１個）を表示する
      *
      */
-    private void drawObject(Canvas canvas, MeMoMaObjectHolder.PositionObject object, boolean isMoving, float offsetX, float offsetY)
+    private void drawObject(Canvas canvas, PositionObject object, boolean isMoving, float offsetX, float offsetY)
     {
     	float label_offsetX = OBJECTLABEL_MARGIN;
     	float label_offsetY = 0.0f;
 
         // オブジェクトの色と枠線を設定する
     	Paint paint = new Paint();
-    	if (isMoving == true)
+    	if (isMoving)
     	{
             paint.setColor(Color.YELLOW);
         	paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(object.strokeWidth);
+            paint.setStrokeWidth(object.getstrokeWidth());
     	}
     	else
     	{
-            paint.setColor(object.objectColor);
-            paint.setStyle(Paint.Style.valueOf(object.paintStyle));
-            paint.setStrokeWidth(object.strokeWidth);
+            paint.setColor(object.getObjectColor());
+            paint.setStyle(Paint.Style.valueOf(object.getPaintStyle()));
+            paint.setStrokeWidth(object.getstrokeWidth());
     	}
  
        // 図形の形状に合わせて描画する
-    	RectF objectShape = new RectF(object.rect);
+    	RectF objectShape = new RectF(object.getRect());
     	objectShape.left = objectShape.left + offsetX;
     	objectShape.right = objectShape.right + offsetX;
     	objectShape.top = objectShape.top + offsetY;
     	objectShape.bottom = objectShape.bottom + offsetY;
-    	
-    	if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_OVAL)
+
+    	int drawStyle = object.getDrawStyle();
+    	if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_OVAL)
 		{
 			// 楕円形の描画
     		label_offsetY = ObjectShapeDrawer.drawObjectOval(canvas, objectShape, paint);
 		}
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_ROUNDRECT)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_ROUNDRECT)
 		{
 			// 丸角四角形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectRoundRect(canvas, objectShape, paint);
 		}
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DIAMOND)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DIAMOND)
 		{
 			// 菱形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectDiamond(canvas, objectShape, paint);
             label_offsetX = OBJECTLABEL_MARGIN;
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_KEYBOARD)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_KEYBOARD)
 		{
 			// 台形(キーボード型)の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectKeyboard(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PARALLELOGRAM)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PARALLELOGRAM)
 		{
 			// 平行四辺形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectParallelogram(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_HEXAGONAL)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_HEXAGONAL)
 		{
 			// 六角形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectHexagonal(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PAPER)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PAPER)
 		{
 			// 書類の形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectPaper(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DRUM)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DRUM)
 		{
 			// 円柱の描画
-	   		label_offsetY = ObjectShapeDrawer.drawObjectDrum(canvas, objectShape, paint, Paint.Style.valueOf(object.paintStyle));
+	   		label_offsetY = ObjectShapeDrawer.drawObjectDrum(canvas, objectShape, paint, Paint.Style.valueOf(object.getPaintStyle()));
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)
 		{
 			// 円を描画する
 	   		label_offsetY = ObjectShapeDrawer.drawObjectCircle(canvas, objectShape, paint);
 		}
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_NO_REGION)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_NO_REGION)
 		{
 			  // 枠なしを描画（？）する ... なにもしない
-			  if (object.label.length() == 0)
+			  if (object.getLabel().length() == 0)
 			  {
 				  // 何も表示しないとわからないので、ラベルが無いときには枠を表示する
 				  ObjectShapeDrawer.drawObjectNoRegion(canvas, objectShape, paint);
 			  }
 		}
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_START)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_START)
 		{
 			// ループ開始図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectLoopStart(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_END)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_END)
 		{
 			// ループ終了図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectLoopEnd(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LEFT_ARROW)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LEFT_ARROW)
 		{
 			// 左側矢印図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectLeftArrow(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DOWN_ARROW)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DOWN_ARROW)
 		{
 			// 下側矢印図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectDownArrow(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_UP_ARROW)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_UP_ARROW)
 		{
 			// 上側矢印図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectUpArrow(canvas, objectShape, paint);
         }
-		else if (object.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_RIGHT_ARROW)
+		else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_RIGHT_ARROW)
 		{
 			// 右側矢印図形の描画
 	   		label_offsetY = ObjectShapeDrawer.drawObjectRightArrow(canvas, objectShape, paint);
@@ -713,7 +708,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
         }
 
         // 文字サイズを設定する。
-        paint.setTextSize(object.fontSize);
+        paint.setTextSize(object.getFontSize());
 
         // 文字ラベルを表示する
        	ObjectShapeDrawer.drawTextLabel(canvas, paint, object, objectShape, displayObjectInformation, label_offsetX, label_offsetY);
@@ -722,7 +717,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     /**
      *   オブジェクトをすべて表示する
      *
-     * @param canvas
+     *
      */
     private void drawObjects(Canvas canvas , float offsetX, float offsetY)
     {
@@ -731,15 +726,14 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
         while (keys.hasMoreElements())
         {
             Integer key = keys.nextElement();
-            MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
+            PositionObject pos = objectHolder.getPosition(key);
             drawObject(canvas, pos, false, offsetX, offsetY);
         }
     }
 
     /**
      *   タッチされたタイミングでの処理
-     * @param event
-     * @return
+     *
      */
     private boolean onTouchDown(MotionEvent event)
     {
@@ -765,6 +759,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
         		// オブジェクトが生成されたことを通知する
         		selectionReceiver.objectCreated();        		
     		}
+/*
     		else if (data ==OperationModeHolder.OPERATIONMODE_MOVE)
     		{
     			// 移動モードのとき
@@ -773,19 +768,19 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	        {
 	        	// 削除モードのとき...何もしない
 	        }
+*/
     	}
         return (false);
     }
 
     /**
      *   タッチが離されたタイミングでの処理
-     * @param event
-     * @return
+	 *
      */
     private boolean onTouchUp(MotionEvent event)
     {
     	boolean longPress = false;
-        if (onGestureProcessed == true)
+        if (onGestureProcessed)
         {
         	// ロングタッチ中だった場合...フラグを落とす
         	onGestureProcessed = false;
@@ -827,24 +822,25 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
         	return (true);
         }
 
-        if (selectedPosition.rect.contains(x, y) == true)
+        RectF selectedRect = selectedPosition.getRect();
+        if (selectedRect.contains(x, y))
     	{
         	//  タッチが離された位置がタッチしたオブジェクトと同じ位置だった場合......
 
         	// タッチが離された位置を認識する
         	float diffX = Math.abs(event.getX() - drawTransX - downPosX);
-        	float diffY = Math.abs(event.getY() - drawTransY - downPosY);    	
+        	float diffY = Math.abs(event.getY() - drawTransY - downPosY);
 
     		// タッチが離された位置が動いていた場合、オブジェクト位置の微調整と判定する。
-    		if (((diffX > 2.0f)||(diffY > 2.0f))||(longPress == true))
+    		if (((diffX > 2.0f)||(diffY > 2.0f))||(longPress))
     		{
     	        // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
     	    	Log.v(Main.APP_IDENTIFIER, "MOVE OBJECT : (" + diffX + "," + diffY + ")");
     			moveObjectPosition(x, y);
     			return (true);
     		}
-    		
-            //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。        	
+
+            //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。
     		Log.v(Main.APP_IDENTIFIER, " ITEM SELECTED :" + x + "," + y);
     		if (selectionReceiver != null)
     		{
@@ -859,8 +855,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     	}
 
     	// タッチが離された位置にオブジェクトがいるかどうかのチェック
-    	MeMoMaObjectHolder.PositionObject position = checkSelectedObject(x, y);
-        if ((position != null)&&(longPress == false))
+    	PositionObject position = checkSelectedObject(x, y);
+        if ((position != null)&&(!longPress))
         {
         	// 他のオブジェクトと重なるように操作した、この場合は、オブジェクト間を線をつなげる
         	// （ただし、ボタンを長押ししていなかったとき。）
@@ -885,22 +881,19 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     
     /**
      *   オブジェクトの位置を移動させる
-     * 
-     * @param x
-     * @param y
+     *
      */
     private void moveObjectPosition(float x, float y)
     {
+        RectF curRect = selectedPosition.getRect();
         tempPosX = Float.MIN_VALUE;
     	tempPosY = Float.MIN_VALUE;
-    	float sizeX = selectedPosition.rect.right - selectedPosition.rect.left;
-    	float sizeY = selectedPosition.rect.bottom - selectedPosition.rect.top;
+    	float sizeX = curRect.right - curRect.left;
+    	float sizeY = curRect.bottom - curRect.top;
     	
     	float positionX = alignPosition(x, (sizeX / 2) * (-1));
     	float positionY = alignPosition(y, (sizeY / 2) * (-1));
-    	selectedPosition.rect = new  android.graphics.RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY));
-    	
-    	return;
+        selectedPosition.setRect(new  android.graphics.RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY)));
     }
     
 	  /**
@@ -909,22 +902,22 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   */
 	  public boolean onTouchEvent(MotionEvent event)
 	  {
-            boolean isDraw = false;
+            boolean isDraw;
 
-            /** スケールジェスチャ(マルチタッチのジェスチャ)を拾う **/
-            isDraw = scaleGestureDetector.onTouchEvent(event);
-        	if ((onScaling == true)||(scaleGestureDetector.isInProgress() == true))
+            // スケールジェスチャ(マルチタッチのジェスチャ)を拾う
+            // isDraw = scaleGestureDetector.onTouchEvent(event);
+        	if ((onScaling)||(scaleGestureDetector.isInProgress()))
         	{
         		//  マルチタッチ操作中...
         		return (true);
         	}
         	
-	        /**  先にジェスチャーを拾ってみよう...   **/
+	        //  先にジェスチャーを拾ってみよう...
             isDraw = gestureDetector.onTouchEvent(event);
-            if (isDraw == true)
+            if (isDraw)
             {
             	Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onTouchEvent() : isDraw == true");
-            	return (isDraw);
+            	return (true);
             }
 
 	    	int action = event.getAction();
@@ -953,8 +946,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
 	  /**
 	   *   タテヨコ位置を合わせられるよう、調整する。
-	   * @param pos
-	   * @return
+	   *
 	   */
 	  private float alignPosition(float pos, float offset)
 	  {
@@ -965,21 +957,20 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *    位置から判定し、選択したオブジェクトを応答する
 	   *    （オブジェクトが選択されていない場合には、nullを応答する）
-	   * @param x
-	   * @param y
-	   * @return
+	   *
 	   */
-	  private MeMoMaObjectHolder.PositionObject checkSelectedObject(float x, float y)
+	  private PositionObject checkSelectedObject(float x, float y)
 	  {
           Enumeration<Integer> keys = objectHolder.getObjectKeys();
 	      //Log.v(Main.APP_IDENTIFIER, "CHECK POS "  + x + "," + y);
 		  while (keys.hasMoreElements())
 		  {
 			  Integer key = keys.nextElement();
-			  MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
-			  if (pos.rect.contains(x, y) == true)
+			  PositionObject pos = objectHolder.getPosition(key);
+			  RectF posRect = pos.getRect();
+			  if (posRect.contains(x, y))
 			  {
-				      Log.v(Main.APP_IDENTIFIER, "SELECTED :"  + pos.rect.centerX() + "," + pos.rect.centerY() +  " KEY :" + key);
+				      Log.v(Main.APP_IDENTIFIER, "SELECTED :"  + posRect.centerX() + "," + posRect.centerY() +  " KEY :" + key);
 				      return (pos);
 			  }
 			  //Log.v(Main.APP_IDENTIFIER, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
@@ -991,10 +982,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *   線と交差するオブジェクト接続線をすべて削除する
 	   * 
-	   * @param startX
-	   * @param startY
-	   * @param endX
-	   * @param endY
 	   */
       private void disconnectObjects(float startX, float startY, float endX, float endY)
       {
@@ -1005,19 +992,19 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		        while (keys.hasMoreElements())
 		        {
 		            Integer key = keys.nextElement();
-		            MeMoMaConnectLineHolder.ObjectConnector line = lineHolder.getLine(key);
-		            if (line.key > 0)
+		            ObjectConnector line = lineHolder.getLine(key);
+		            if (line.getKey() > 0)
 		            {
 		            	    // 線の始点と終点を取り出す
-		    			    MeMoMaObjectHolder.PositionObject from = objectHolder.getPosition(line.fromObjectKey);
-		    			    MeMoMaObjectHolder.PositionObject to = objectHolder.getPosition(line.toObjectKey);
+		    			    RectF fromRect = objectHolder.getPosition(line.getFromObjectKey()).getRect();
+		    			    RectF toRect = objectHolder.getPosition(line.getToObjectKey()).getRect();
 
 		    			    // 線が交差しているかチェックする
-		    			    if (checkIntersection(startX, startY, endX, endY, from.rect.centerX(),  from.rect.centerY(),  to.rect.centerX(), to.rect.centerY()) == true)		    			    
+		    			    if (checkIntersection(startX, startY, endX, endY, fromRect.centerX(),  fromRect.centerY(),  toRect.centerX(), toRect.centerY()))
 		    			    {
                                 // 線が交差していた！ 線を切る！
 		    			    	//Log.v(Main.APP_IDENTIFIER, "CUT LINE [" +  from.rect.centerX() + "," +  from.rect.centerY() +"]-[" + to.rect.centerX() + "," + to.rect.centerY() + "]");
-			    			    lineHolder.disconnectLines(line.key);
+			    			    lineHolder.disconnectLines(line.getKey());
 		    			    }		    			    
 		    		 }
 		        }
@@ -1062,11 +1049,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
           //crossY = y1 + dR * (y2 - y1);
 
           // 交点が線分内にあるかどうかをチェックする
-          if ((dR >= 0)&&(dR <= 1)&&(dS >= 0)&&(dS <= 1))
-          {
-        	  return (true);
-          }
-          return (false);
+          return ((dR >= 0)&&(dR <= 1)&&(dS >= 0)&&(dS <= 1));
       }
 
       /**
@@ -1090,7 +1073,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
       /**
        *    スライドバーを変更された時の処理
        */
-      public void zoomScaleChanged(int progress)
+      private void zoomScaleChanged(int progress)
       {
     	  float val = ((float) progress - 50.0f) / 50.0f;
 
@@ -1100,8 +1083,9 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
     	  //  表示倍率を変更し、倍率を画面に表示する
     	  drawScale = (float) Math.round(Math.pow(10.0, val) * 10.0) / 10.0f;
-    	  TextView  textview = (TextView) parent.findViewById(R.id.ZoomRate);
-    	  textview.setText("x" + drawScale);
+    	  TextView  textview = parent.findViewById(R.id.ZoomRate);
+    	  String showText = "x" + drawScale;
+    	  textview.setText(showText);
 
     	  // 現在の表示領域サイズを取得
     	  float showSizeWidth = screenWidth * drawScale;
@@ -1128,7 +1112,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
           editor.putFloat("drawTransX", drawTransX);
           editor.putFloat("drawTransY", drawTransY);
           editor.putInt("zoomProgress", progress);
-          editor.commit();    	  
+          editor.apply();
       }
 
       /**
@@ -1174,7 +1158,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
       	  float y = (event.getY() - drawTransY) / drawScale;
 
     	  // タッチ位置にオブジェクトが存在するか確認する
-          MeMoMaObjectHolder.PositionObject  position = checkSelectedObject(x, y);
+          PositionObject  position = checkSelectedObject(x, y);
       	  if (position != null)
       	  {
       		  // 長押し処理を実施していることを記憶する
@@ -1221,7 +1205,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     	    zoomScaleChanged(progress);
 
     	    // 画面描画クラスに再描画を指示する
-	        final GokigenSurfaceView surfaceView = (GokigenSurfaceView) parent.findViewById(R.id.GraphicView);
+	        final GokigenSurfaceView surfaceView = parent.findViewById(R.id.GraphicView);
 	        surfaceView.doDraw();
       }
 
@@ -1244,15 +1228,14 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
       /**
        *   （ScaleGestureDetector.OnScaleGestureListener の実装）
        * 
-       * @param detector
-       * @return
+       *
        */
       public boolean onScale(ScaleGestureDetector detector)
       {
           float scaleFactor = detector.getScaleFactor();
           //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onScale() : " + scaleFactor + " (" + currentScaleBar + ")");
 
-          /** 画面表示の倍率が変更された！　x < 1 : 縮小、 1 < x : 拡大 **/
+          // 画面表示の倍率が変更された！　x < 1 : 縮小、 1 < x : 拡大
           if (scaleFactor < 1.0f)
           {
         	  currentScaleBar = (currentScaleBar == 0) ? 0 : currentScaleBar - 1;
@@ -1290,7 +1273,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     	  onScaling = false;
     	  
     	  // シークバーを設定し、値を記憶する
-	      final SeekBar seekbar = (SeekBar) parent.findViewById(R.id.ZoomInOut);
+	      final SeekBar seekbar = parent.findViewById(R.id.ZoomInOut);
 	      seekbar.setProgress(currentScaleBar);	        
 	      zoomScaleChanged(currentScaleBar);
       }

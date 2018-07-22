@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma.fileio;
+package jp.sourceforge.gokigen.memoma.io;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -6,12 +6,14 @@ import java.util.Enumeration;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.RectF;
 import android.util.Log;
 import android.util.Xml;
 
 import jp.sourceforge.gokigen.memoma.Main;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するエンジン部分
@@ -28,12 +30,12 @@ public class MeMoMaFileSavingEngine
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileSavingEngine(ExternalStorageFileUtility utility, String bgUri, String checkBoxLabel)
+	MeMoMaFileSavingEngine(ExternalStorageFileUtility utility, String bgUri, String checkBoxLabel)
     {
-    	/** ファイルユーティリティを記憶する **/
+    	// ファイルユーティリティを記憶する
     	fileUtility = utility;
     	
-    	/** ファイルをバックアップするディレクトリを作成する **/
+    	// ファイルをバックアップするディレクトリを作成する
     	File dir = new File(fileUtility.getGokigenDirectory() + "/backup");
     	dir.mkdir();
 
@@ -44,15 +46,13 @@ public class MeMoMaFileSavingEngine
 
     /**
      *   ファイルが存在したとき、リネームする
-     * 
-     * @param targetFileName
-     * @param newFileName
+     *
      */
     private boolean renameFile(String targetFileName, String newFileName)
     {
     	boolean ret = true;
 		File targetFile = new File(targetFileName);
-		if (targetFile.exists() == true)
+		if (targetFile.exists())
 		{
 			// ファイルが存在した、、、ファイル名を１世代古いものに変更する
 			ret = targetFile.renameTo(new File(newFileName));
@@ -63,7 +63,7 @@ public class MeMoMaFileSavingEngine
     /**
      *    保管データを複数世代保管する。
      * 
-     * @param fileName
+     *
      */
     private void backupFiles(String dirName, String backupFileName)
     {
@@ -73,7 +73,7 @@ public class MeMoMaFileSavingEngine
         {
         	String  fileName = dirName +  "backup/" + backupFileName;
     		File backFile = new File(fileName + ".xml.bak5");
-    		if (backFile.exists() == true)
+    		if (backFile.exists())
     		{
     			// ファイルが存在した、、、削除する
     			backFile.delete();
@@ -91,20 +91,16 @@ public class MeMoMaFileSavingEngine
         	// 何か例外が発生した場合にはエラーと認識する。
         	result = false;
         }
-		if (result == false)
+		if (!result)
 		{
             // バックアップファイルのコピー失敗をログに記述する
             Log.v(Main.APP_IDENTIFIER, "rename failure : " + dirName +  backupFileName + ".xml");
 		}
-		return;
     }
     
     /**
      *    データを(XML形式で)保管する。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
+     *
      */
     private String storeToXmlFile(String fileName, MeMoMaObjectHolder objectHolder)
     {
@@ -152,42 +148,43 @@ public class MeMoMaFileSavingEngine
             while (keys.hasMoreElements())
             {
                 Integer key = keys.nextElement();
-                MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
+                PositionObject pos = objectHolder.getPosition(key);
+                RectF posRect = pos.getRect();
                 serializer.startTag(Main.APP_NAMESPACE, "object");
 
                 serializer.attribute(Main.APP_NAMESPACE, "key", Integer.toString(key));
 
                 serializer.startTag(Main.APP_NAMESPACE, "rect");
                 serializer.startTag(Main.APP_NAMESPACE, "top");
-                serializer.text(Float.toString(pos.rect.top));
+                serializer.text(Float.toString(posRect.top));
                 serializer. endTag(Main.APP_NAMESPACE, "top");
                 serializer.startTag(Main.APP_NAMESPACE, "left");
-                serializer.text(Float.toString(pos.rect.left));
+                serializer.text(Float.toString(posRect.left));
                 serializer. endTag(Main.APP_NAMESPACE, "left");
                 serializer.startTag(Main.APP_NAMESPACE, "right");
-                serializer.text(Float.toString(pos.rect.right));
+                serializer.text(Float.toString(posRect.right));
                 serializer. endTag(Main.APP_NAMESPACE, "right");
                 serializer.startTag(Main.APP_NAMESPACE, "bottom");
-                serializer.text(Float.toString(pos.rect.bottom));
+                serializer.text(Float.toString(posRect.bottom));
                 serializer. endTag(Main.APP_NAMESPACE, "bottom");
                 serializer. endTag(Main.APP_NAMESPACE, "rect");
 
                 serializer.startTag(Main.APP_NAMESPACE, "drawStyle");
-                serializer.text(Integer.toString(pos.drawStyle));
+                serializer.text(Integer.toString(pos.getDrawStyle()));
                 serializer. endTag(Main.APP_NAMESPACE, "drawStyle");
 
                 serializer.startTag(Main.APP_NAMESPACE, "icon");
-                serializer.text(Integer.toString(pos.icon));
+                serializer.text(Integer.toString(pos.getIcon()));
                 serializer. endTag(Main.APP_NAMESPACE, "icon");
 
                 serializer.startTag(Main.APP_NAMESPACE, "label");
-                serializer.text(pos.label);
+                serializer.text(pos.getLabel());
                 serializer. endTag(Main.APP_NAMESPACE, "label");
 
                 serializer.startTag(Main.APP_NAMESPACE, "detail");
-                serializer.text(pos.detail);
+                serializer.text(pos.getDetail());
                 serializer. endTag(Main.APP_NAMESPACE, "detail");
-/**
+/*
                 serializer.startTag(Main.APP_NAMESPACE, "otherInfoUri");
                 serializer.text(pos.otherInfoUri);
                 serializer. endTag(Main.APP_NAMESPACE, "otherInfoUri");
@@ -199,29 +196,29 @@ public class MeMoMaFileSavingEngine
                 serializer.startTag(Main.APP_NAMESPACE, "objectStatus");
                 serializer.text(pos.objectStatus);
                 serializer. endTag(Main.APP_NAMESPACE, "objectStatus");
-**/
+*/
                 serializer.startTag(Main.APP_NAMESPACE, "userChecked");
-                serializer.text(Boolean.toString(pos.userChecked));
+                serializer.text(Boolean.toString(pos.getUserChecked()));
                 serializer. endTag(Main.APP_NAMESPACE, "userChecked");
                 
                 serializer.startTag(Main.APP_NAMESPACE, "labelColor");
-                serializer.text(Integer.toString(pos.labelColor));
+                serializer.text(Integer.toString(pos.getLabelColor()));
                 serializer. endTag(Main.APP_NAMESPACE, "labelColor");
 
                 serializer.startTag(Main.APP_NAMESPACE, "objectColor");
-                serializer.text(Integer.toString(pos.objectColor));
+                serializer.text(Integer.toString(pos.getObjectColor()));
                 serializer. endTag(Main.APP_NAMESPACE, "objectColor");
 
                 serializer.startTag(Main.APP_NAMESPACE, "paintStyle");
-                serializer.text(pos.paintStyle);
+                serializer.text(pos.getPaintStyle());
                 serializer. endTag(Main.APP_NAMESPACE, "paintStyle");
                
                 serializer.startTag(Main.APP_NAMESPACE, "strokeWidth");
-                serializer.text(Float.toString(pos.strokeWidth));
+                serializer.text(Float.toString(pos.getstrokeWidth()));
                 serializer. endTag(Main.APP_NAMESPACE, "strokeWidth");
 
                 serializer.startTag(Main.APP_NAMESPACE, "fontSize");
-                serializer.text(Float.toString(pos.fontSize));
+                serializer.text(Float.toString(pos.getFontSize()));
                 serializer. endTag(Main.APP_NAMESPACE, "fontSize");
 
                 serializer.endTag(Main.APP_NAMESPACE, "object");
@@ -232,30 +229,30 @@ public class MeMoMaFileSavingEngine
             while (lineKeys.hasMoreElements())
             {
                 Integer key = lineKeys.nextElement();
-                MeMoMaConnectLineHolder.ObjectConnector line = objectHolder.getConnectLineHolder().getLine(key);
+                ObjectConnector line = objectHolder.getConnectLineHolder().getLine(key);
                 serializer.startTag(Main.APP_NAMESPACE, "line");
                 serializer.attribute(Main.APP_NAMESPACE, "key", Integer.toString(key));
 
                 serializer.startTag(Main.APP_NAMESPACE, "fromObjectKey");
-                serializer.text(Integer.toString(line.fromObjectKey));
+                serializer.text(Integer.toString(line.getFromObjectKey()));
                 serializer.endTag(Main.APP_NAMESPACE, "fromObjectKey");
 
                 serializer.startTag(Main.APP_NAMESPACE, "toObjectKey");
-                serializer.text(Integer.toString(line.toObjectKey));
+                serializer.text(Integer.toString(line.getToObjectKey()));
                 serializer.endTag(Main.APP_NAMESPACE, "toObjectKey");
 
                 serializer.startTag(Main.APP_NAMESPACE, "lineStyle");
-                serializer.text(Integer.toString(line.lineStyle));
+                serializer.text(Integer.toString(line.getLineStyle()));
                 serializer.endTag(Main.APP_NAMESPACE, "lineStyle");
 
                 serializer.startTag(Main.APP_NAMESPACE, "lineShape");
-                serializer.text(Integer.toString(line.lineShape));
+                serializer.text(Integer.toString(line.getLineShape()));
                 serializer.endTag(Main.APP_NAMESPACE, "lineShape");
 
                 serializer.startTag(Main.APP_NAMESPACE, "lineThickness");
-                serializer.text(Integer.toString(line.lineThickness));
+                serializer.text(Integer.toString(line.getLineThickness()));
                 serializer.endTag(Main.APP_NAMESPACE, "lineThickness");
-/**
+/*
                 serializer.startTag(Main.APP_NAMESPACE, "fromShape");
                 serializer.text(Integer.toString(line.fromShape));
                 serializer.endTag(Main.APP_NAMESPACE, "fromShape");
@@ -271,7 +268,7 @@ public class MeMoMaFileSavingEngine
                 serializer.startTag(Main.APP_NAMESPACE, "toString");
                 serializer.text(line.toString);
                 serializer.endTag(Main.APP_NAMESPACE, "toString");
-**/
+*/
                 serializer.endTag(Main.APP_NAMESPACE, "line");
             }
 
@@ -292,8 +289,7 @@ public class MeMoMaFileSavingEngine
     /**
      *    オブジェクトを保存する
      * 
-     * @param objectHolder
-     * @return
+     *
      */
     public String saveObjects(MeMoMaObjectHolder objectHolder)
     {
@@ -312,8 +308,6 @@ public class MeMoMaFileSavingEngine
     	String fileName = fileUtility.getGokigenDirectory() + "/" + objectHolder.getDataTitle();
 
     	// データを保管する
-        String result = storeToXmlFile(fileName, objectHolder);
-
-        return (result);
+        return (storeToXmlFile(fileName, objectHolder));
     }
 }

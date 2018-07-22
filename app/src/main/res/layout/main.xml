@@ -179,7 +179,7 @@
             android:max="100"
             android:progress="50" />
 
-        <jp.sourceforge.gokigen.memoma.GokigenSurfaceView
+        <jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView
             android:id="@+id/GraphicView"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

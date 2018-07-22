@@ -5,12 +5,14 @@ import java.util.Enumeration;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  オブジェクトの位置を整列するクラス (非同期処理を実行)
@@ -25,8 +27,8 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  */
 public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-	ProgressDialog executingDialog = null;
-	IAlignCallback  receiver = null;
+	private ProgressDialog executingDialog;
+	private IAlignCallback  receiver;
 	/**
 	 *   コンストラクタ
 	 */
@@ -68,11 +70,11 @@ public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String
         while (keys.hasMoreElements())
         {
             Integer key = keys.nextElement();
-            MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
-            
-            float newLeft = (float) Math.floor((pos.rect.left + 15.0f)/ 30.0) * 30.0f;
-            float newTop = (float) Math.floor((pos.rect.top + 15.0f)/ 30.0) * 30.0f;
-            pos.rect.offsetTo(newLeft, newTop);
+            PositionObject pos = objectHolder.getPosition(key);
+            RectF posRect = pos.getRect();
+            float newLeft = (float) Math.floor((posRect.left + 15.0f)/ 30.0) * 30.0f;
+            float newTop = (float) Math.floor((posRect.top + 15.0f)/ 30.0) * 30.0f;
+            pos.setRectOffsetTo(newLeft, newTop);
         }
         System.gc();
 		
@@ -111,7 +113,6 @@ public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String
 
     	// プログレスダイアログを消す
     	executingDialog.dismiss();
-        return;
     }     
     
     /**
@@ -122,6 +123,6 @@ public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String
      */
     public interface IAlignCallback
     {
-        public abstract void objectAligned();
+        void objectAligned();
     }
 }

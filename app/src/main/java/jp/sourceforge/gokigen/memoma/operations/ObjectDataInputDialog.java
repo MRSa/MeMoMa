@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.preference.PreferenceManager;
@@ -26,6 +27,7 @@ import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *   オブジェクトのデータを入力するダイアログを表示する
@@ -35,9 +37,9 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  */
 public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ImageButton.OnClickListener
 {
-	private final float FONTSIZE_SMALL = 4.0f;
-	private final float FONTSIZE_MIDDLE = 6.0f;
-	private final float FONTSIZE_LARGE = 10.0f;
+	private final float FONTSIZE_SMALL = 5.0f;
+	private final float FONTSIZE_MIDDLE = 8.0f;
+	private final float FONTSIZE_LARGE = 12.0f;
 	
 	private Context context = null;	
 	private IResultReceiver resultReceiver = null;
@@ -66,7 +68,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
 	
     /**
      *   確認ダイアログを応答する
-     * @return
+     *
      */
     public Dialog getDialog()
     {
@@ -90,7 +92,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
             backgroundColor = MeMoMaCanvasDrawer.BACKGROUND_COLOR_DEFAULT;
         }
 
-        final TextView colorLabel = (TextView) layout.findViewById(R.id.setBorderColorLabel);
+        final TextView colorLabel = layout.findViewById(R.id.setBorderColorLabel);
         backgroundShape = (GradientDrawable)colorLabel.getBackground();
 
         // 入力文字列の色を設定する
@@ -100,59 +102,58 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
         final EditText detail = (EditText) layout.findViewById(R.id.descriptionInputArea);
         //detail.setTextColor(Color.LTGRAY);
 
-        borderColorView = (SeekBar) layout.findViewById(R.id.borderColorSelectionBar);
+        borderColorView = layout.findViewById(R.id.borderColorSelectionBar);
         borderColorView.setOnSeekBarChangeListener(this);        
         
-        final CheckBox userCheckbox = (CheckBox) layout.findViewById(R.id.checkUserCheckbox);
-        final CheckBox boldText = (CheckBox) layout.findViewById(R.id.checkBoldText);
-        fillObjectView = (CheckBox) layout.findViewById(R.id.checkFillObject);
+        final CheckBox userCheckbox = layout.findViewById(R.id.checkUserCheckbox);
+        final CheckBox boldText = layout.findViewById(R.id.checkBoldText);
+        fillObjectView = layout.findViewById(R.id.checkFillObject);
         fillObjectView.setOnCheckedChangeListener(this);
 
-        colorBorderAreaView = (TextView) layout.findViewById(R.id.borderColorArea);
+        colorBorderAreaView = layout.findViewById(R.id.borderColorArea);
         colorBorderAreaView.setOnClickListener(this);
         
-        final ImageButton rect = (ImageButton) layout.findViewById(R.id.btnObjectRectangle);
+        final ImageButton rect = layout.findViewById(R.id.btnObjectRectangle);
         rect.setOnClickListener(this);
-        final ImageButton roundRect = (ImageButton) layout.findViewById(R.id.btnObjectRoundRect);
+        final ImageButton roundRect = layout.findViewById(R.id.btnObjectRoundRect);
         roundRect.setOnClickListener(this);
-        final ImageButton oval = (ImageButton) layout.findViewById(R.id.btnObjectOval);
+        final ImageButton oval = layout.findViewById(R.id.btnObjectOval);
         oval.setOnClickListener(this);
-        final ImageButton diamond = (ImageButton) layout.findViewById(R.id.btnObjectDiamond);
+        final ImageButton diamond = layout.findViewById(R.id.btnObjectDiamond);
         diamond.setOnClickListener(this);
-        final ImageButton hexagonal = (ImageButton) layout.findViewById(R.id.btnObjectHexagonal);
+        final ImageButton hexagonal = layout.findViewById(R.id.btnObjectHexagonal);
         hexagonal.setOnClickListener(this);
-        final ImageButton parallelogram = (ImageButton) layout.findViewById(R.id.btnObjectParallelogram);
+        final ImageButton parallelogram = layout.findViewById(R.id.btnObjectParallelogram);
         parallelogram.setOnClickListener(this);
-        final ImageButton keyboard = (ImageButton) layout.findViewById(R.id.btnObjectKeyboard);
+        final ImageButton keyboard = layout.findViewById(R.id.btnObjectKeyboard);
         keyboard.setOnClickListener(this);
-        final ImageButton paper = (ImageButton) layout.findViewById(R.id.btnObjectPaper);
+        final ImageButton paper = layout.findViewById(R.id.btnObjectPaper);
         paper.setOnClickListener(this);
-        final ImageButton drum = (ImageButton) layout.findViewById(R.id.btnObjectDrum);
+        final ImageButton drum = layout.findViewById(R.id.btnObjectDrum);
         drum.setOnClickListener(this);
-        final ImageButton circle = (ImageButton) layout.findViewById(R.id.btnObjectCircle);
+        final ImageButton circle = layout.findViewById(R.id.btnObjectCircle);
         circle.setOnClickListener(this);
-        final ImageButton noregion = (ImageButton) layout.findViewById(R.id.btnObjectNoRegion);
+        final ImageButton noregion = layout.findViewById(R.id.btnObjectNoRegion);
         noregion.setOnClickListener(this);
-
-        final ImageButton loopStart = (ImageButton) layout.findViewById(R.id.btnObjectLoopStart);
+        final ImageButton loopStart = layout.findViewById(R.id.btnObjectLoopStart);
         loopStart.setOnClickListener(this);
-        final ImageButton loopEnd = (ImageButton) layout.findViewById(R.id.btnObjectLoopEnd);
+        final ImageButton loopEnd = layout.findViewById(R.id.btnObjectLoopEnd);
         loopEnd.setOnClickListener(this);
-        final ImageButton leftArrow = (ImageButton) layout.findViewById(R.id.btnObjectLeftArrow);
+        final ImageButton leftArrow = layout.findViewById(R.id.btnObjectLeftArrow);
         leftArrow.setOnClickListener(this);
-        final ImageButton downArrow = (ImageButton) layout.findViewById(R.id.btnObjectDownArrow);
+        final ImageButton downArrow = layout.findViewById(R.id.btnObjectDownArrow);
         downArrow.setOnClickListener(this);
-        final ImageButton upArrow = (ImageButton) layout.findViewById(R.id.btnObjectUpArrow);
+        final ImageButton upArrow = layout.findViewById(R.id.btnObjectUpArrow);
         upArrow.setOnClickListener(this);
-        final ImageButton rightArrow = (ImageButton) layout.findViewById(R.id.btnObjectRightArrow);
+        final ImageButton rightArrow = layout.findViewById(R.id.btnObjectRightArrow);
         rightArrow.setOnClickListener(this);
 
         // 背景の色を調整（塗りつぶしの時はオブジェクトの色とする。）
         int color = convertColor(borderColorView.getProgress());
-		colorBorderAreaView.setBackgroundColor((fillObjectView.isChecked() == true) ? color : backgroundColor);
+		colorBorderAreaView.setBackgroundColor((fillObjectView.isChecked()) ? color : backgroundColor);
 		//backgroundShape.setStroke(2, color);
 
-		if (fillObjectView.isChecked() == true)
+		if (fillObjectView.isChecked())
 		{
 			// 塗りつぶし時は文字の色を変える。
             color = (color ^ 0x00ffffff);
@@ -162,29 +163,29 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
 		
         builder.setView(layout);
         builder.setCancelable(false);
+
         builder.setPositiveButton(context.getString(R.string.confirmYes), new DialogInterface.OnClickListener()
               {
                    public void onClick(DialogInterface dialog, int id)
                    {
-                	   boolean ret = false;
-                	   boolean isUserCheck = false;
-                	   if (userCheckbox != null)
-                	   {
-                		   isUserCheck = userCheckbox.isChecked();
-                	   }
-                	   setObjectData(label.getText().toString(), detail.getText().toString(), borderColorView.getProgress(), boldText.isChecked(), fillObjectView.isChecked(), isUserCheck, currentObjectDrawStyle);
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.finishObjectInput();
-                	   }
-                       if (ret == true)
+                       try
                        {
-                    	   dialog.dismiss();
+                           boolean isUserCheck = false;
+                           if (userCheckbox != null)
+                           {
+                               isUserCheck = userCheckbox.isChecked();
+                           }
+                           setObjectData(label.getText().toString(), detail.getText().toString(), borderColorView.getProgress(), boldText.isChecked(), fillObjectView.isChecked(), isUserCheck, currentObjectDrawStyle);
+                           if (resultReceiver != null)
+                           {
+                               resultReceiver.finishObjectInput();
+                           }
                        }
-                       else
+                       catch (Exception e)
                        {
-                           dialog.cancel();
+                           e.printStackTrace();
                        }
+                       dialog.dismiss();
                        System.gc();
                    }
                });
@@ -192,19 +193,18 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
                {
                    public void onClick(DialogInterface dialog, int id)
                    {
-                	   boolean ret = false;
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.cancelObjectInput();
-                	   }
-                       if (ret == true)
+                       try
                        {
-                    	   dialog.dismiss();
+                           if (resultReceiver != null)
+                           {
+                               resultReceiver.cancelObjectInput();
+                           }
                        }
-                       else
+                       catch (Exception e)
                        {
-                           dialog.cancel();
+                           e.printStackTrace();
                        }
+                       dialog.cancel();
                        System.gc();
                    }
                });
@@ -217,36 +217,36 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
      */
     public void prepareObjectInputDialog(Dialog dialog, Integer objectKey)
     {
-        MeMoMaObjectHolder.PositionObject position = objectHolder.getPosition(objectKey);
+        PositionObject position = objectHolder.getPosition(objectKey);
     	key = objectKey;
         if (position != null)
         {
         	// 色を設定する
-            final SeekBar borderColorProgess = (SeekBar) dialog.findViewById(R.id.borderColorSelectionBar);
-            borderColorProgess.setProgress(convertProgress(position.objectColor));
+            final SeekBar borderColorProgess = dialog.findViewById(R.id.borderColorSelectionBar);
+            borderColorProgess.setProgress(convertProgress(position.getObjectColor()));
 
-            final CheckBox  boldTextCheck = (CheckBox) dialog.findViewById(R.id.checkBoldText);
-            boldTextCheck.setChecked(position.strokeWidth == MeMoMaObjectHolder.STOROKE_BOLD_WIDTH);
+            final CheckBox  boldTextCheck = dialog.findViewById(R.id.checkBoldText);
+            boldTextCheck.setChecked(position.getstrokeWidth() == MeMoMaObjectHolder.STOROKE_BOLD_WIDTH);
 
-            final CheckBox  fillObjectCheck = (CheckBox) dialog.findViewById(R.id.checkFillObject);
-            fillObjectCheck.setChecked(Paint.Style.valueOf(position.paintStyle) != Paint.Style.STROKE);
+            final CheckBox  fillObjectCheck = dialog.findViewById(R.id.checkFillObject);
+            fillObjectCheck.setChecked(Paint.Style.valueOf(position.getPaintStyle()) != Paint.Style.STROKE);
 
             // フォントサイズを設定する
-            textFontSize = position.fontSize / 2.0f;
+            textFontSize = position.getFontSize() / 2.0f;
             
         	// 入力文字列を設定する
-            final EditText targetLabel = (EditText) dialog.findViewById(R.id.labelInputArea);
-            targetLabel.setText(position.label);
+            final EditText targetLabel = dialog.findViewById(R.id.labelInputArea);
+            targetLabel.setText(position.getLabel());
 
-            final EditText targetDetail = (EditText) dialog.findViewById(R.id.descriptionInputArea);
-            targetDetail.setText(position.detail);
+            final EditText targetDetail = dialog.findViewById(R.id.descriptionInputArea);
+            targetDetail.setText(position.getDetail());
             
         	//  設定に記録されているデータを画面に反映させる
         	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
             String userCheckboxTitle = preferences.getString("userCheckboxString", "");
 
             // 描画スタイルを設定する
-            currentObjectDrawStyle = position.drawStyle;
+            currentObjectDrawStyle = position.getDrawStyle();
         	updateObjectDrawStyleImageButton(currentObjectDrawStyle);
             
             // 背景色を設定する
@@ -261,10 +261,10 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
             }
             setTextColorSample(borderColorProgess.getProgress(), textFontSize, fillObjectView.isChecked());
 
-            final CheckBox  userCheckbox = (CheckBox) dialog.findViewById(R.id.checkUserCheckbox);
+            final CheckBox  userCheckbox = dialog.findViewById(R.id.checkUserCheckbox);
             userCheckbox.setEnabled(true);
             userCheckbox.setText(userCheckboxTitle);
-            userCheckbox.setChecked(position.userChecked);
+            userCheckbox.setChecked(position.getUserChecked());
         }
     }
     
@@ -272,23 +272,24 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
      *    オブジェクトにデータを設定する
      *
      */
-    public void setObjectData(String label, String detail, int progress, boolean boldText, boolean fillObject, boolean userCheck, int drawStyle)
+    private void setObjectData(String label, String detail, int progress, boolean boldText, boolean fillObject, boolean userCheck, int drawStyle)
     {
-    	MeMoMaObjectHolder.PositionObject positionObject = objectHolder.getPosition(key);
+    	PositionObject positionObject = objectHolder.getPosition(key);
     	if (positionObject != null)
     	{
-            positionObject.label = label;
-            positionObject.detail = detail;
+            positionObject.setLabel(label);
+            positionObject.setDetail(detail);
     		int color = convertColor(progress);
-            positionObject.objectColor = color;
+            positionObject.setObjectColor(color);
     		color = (color ^ 0x00ffffff);
-        	positionObject.fontSize = textFontSize * 2.0f;
-            positionObject.labelColor = color;
-        	positionObject.strokeWidth = (boldText == true) ? MeMoMaObjectHolder.STOROKE_BOLD_WIDTH : MeMoMaObjectHolder.STOROKE_NORMAL_WIDTH;
-        	positionObject.paintStyle = ((fillObject == true) ? Paint.Style.FILL : Paint.Style.STROKE).toString();
-        	positionObject.userChecked = userCheck;
-        	
-        	if (positionObject.drawStyle != drawStyle)
+        	positionObject.setFontSize(textFontSize * 2.0f);
+            positionObject.setLabelColor(color);
+        	positionObject.setStrokeWidth((boldText) ? MeMoMaObjectHolder.STOROKE_BOLD_WIDTH : MeMoMaObjectHolder.STOROKE_NORMAL_WIDTH);
+        	positionObject.setPaintStyle(((fillObject) ? Paint.Style.FILL : Paint.Style.STROKE).toString());
+        	positionObject.setUserChecked(userCheck);
+
+        	int posDrawStyle = positionObject.getDrawStyle();
+        	if (posDrawStyle != drawStyle)
         	{
         	    if ((drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)||
         	    	(drawStyle == MeMoMaObjectHolder.	DRAWSTYLE_LEFT_ARROW)||
@@ -299,53 +300,54 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
         	    	// (長方形の形状から)正方形の形状にする場合...
         	    	setRectToSquare(positionObject);        	    	
         	    }
-        	    else if ((positionObject.drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)||
-                            (positionObject.drawStyle == MeMoMaObjectHolder.	DRAWSTYLE_LEFT_ARROW)||
-                            (positionObject.drawStyle == MeMoMaObjectHolder.	DRAWSTYLE_DOWN_ARROW)||
-                            (positionObject.drawStyle == MeMoMaObjectHolder.	DRAWSTYLE_UP_ARROW)||
-                            (positionObject.drawStyle == MeMoMaObjectHolder.	DRAWSTYLE_RIGHT_ARROW))
+        	    else if ((posDrawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)||
+                            (posDrawStyle == MeMoMaObjectHolder.	DRAWSTYLE_LEFT_ARROW)||
+                            (posDrawStyle == MeMoMaObjectHolder.	DRAWSTYLE_DOWN_ARROW)||
+                            (posDrawStyle == MeMoMaObjectHolder.	DRAWSTYLE_UP_ARROW)||
+                            (posDrawStyle == MeMoMaObjectHolder.	DRAWSTYLE_RIGHT_ARROW))
         	    {
         	    	// 正方形の形状から、長方形の形状にする場合...
         	    	setRectFromSquare(positionObject);
         	    }  	
-        	    positionObject.drawStyle = drawStyle;
+        	    positionObject.setDrawStyle(drawStyle);
         	}
     	}
-    	positionObject = null;
     }
 
     /**
      *   オブジェクトの領域を長方形から正方形にする
      */
-    private void setRectToSquare(MeMoMaObjectHolder.PositionObject positionObject)
+    private void setRectToSquare(PositionObject positionObject)
     {
-           float bandWidth = ((positionObject.rect.right -  positionObject.rect.left)) / 2.0f;
-           float center = positionObject.rect.centerY();
-           
-           positionObject.rect.top = center - bandWidth;
-           positionObject.rect.bottom = center + bandWidth;
+        RectF posRect = positionObject.getRect();
+        float bandWidth = ((posRect.right -  posRect.left)) / 2.0f;
+        float center = posRect.centerY();
+
+        positionObject.setRectTop(center - bandWidth);
+        positionObject.setRectBottom(center + bandWidth);
     }
 
     /**
      *   オブジェクトの領域を正方形から長方形にする
      */
-    private void setRectFromSquare(MeMoMaObjectHolder.PositionObject positionObject)
+    private void setRectFromSquare(PositionObject positionObject)
     {
-        float bandWidth = ((positionObject.rect.right -  positionObject.rect.left) / 16.0f * 9.0f) / 2.0f;
-        float center = positionObject.rect.centerY();
-        
-        positionObject.rect.top = center - bandWidth;
-        positionObject.rect.bottom = center + bandWidth;
+        RectF posRect = positionObject.getRect();
+        float bandWidth = ((posRect.right -  posRect.left) / 16.0f * 9.0f) / 2.0f;
+        float center = posRect.centerY();
+
+        positionObject.setRectTop(center - bandWidth);
+        positionObject.setRectBottom(center + bandWidth);
     }
 
     private void setButtonBorder(int id, boolean isHighlight)
     {
     	try
     	{
-            ImageButton button = (ImageButton) dialogLayout.findViewById(id);
+            ImageButton button = dialogLayout.findViewById(id);
             //GradientDrawable btnBackgroundShape = (GradientDrawable)button.getBackground();
             BitmapDrawable btnBackgroundShape = (BitmapDrawable)button.getBackground();
-            if (isHighlight == true)
+            if (isHighlight)
             {
 //               	btnBackgroundShape.setColorFilter(Color.rgb(51, 181, 229), Mode.LIGHTEN);
             	btnBackgroundShape.setColorFilter(Color.BLUE, Mode.LIGHTEN);
@@ -366,7 +368,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     /**
      *    イメージボタンの選択状態を更新する
      * 
-     * @param drawStyle
+     *
      */
     private void updateObjectDrawStyleImageButton(int drawStyle)
     {
@@ -476,12 +478,11 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     /**
      *   0x00～0x3fの値(R, G, B, それぞれ2ビット)で色を変える
      * 
-     * @param value
-     * @return
+     *
      */
     private int convertColor(int value)
     {
-    	int color = 0;	
+    	int color;
     	int r = ((value >> 4 ) & 0x03) * 85;
     	int g = ((value >> 2) & 0x03) * 85;
     	int b = (value & 0x03)  * 85;
@@ -493,8 +494,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     /**
      *    色をプログレスバーの値に変換する
      *    
-     * @param color
-     * @return
+     *
      */
     private int convertProgress(int color)
     {
@@ -508,21 +508,19 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     /**
      *   背景色を設定する処理
      *   
-     * @param progress
-     * @param fontSize
-     * @param value
+     *
      */
     private void setTextColorSample(int progress, float fontSize, boolean value)
     {
     	if (colorBorderAreaView != null)
     	{
     		int color = convertColor(progress);
-    		int backColor = (value == true) ? color : backgroundColor;
+    		int backColor = (value) ? color : backgroundColor;
     		colorBorderAreaView.setBackgroundColor(backColor);
     		
     		backgroundShape.setStroke(2, color);
     		
-    		if (value == true)
+    		if (value)
     		{
     			// 塗りつぶし時には色を変える
     		    color = (color ^ 0x00ffffff);
@@ -572,7 +570,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     
     public interface IResultReceiver
     {
-        public abstract void finishObjectInput();
-        public abstract void cancelObjectInput();
+        void finishObjectInput();
+        void cancelObjectInput();
     }
 }

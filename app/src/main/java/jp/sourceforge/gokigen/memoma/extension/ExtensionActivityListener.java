@@ -25,16 +25,18 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
+import jp.sourceforge.gokigen.memoma.holders.OperationHistoryHolder;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
+import jp.sourceforge.gokigen.memoma.io.ExternalStorageFileUtility;
 import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog;
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
-import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileExportCsvProcess;
-import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileImportCsvProcess;
-import jp.sourceforge.gokigen.memoma.fileio.MeMoMaFileLoadingProcess;
+import jp.sourceforge.gokigen.memoma.io.MeMoMaFileExportCsvProcess;
+import jp.sourceforge.gokigen.memoma.io.MeMoMaFileImportCsvProcess;
+import jp.sourceforge.gokigen.memoma.io.MeMoMaFileLoadingProcess;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.R;
-import jp.sourceforge.gokigen.memoma.SharedIntentInvoker;
+import jp.sourceforge.gokigen.memoma.io.SharedIntentInvoker;
 import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayAdapter;
 import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayItem;
 
@@ -68,9 +70,10 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
 	ExtensionActivityListener(Activity argument)
     {
+        OperationHistoryHolder historyHolder = new OperationHistoryHolder();
         parent = argument;
         fileUtility = new ExternalStorageFileUtility(Main.APP_BASEDIR);
-        objectHolder = new MeMoMaObjectHolder(parent, new MeMoMaConnectLineHolder());
+        objectHolder = new MeMoMaObjectHolder(parent, new MeMoMaConnectLineHolder(historyHolder), historyHolder);
     }
     /**
      *  起動時にデータを準備する
@@ -350,16 +353,16 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 	        while (keys.hasMoreElements())
 	        {
 	            Integer key = keys.nextElement();
-	            MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
+	            PositionObject pos = objectHolder.getPosition(key);
 
 	            // アイコンの決定
-	            int objectStyleIcon = MeMoMaObjectHolder .getObjectDrawStyleIcon(pos.drawStyle);
+	            int objectStyleIcon = MeMoMaObjectHolder .getObjectDrawStyleIcon(pos.getDrawStyle());
 	            
 	            // ユーザチェックの有無表示
-	            int userCheckedIcon = (pos.userChecked) ? R.drawable.btn_checked : R.drawable.btn_notchecked;
+	            int userCheckedIcon = (pos.getUserChecked()) ? R.drawable.btn_checked : R.drawable.btn_notchecked;
 
 	            // TODO: アイテム選択時の情報エリアは(ArrayItem側には)用意しているが未使用。
-	            SymbolListArrayItem listItem = new SymbolListArrayItem(userCheckedIcon, pos.label, pos.detail, "", objectStyleIcon);
+	            SymbolListArrayItem listItem = new SymbolListArrayItem(userCheckedIcon, pos.getLabel(), pos.getDetail(), "", objectStyleIcon);
 
 	            listItems.add(listItem);
 	        }

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma.fileio;
+package jp.sourceforge.gokigen.memoma.io;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.Display;
@@ -22,6 +23,7 @@ import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -38,6 +40,7 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  */
 public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, String>
 {
+    private static final int OUTPUT_EXPORT_SHARE_ID = 1000;
 	private static final int OUTPUT_MARGIN = 8;
 	private static final int OUTPUT_MARGIN_TOP = 50;
 	
@@ -146,22 +149,23 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         while (keys.hasMoreElements())
         {
             Integer key = keys.nextElement();
-            MeMoMaObjectHolder.PositionObject pos = objectHolder.getPosition(key);
-            if (canvasSize.left > pos.rect.left)
+            PositionObject pos = objectHolder.getPosition(key);
+            RectF posRect = pos.getRect();
+            if (canvasSize.left > posRect.left)
             {
-            	canvasSize.left = (int) pos.rect.left;
+            	canvasSize.left = (int) posRect.left;
             }
-            if (canvasSize.right < pos.rect.right)
+            if (canvasSize.right < posRect.right)
             {
-            	canvasSize.right = (int) pos.rect.right;
+            	canvasSize.right = (int) posRect.right;
             }
-            if (canvasSize.top > pos.rect.top)
+            if (canvasSize.top > posRect.top)
             {
-            	canvasSize.top = (int) pos.rect.top;
+            	canvasSize.top = (int) posRect.top;
             }
-            if (canvasSize.bottom < pos.rect.bottom)
+            if (canvasSize.bottom < posRect.bottom)
             {
-            	canvasSize.bottom = (int) pos.rect.bottom;
+            	canvasSize.bottom = (int) posRect.bottom;
             }
         }
         
@@ -258,7 +262,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     	{
             if (receiver != null)
             {
-            	receiver.onCaptureLayoutExportedResult(exportedFileName, result);
+            	receiver.onCaptureLayoutExportedResult(exportedFileName, result, OUTPUT_EXPORT_SHARE_ID);
             }
     	}
     	catch (Exception ex)
@@ -281,6 +285,6 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     public interface ICaptureLayoutExporter
     {
         //  保存結果の報告
-        void onCaptureLayoutExportedResult(String exportedFileName, String detail);
+        void onCaptureLayoutExportedResult(String exportedFileName, String detail, int id);
     }
 }

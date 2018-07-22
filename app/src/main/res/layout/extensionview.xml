@@ -54,7 +54,7 @@
 </ListView>
 
 <!-- 
-<jp.sourceforge.gokigen.memoma.GokigenSurfaceView
+<jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView
     android:id="@+id/ExtensionView"
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 

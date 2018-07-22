@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.io;
 
 import android.app.Activity;
 import android.content.Intent;

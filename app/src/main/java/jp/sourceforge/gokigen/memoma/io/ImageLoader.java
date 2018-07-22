@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma.fileio;
+package jp.sourceforge.gokigen.memoma.io;
 
 import java.io.File;
 import java.io.InputStream;

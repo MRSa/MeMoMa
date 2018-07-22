@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 
-import jp.sourceforge.gokigen.memoma.fileio.MeMoMaDataInOutManager;
+import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager;
 
 import static android.os.Build.VERSION_CODES.KITKAT;
 

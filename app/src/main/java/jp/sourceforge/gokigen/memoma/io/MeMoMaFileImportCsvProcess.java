@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma.fileio;
+package jp.sourceforge.gokigen.memoma.io;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,6 +13,7 @@ import android.util.Log;
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -167,18 +168,18 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             float top = centerY - (height / 2.0f);
 
             // オブジェクトのデータを作成する
-            MeMoMaObjectHolder.PositionObject pos = objectHolder.createPosition(left, top, drawStyle);
+            PositionObject pos = objectHolder.createPosition(left, top, drawStyle);
             if (pos == null)
             {
                 Log.v(Main.APP_IDENTIFIER, "parseRecord() : object create failure.");
             	return;            	
             }
-            pos.rect.right = left + width;
-            pos.rect.bottom = top + height;
-            pos.label = label;
-            pos.detail = detail;
-            pos.paintStyle = paintStyle;
-            pos.userChecked = userChecked;
+            pos.setRectRight(left + width);
+            pos.setRectBottom(top + height);
+            pos.setLabel(label);
+            pos.setDetail(detail);
+            pos.setPaintStyle(paintStyle);
+            pos.setUserChecked(userChecked);
             Log.v(Main.APP_IDENTIFIER, "OBJECT CREATED: " + label + "(" + left + "," + top + ") [" +drawStyle + "]");
         }
         catch (Exception ex)

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma.fileio;
+package jp.sourceforge.gokigen.memoma.io;
 
 import java.io.File;
 import java.io.FileReader;
@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -15,6 +16,8 @@ import android.util.Xml;
 import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
+import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
+import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
@@ -29,12 +32,12 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  */
 public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-	private Context parent = null;
-	private IResultReceiver receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
+	private Context parent;
+	private IResultReceiver receiver;
+	private ExternalStorageFileUtility fileUtility;
 
-	 private MeMoMaObjectHolder.PositionObject position = null;
-	 private MeMoMaConnectLineHolder.ObjectConnector line = null;
+	 private PositionObject position = null;
+	 private ObjectConnector line = null;
 
 	 private String backgroundUri = "";
      private String userCheckboxString = "";
@@ -66,37 +69,37 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 	    	//Log.v(Main.APP_IDENTIFIER, "parseStartTag() name = " + name);
             if ((name.equalsIgnoreCase("top"))&&(position != null))
             {
-            	position.rect.top = Float.parseFloat(parser.nextText());
+            	position.setRectTop(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("bottom"))&&(position != null))
             {
-            	position.rect.bottom = Float.parseFloat(parser.nextText());            	
+            	position.setRectBottom(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("left"))&&(position != null))
             {
-            	position.rect.left = Float.parseFloat(parser.nextText());            	
+            	position.setRectLeft(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("right"))&&(position != null))
             {
-            	position.rect.right = Float.parseFloat(parser.nextText());            	
+            	position.setRectRight(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("drawStyle"))&&(position != null))
             {
-            	position.drawStyle = Integer.parseInt(parser.nextText());
+            	position.setDrawStyle(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("icon"))&&(position != null))
             {
-            	position.icon = Integer.parseInt(parser.nextText());            	
+            	position.setIcon(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("label"))&&(position != null))
             {
-            	position.label = parser.nextText();
+            	position.setLabel(parser.nextText());
             }
             else if ((name.equalsIgnoreCase("detail"))&&(position != null))
             {
-            	position.detail = parser.nextText();            	
+            	position.setDetail(parser.nextText());
             }
-/**
+/*
             else if ((name.equalsIgnoreCase("backgroundUri"))&&(position != null))
             {
             	position.backgroundUri = parser.nextText();            	            	
@@ -113,49 +116,49 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
             else if ((name.equalsIgnoreCase("userChecked"))&&(position != null))
             {
             	String parseData = parser.nextText();
-            	position.userChecked =(parseData.equalsIgnoreCase("true")) ? true : false;
+            	position.setUserChecked((parseData.equalsIgnoreCase("true")));
             }
             else if ((name.equalsIgnoreCase("labelColor"))&&(position != null))
             {
-            	position.labelColor = Integer.parseInt(parser.nextText());            	
+            	position.setLabelColor(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("objectColor"))&&(position != null))
             {
-            	position.objectColor = Integer.parseInt(parser.nextText());            	
+            	position.setObjectColor(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("paintStyle"))&&(position != null))
             {
-            	position.paintStyle = parser.nextText();
+            	position.setPaintStyle(parser.nextText());
             }
             else if ((name.equalsIgnoreCase("strokeWidth"))&&(position != null))
             {
-            	position.strokeWidth = Float.parseFloat(parser.nextText());            	
+            	position.setStrokeWidth(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("fontSize"))&&(position != null))
             {
-            	position.fontSize = Float.parseFloat(parser.nextText());            	
+            	position.setFontSize(Float.parseFloat(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("fromObjectKey"))&&(line != null))
             {
-            	line.fromObjectKey = Integer.parseInt(parser.nextText());            	
+            	line.setFromObjectKey(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("toObjectKey"))&&(line != null))
             {
-            	line.toObjectKey = Integer.parseInt(parser.nextText());            	
+            	line.setToObjectKey(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("lineStyle"))&&(line != null))
             {
-            	line.lineStyle = Integer.parseInt(parser.nextText());            	
+            	line.setLineStyle(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("lineShape"))&&(line != null))
             {
-            	line.lineShape = Integer.parseInt(parser.nextText());            	
+            	line.setLineShape(Integer.parseInt(parser.nextText()));
             }
             else if ((name.equalsIgnoreCase("lineThickness"))&&(line != null))
             {
-            	line.lineThickness = Integer.parseInt(parser.nextText());            	
+            	line.setLineThickness(Integer.parseInt(parser.nextText()));
             }
-/**
+/*
             else if ((name.equalsIgnoreCase("fromShape"))&&(line != null))
             {
             	line.fromShape = Integer.parseInt(parser.nextText());            	
@@ -203,15 +206,20 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
             {
                 int key = Integer.parseInt(parser.getAttributeValue(Main.APP_NAMESPACE, "key"));
                 //Log.v(Main.APP_IDENTIFIER, "create object, key :" + key);
-                position = null;
-                position = objectHolder.createPosition(key);
+                if (objectHolder != null)
+                {
+                    position = objectHolder.createPosition(key);
+                }
             }
             else if (name.equalsIgnoreCase("line"))
             {
                 int key = Integer.parseInt(parser.getAttributeValue(Main.APP_NAMESPACE, "key"));
                 //Log.v(Main.APP_IDENTIFIER, "create line, key :" + key);
                 line = null;
-                line = objectHolder.getConnectLineHolder().createLine(key);        	
+                if (objectHolder != null)
+                {
+                    line = objectHolder.getConnectLineHolder().createLine(key);
+                }
             }
     	}
         catch (Exception e)
@@ -230,19 +238,22 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
                 //objectHolder.dumpPositionObject(position);
 
             	// 領域サイズがおかしい場合には、オブジェクトサイズを補正する (ふつーありえないはずなんだけど...)
-            	if ((position.rect.left > position.rect.right)||(position.rect.top > position.rect.bottom))
+                RectF posRect = position.getRect();
+            	if ((posRect.left > posRect.right)||(posRect.top > posRect.bottom))
             	{
-            		Log.v(Main.APP_IDENTIFIER, "RECT IS ILLEGAL. : [" + position.rect.left + "," + position.rect.top + "-[" + position.rect.right + "," + position.rect.bottom + "]");
-            		position.rect.right = position.rect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X;
-            		position.rect.bottom = position.rect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y;
+            		Log.v(Main.APP_IDENTIFIER, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
+            		position.setRectRight(posRect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X);
+            		position.setRectBottom(posRect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y);
             	}
-            	
             }
+/*
             else if (name.equalsIgnoreCase("line"))
             {
+                //
                 //Log.v(Main.APP_IDENTIFIER, "parseEndTag() : LINE");       
                 //objectHolder.getConnectLineHolder().dumpConnectLine(line);
             }
+*/
         }
         catch (Exception e)
         {
@@ -252,10 +263,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     
     /**
      *    (XML形式の)データを読みだす。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
+     *
      */
     private String restoreToXmlFile(String fileName, MeMoMaObjectHolder objectHolder)
     {
@@ -270,7 +278,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	 try
     	 {
     		 File inputFile = new File(fileName);
-    		 if (inputFile.exists() == false)
+    		 if (!inputFile.exists())
     		 {
     			 // ファイルがなかったときには、「ファイルなし」と報告する。
     			 resultMessage = "ERR>File not found.";
@@ -281,7 +289,6 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     		 parser.setInput(reader);
 
     		 int eventType = parser.getEventType();
-             boolean done = false;
 
              // オブジェクトとラインをすべてクリアする
              objectHolder.removeAllPositions();
@@ -292,7 +299,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
              }
              lineHolder.removeAllLines();
              
-             while ((eventType != XmlPullParser.END_DOCUMENT)&&(done != true))
+             while ((eventType != XmlPullParser.END_DOCUMENT))
              {
                  switch (eventType)
                  {
@@ -366,14 +373,14 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     {
     	try
     	{
-    		if (result.isEmpty() == true)
+    		if (result.isEmpty())
     		{
     	    	//  エラーが発生していない場合には、読みだしたデータをPreferenceに設定登録...
     	    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString("backgroundUri", backgroundUri);
                 editor.putString("userCheckboxString", userCheckboxString);
-                editor.commit();
+                editor.apply();
     		}
 
             if (receiver != null)
@@ -385,7 +392,6 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	{
     		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
     	}
-        return;
     }     
 	
     /**
@@ -397,9 +403,9 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     public interface IResultReceiver
     {
         /**   処理中の処理   **/
-    	public abstract void onLoadingProcess();
+    	void onLoadingProcess();
     	
         /**  保存結果の報告 **/
-        public abstract void onLoadedResult(String detail);
+        void onLoadedResult(String detail);
     }
 }

@@ -65,76 +65,29 @@ public class MeMoMaObjectHolder
 	
     private MeMoMaConnectLineHolder connectLineHolder = null;
     
-    /**
-     *    オブジェクトの情報 
-     * 
-     * @author MRSa
-     *
-     */
-	public class PositionObject
-	{
-		private Integer key;                 // オブジェクト識別子 (変更不可）
-		public RectF rect;                    // オブジェクトの大きさ
-	    public int drawStyle;               // オブジェクトの形状
-
-	    public int icon;                        // オブジェクトのアイコン
-	    public String label;                   // オブジェクトの表示ラベル
-	    public String detail;                  // オブジェクトの説明
-	    //public String backgroundUri;     // オブジェクトの背景画像
-	    //public String otherInfoUri;        // 補足（写真とかへのURI）
-	    //public String objectStatus;        // オブジェクトの状態
-	    public boolean userChecked;    // ユーザチェックボックス
-
-	    public int labelColor;               // オブジェクト内に表示する色
-	    public int objectColor;             // オブジェクトの色
-	    public String paintStyle;           // オブジェクトの表示方法 （枠線のみ、塗りつぶし、塗りつぶしと枠線）
-	    public float strokeWidth;         // 枠線の太さ
-	    public float fontSize;               // フォントサイズ
-
-	    /**
-	     *    コンストラクタ (キーを設定する)
-	     * @param id
-	     */
-	    public PositionObject(int id)
-	    {
-	    	key = id;
-	    }
-
-	    /**
-	     *    オブジェクトのキーを取得する
-	     * @return
-	     */
-	    public Integer getKey()
-	    {
-	    	return (key);
-	    }
-	};
-
 	private Hashtable<Integer, PositionObject> objectPoints = null;
 	private Integer serialNumber = 1;
 	private String  dataTitle = "";
 	private String  background = "";
-	private Context parent = null;
+	private Context parent;
+	private final IOperationHistoryHolder historyHolder;
 
-    public MeMoMaObjectHolder(Context context, MeMoMaConnectLineHolder lineHolder)
+    public MeMoMaObjectHolder(Context context, MeMoMaConnectLineHolder lineHolder, IOperationHistoryHolder historyHolder)
     {
-		  objectPoints = new Hashtable<Integer, PositionObject>();
+		  objectPoints = new Hashtable<>();
 		  connectLineHolder = lineHolder;
 		  parent = context;
+		  this.historyHolder = historyHolder;
     }
 
     /**
      *    データの有無を見る (true の場合、データはない。)
      * 
-     * @return
+     *
      */
     public boolean isEmpty()
-    {	
-    	if ((connectLineHolder == null)||(objectPoints == null))
-    	{
-    		return (true);
-    	}
-    	return (objectPoints.isEmpty());
+    {
+		return (((connectLineHolder == null)||(objectPoints == null))||(objectPoints.isEmpty()));
     }
     
     public MeMoMaConnectLineHolder getConnectLineHolder()
@@ -206,15 +159,16 @@ public class MeMoMaObjectHolder
     	{
     		return;
     	}
-        Log.v(Main.APP_IDENTIFIER, "[" + position.rect.left + "," + position.rect.top + "][" + position.rect.right + "," + position.rect.bottom + "] " + "label : " + position.label + " detail : " + position.detail);
+    	RectF posRect = position.getRect();
+        Log.v(Main.APP_IDENTIFIER, "[" + posRect.left + "," + posRect.top + "][" + posRect.right + "," + posRect.bottom + "] " + "label : " + position.getLabel() + " detail : " + position.getDetail());
     }
     
     
     /**
      *   オブジェクトを複製する。
      * 
-     * @param key
-     * @return
+     *
+     *
      */
     public PositionObject duplicatePosition(int key)
     {
@@ -224,25 +178,20 @@ public class MeMoMaObjectHolder
     		// 元のオブジェクトが見つからなかったので、何もせずに戻る
     		return (null);
     	}
-    	PositionObject position = new PositionObject(serialNumber);
-    	position.rect = new RectF();
-    	position.rect.left = orgPosition.rect.left + DUPLICATEPOSITION_MARGIN;
-    	position.rect.right = orgPosition.rect.right + DUPLICATEPOSITION_MARGIN;
-    	position.rect.top = orgPosition.rect.top + DUPLICATEPOSITION_MARGIN;
-    	position.rect.bottom = orgPosition.rect.bottom + DUPLICATEPOSITION_MARGIN;
-    	position.drawStyle = orgPosition.drawStyle;
-    	position.icon = orgPosition.icon;
-    	position.label = orgPosition.label;
-    	position.detail = orgPosition.detail;
-    	//position.otherInfoUri = orgPosition.otherInfoUri;
-    	//position.backgroundUri = orgPosition.backgroundUri;
-    	//position.objectStatus = orgPosition.objectStatus;
-    	position.userChecked = orgPosition.userChecked;
-    	position.objectColor = orgPosition.objectColor;
-    	position.labelColor = orgPosition.labelColor;
-    	position.paintStyle = orgPosition.paintStyle;
-    	position.strokeWidth = orgPosition.strokeWidth;
-    	position.fontSize = orgPosition.fontSize;
+    	RectF orgRect = orgPosition.getRect();
+    	PositionObject position = new PositionObject(serialNumber,
+                new RectF(orgRect.left + DUPLICATEPOSITION_MARGIN, orgRect.top + DUPLICATEPOSITION_MARGIN, orgRect.right + DUPLICATEPOSITION_MARGIN, orgRect.bottom + DUPLICATEPOSITION_MARGIN),
+                orgPosition.getDrawStyle(),
+                orgPosition.getIcon(),
+                orgPosition.getLabel(),
+                orgPosition.getDetail(),
+                orgPosition.getUserChecked(),
+                orgPosition.getLabelColor(),
+                orgPosition.getObjectColor(),
+                orgPosition.getPaintStyle(),
+                orgPosition.getstrokeWidth(),
+                orgPosition.getFontSize(),
+                historyHolder);
 		objectPoints.put(serialNumber, position);
 		serialNumber++;
 		return (position);
@@ -250,25 +199,19 @@ public class MeMoMaObjectHolder
 
     public PositionObject createPosition(int id)
     {
-    	PositionObject position = new PositionObject(id);
-    	position.rect = new RectF();
-    	position.rect.top = 0;
-    	position.rect.bottom = OBJECTSIZE_DEFAULT_Y;
-    	position.rect.left = 0;
-    	position.rect.right = OBJECTSIZE_DEFAULT_X;
-    	position.drawStyle = MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE;
-    	position.icon = 0;
-    	position.label = "";
-    	position.detail = "";
-    	//position.otherInfoUri = "";
-    	//position.backgroundUri = "";
-    	//position.objectStatus = "";
-    	position.userChecked = false;
-    	position.objectColor = Color.WHITE;
-    	position.labelColor = Color.WHITE;
-    	position.paintStyle = Paint.Style.STROKE.toString();
-    	position.strokeWidth = STOROKE_NORMAL_WIDTH;
-    	position.fontSize = FONTSIZE_DEFAULT;
+    	PositionObject position = new PositionObject(id,
+                new RectF(0, 0, OBJECTSIZE_DEFAULT_X, OBJECTSIZE_DEFAULT_Y),
+                MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE,
+                0,
+                "",
+                "",
+                false,
+                Color.WHITE,
+                Color.WHITE,
+                Paint.Style.STROKE.toString(),
+                STOROKE_NORMAL_WIDTH,
+                FONTSIZE_DEFAULT,
+                historyHolder);
 		objectPoints.put(id, position);
 		return (position);    	
     }
@@ -276,11 +219,12 @@ public class MeMoMaObjectHolder
     public PositionObject createPosition(float x, float y, int drawStyle)
     {
     	PositionObject position = createPosition(serialNumber);
-    	position.rect.left = position.rect.left + x;
-    	position.rect.right = position.rect.right + x;
-    	position.rect.top = position.rect.top + y;
-    	position.rect.bottom = position.rect.bottom + y;
-    	position.drawStyle = drawStyle;
+    	RectF posRect = position.getRect();
+    	position.setRectLeft(posRect.left + x);
+    	position.setRectRight(posRect.right + x);
+    	position.setRectTop(posRect.top + y);
+    	position.setRectBottom(posRect.bottom + y);
+    	position.setDrawStyle(drawStyle);
 		serialNumber++;
 		return (position);
     }
@@ -297,8 +241,9 @@ public class MeMoMaObjectHolder
     		// 元のオブジェクトが見つからなかったので、何もせずに戻る
     		return;
     	}
-        float width = position.rect.right - position.rect.left;
-        float height = position.rect.bottom - position.rect.top;
+    	RectF posRect = position.getRect();
+        float width = posRect.right - posRect.left;
+        float height = posRect.bottom - posRect.top;
         if (((width + (OBJECTSIZE_STEP_X * 2.0f)) > OBJECTSIZE_MAXIMUM_X)||((height + (OBJECTSIZE_STEP_Y * 2.0f)) > OBJECTSIZE_MAXIMUM_Y))
         {
             // 拡大リミットだった。。。拡大しない
@@ -306,16 +251,16 @@ public class MeMoMaObjectHolder
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
             return;
         }
-        position.rect.left = position.rect.left - OBJECTSIZE_STEP_X;
-        position.rect.right = position.rect.right + OBJECTSIZE_STEP_X;
-        position.rect.top = position.rect.top - OBJECTSIZE_STEP_Y;
-        position.rect.bottom = position.rect.bottom + OBJECTSIZE_STEP_Y;	
+        position.setRectLeft(posRect.left - OBJECTSIZE_STEP_X);
+        position.setRectRight(posRect.right + OBJECTSIZE_STEP_X);
+        position.setRectTop(posRect.top - OBJECTSIZE_STEP_Y);
+        position.setRectBottom(posRect.bottom + OBJECTSIZE_STEP_Y);
     }
 
     /**
      *   オブジェクトのサイズを縮小する
      * 
-     * @param key
+     *
      */
     public void shrinkObjectSize(Integer key)
     {
@@ -325,8 +270,9 @@ public class MeMoMaObjectHolder
     		// 元のオブジェクトが見つからなかったので、何もせずに戻る
     		return;
     	}
-        float width = position.rect.right - position.rect.left;
-        float height = position.rect.bottom - position.rect.top;
+    	RectF posRect = position.getRect();
+        float width = posRect.right - posRect.left;
+        float height = posRect.bottom - posRect.top;
         if (((width - (OBJECTSIZE_STEP_X * 2.0f)) < OBJECTSIZE_MINIMUM_X)||((height - (OBJECTSIZE_STEP_Y * 2.0f)) < OBJECTSIZE_MINIMUM_Y))
         {
             // 縮小リミットだった。。。縮小しない
@@ -334,10 +280,10 @@ public class MeMoMaObjectHolder
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
             return;
         }
-        position.rect.left = position.rect.left + OBJECTSIZE_STEP_X;
-        position.rect.right = position.rect.right - OBJECTSIZE_STEP_X;
-        position.rect.top = position.rect.top + OBJECTSIZE_STEP_Y;
-        position.rect.bottom = position.rect.bottom - OBJECTSIZE_STEP_Y;	    	
+        position.setRectLeft(posRect.left + OBJECTSIZE_STEP_X);
+        position.setRectRight(posRect.right - OBJECTSIZE_STEP_X);
+        position.setRectTop(posRect.top + OBJECTSIZE_STEP_Y);
+        position.setRectBottom(posRect.bottom - OBJECTSIZE_STEP_Y);
     }
 
     public MeMoMaConnectLineHolder getLineHolder()
@@ -418,5 +364,4 @@ public class MeMoMaObjectHolder
     	}
     	return (icon);
 	}
-	
 }

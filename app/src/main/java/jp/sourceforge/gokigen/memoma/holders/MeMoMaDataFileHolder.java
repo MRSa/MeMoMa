@@ -6,7 +6,7 @@ import java.io.FilenameFilter;
 import android.content.Context;
 import android.widget.ArrayAdapter;
 
-import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
+import jp.sourceforge.gokigen.memoma.io.ExternalStorageFileUtility;
 
 /**
  *    めもまのデータファイル名を保持するクラス　（ArrayAdapterを拡張）
@@ -16,8 +16,8 @@ import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
  */
 public class MeMoMaDataFileHolder extends ArrayAdapter<String> implements FilenameFilter
 {
-	private ExternalStorageFileUtility fileUtility = null;
-	private String fileExtension = "";
+	private ExternalStorageFileUtility fileUtility;
+	private String fileExtension;
 
 	/**
 	 *    コンストラクタ
@@ -49,7 +49,7 @@ public class MeMoMaDataFileHolder extends ArrayAdapter<String> implements Filena
         try {
 			for (int index = 0; index < dirFileList.length; index++) {
 				String fileName = dirFileList[index].substring(0, dirFileList[index].indexOf(fileExtension));
-				if (fileName.contentEquals(currentFileName) == true)  // ファイル先頭にない場合は追加する。
+				if (fileName.contentEquals(currentFileName))  // ファイル先頭にない場合は追加する。
 				{
 					// 選択したインデックスを設定する。
 					outputIndex = index;
@@ -75,6 +75,6 @@ public class MeMoMaDataFileHolder extends ArrayAdapter<String> implements Filena
      */
     public boolean accept(File dir, String filename)
     {
-    	return (filename.endsWith(fileExtension) ? true : false);
+    	return (filename.endsWith(fileExtension));
     }
 }

@@ -1,4 +1,4 @@
-package jp.sourceforge.gokigen.memoma;
+package jp.sourceforge.gokigen.memoma.drawers;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.drawers.ICanvasDrawer;
 
 /**

@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import jp.sourceforge.gokigen.memoma.fileio.ExternalStorageFileUtility;
+import jp.sourceforge.gokigen.memoma.io.ExternalStorageFileUtility;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
 import jp.sourceforge.gokigen.memoma.R;
 
