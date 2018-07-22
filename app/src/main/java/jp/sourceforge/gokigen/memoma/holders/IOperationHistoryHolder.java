@@ -16,7 +16,9 @@ interface IOperationHistoryHolder
         STROKE_WIDTH,
         FONT_SIZE,
         NEW_OBJECT,
+        DELETE_OBJECT,
         NEW_CONNECT_LINE,
+        DELETE_CONNECT_LINE,
         CONNECT_LINE_FROM_KEY,
         CONNECT_LINE_TO_KEY,
         CONNECT_LINE_STYLE,
@@ -26,6 +28,7 @@ interface IOperationHistoryHolder
 
 
     void addHistory(int key, ChangeKind kind, Object object);
+    void reset();
     void undo();
 
 }

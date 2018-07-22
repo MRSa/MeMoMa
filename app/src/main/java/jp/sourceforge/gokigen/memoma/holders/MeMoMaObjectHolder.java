@@ -132,7 +132,11 @@ public class MeMoMaObjectHolder
 
     public boolean removePosition(Integer key)
     {
-    	objectPoints.remove(key);
+        PositionObject removeTarget = objectPoints.remove(key);
+        if (removeTarget != null)
+        {
+            historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_OBJECT, removeTarget);
+        }
     	Log.v(Main.APP_IDENTIFIER, "REMOVE : " + key);
     	return (true);
     }

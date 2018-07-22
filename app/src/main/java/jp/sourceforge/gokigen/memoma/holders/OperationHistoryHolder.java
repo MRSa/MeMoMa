@@ -17,6 +17,12 @@ public class OperationHistoryHolder implements IOperationHistoryHolder
         Log.v(TAG, "addHistory() KEY : " + key + " KIND : " + kind.toString() + " OBJ : " + object.toString());
     }
 
+    public void reset()
+    {
+        Log.v(TAG, "Histry Reset() ");
+
+    }
+
     public void undo()
     {
         Log.v(TAG, "undo() ");

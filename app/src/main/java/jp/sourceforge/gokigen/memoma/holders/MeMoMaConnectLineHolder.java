@@ -39,7 +39,11 @@ public class MeMoMaConnectLineHolder
 
     public boolean disconnectLines(Integer key)
     {
-        connectLines.remove(key);
+        ObjectConnector removeTarget = connectLines.remove(key);
+        if (removeTarget != null)
+        {
+            historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_CONNECT_LINE, removeTarget);
+        }
         Log.v(Main.APP_IDENTIFIER, "DISCONNECT LINES : " + key);
         return (true);
     }

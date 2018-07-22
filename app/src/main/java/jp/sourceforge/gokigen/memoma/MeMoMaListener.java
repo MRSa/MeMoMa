@@ -1104,6 +1104,9 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
             objectDrawer.resetScaleAndLocation(zoomBar);
         }
 
+        // 操作履歴をクリアする
+        historyHolder.reset();
+
         	/*
         	// 題名を "無題"に変更し、関係情報をクリアする
         	String newName = parent.getString(R.string.no_name);
