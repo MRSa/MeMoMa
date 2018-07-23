@@ -29,6 +29,8 @@ interface IOperationHistoryHolder
 
     void addHistory(int key, ChangeKind kind, Object object);
     void reset();
-    void undo();
+
+    boolean undo();
+    boolean isHistoryExist();
 
 }

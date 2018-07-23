@@ -70,10 +70,9 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
 	ExtensionActivityListener(Activity argument)
     {
-        OperationHistoryHolder historyHolder = new OperationHistoryHolder();
         parent = argument;
         fileUtility = new ExternalStorageFileUtility(Main.APP_BASEDIR);
-        objectHolder = new MeMoMaObjectHolder(parent, new MeMoMaConnectLineHolder(historyHolder), historyHolder);
+        objectHolder = new MeMoMaObjectHolder(parent);
     }
     /**
      *  起動時にデータを準備する

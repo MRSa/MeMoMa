@@ -33,10 +33,8 @@ import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog;
 import jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.extension.ExtensionActivity;
-import jp.sourceforge.gokigen.memoma.holders.OperationHistoryHolder;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager;
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder;
 import jp.sourceforge.gokigen.memoma.operations.IObjectSelectionReceiver;
@@ -69,8 +67,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     private TextEditDialog editTextDialog;   // テキスト編集用ダイアログ
     private MeMoMaCanvasDrawer objectDrawer; // 画像の表示
     private MeMoMaObjectHolder objectHolder;  // オブジェクトの保持クラス
-    private MeMoMaConnectLineHolder lineHolder;  // オブジェクト間の接続状態保持クラス
-    private OperationHistoryHolder historyHolder;  // 操作履歴保持クラス
     //private SelectFeatureListener featureListener = null;  // 機能選択用のリスナ
 
     private MeMoMaDataInOutManager dataInOutManager;
@@ -79,15 +75,10 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     private LineStyleHolder lineStyleHolder;
 
     private ConfirmationDialog confirmationDialog;
-
     private ObjectDataInputDialog objectDataInputDialog;
-
     private SelectLineShapeDialog lineSelectionDialog;
-
     private ItemSelectionDialog itemSelectionDialog;
-    private ObjectOperationCommandHolder commandHolder;
 
-    private boolean isEditing = false;
     private Integer  selectedObjectKey = 0;
     private Integer  objectKeyToDelete = 0;
     private Integer selectedContextKey = 0;
@@ -100,12 +91,8 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     {
         parent = argument;
         dataInOutManager = inoutManager;
-        historyHolder = new OperationHistoryHolder();
-        lineHolder = new MeMoMaConnectLineHolder(historyHolder);
-        objectHolder = new MeMoMaObjectHolder(argument, lineHolder, historyHolder);
+        objectHolder = new MeMoMaObjectHolder(argument);
         editTextDialog = new TextEditDialog(parent, R.drawable.icon);
-        //lineHolder = new MeMoMaConnectLineHolder();
-        //featureListener = new SelectFeatureListener(parent);
         drawModeHolder = new OperationModeHolder(parent);
 
         lineStyleHolder = new LineStyleHolder(parent);
@@ -124,7 +111,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         lineSelectionDialog.setResultReceiver(this);
 
         // アイテム選択ダイアログを生成
-        commandHolder = new ObjectOperationCommandHolder(argument);
+        ObjectOperationCommandHolder commandHolder = new ObjectOperationCommandHolder(argument);
         itemSelectionDialog = new ItemSelectionDialog(argument);
         itemSelectionDialog.prepare(this,  commandHolder, parent.getString(R.string.object_operation));
 
@@ -366,7 +353,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     {
         int id = v.getId();
         // int action = event.getAction();
-
         //Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onTouch() " + id);
 
         if (id == R.id.GraphicView)
@@ -386,10 +372,8 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         int action = event.getAction();
         if ((action == KeyEvent.ACTION_DOWN)&&(keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
         {
-            //
             Log.v(Main.APP_IDENTIFIER, "KEY ENTER");
         }
-
         Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onKey() ");
         return (false);
     }
@@ -461,7 +445,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     public void onPrepareOptionsMenu(Menu menu)
     {
         menu.findItem(MENU_ID_NEW).setVisible(true);
-        menu.findItem(MENU_ID_UNDO).setVisible(false);
+        menu.findItem(MENU_ID_UNDO).setVisible(objectHolder.isHistoryExist());
         menu.findItem(MENU_ID_SHARE).setVisible(true);
         menu.findItem(MENU_ID_CAPTURE).setVisible(true);
         menu.findItem(MENU_ID_ALIGN).setVisible(true);
@@ -559,7 +543,13 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     private boolean undoOperation()
     {
-        return (false);
+        // undo処理を実行する
+        boolean ret = objectHolder.undo();
+
+        // 画面を再描画する
+        redrawSurfaceview();
+
+        return (ret);
     }
 
     /**
@@ -647,7 +637,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         {
             dataInOutManager.prepare(objectHolder, bar, memomaInfo);
         }
-
         //dataInOutManager.loadFile((String) parent.getTitle());
     }
 
@@ -729,7 +718,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 
         //  ダイアログの準備を行う
         objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey);
-
     }
 
     /**
@@ -1100,12 +1088,9 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         // 画面の倍率と表示位置を初期状態に戻す
         if (objectDrawer != null)
         {
-            final SeekBar zoomBar = (SeekBar) parent.findViewById(R.id.ZoomInOut);
+            final SeekBar zoomBar = parent.findViewById(R.id.ZoomInOut);
             objectDrawer.resetScaleAndLocation(zoomBar);
         }
-
-        // 操作履歴をクリアする
-        historyHolder.reset();
 
         	/*
         	// 題名を "無題"に変更し、関係情報をクリアする
@@ -1122,7 +1107,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 
         // ファイル名選択ダイアログを開く
         showInfoMessageEditDialog();
-
     }
 
     /**
@@ -1131,8 +1115,15 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     private void redrawSurfaceview()
     {
-        final GokigenSurfaceView surfaceview = parent.findViewById(R.id.GraphicView);
-        surfaceview.doDraw();
+        try
+        {
+            final GokigenSurfaceView surfaceView = parent.findViewById(R.id.GraphicView);
+            surfaceView.doDraw();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1171,27 +1162,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     public void cancelObjectInput()
     {
         // 何もしない
-    }
-
-
-    /**
-     *   現在編集中かどうかを知る
-     *
-     *
-     */
-    public boolean isEditing()
-    {
-        return (isEditing);
-    }
-
-    /**
-     *   現在編集中のフラグを更新する
-     *
-     *
-     */
-    public void setIsEditing(boolean value)
-    {
-        isEditing = value;
     }
 
     /**
@@ -1274,7 +1244,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 
             // ファイル選択リストの更新
             dataInOutManager.updateFileList(message, parent.getSupportActionBar());
-
         }
         catch (Exception e)
         {
@@ -1282,6 +1251,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         }
         return (true);
     }
+
     public boolean cancelTextEditDialog()
     {
         return (false);
@@ -1296,16 +1266,14 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         int buttonId = LineStyleHolder.getLineShapeImageId(style, shape);
         final ImageButton lineStyleObj =parent.findViewById(R.id.LineStyleButton);
         lineStyleObj.setImageResource(buttonId);
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::finishSelectLineShape() buttonId:" + buttonId);
+        // Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::finishSelectLineShape() buttonId:" + buttonId);
     }
 
     /**
-     *
      *
      */
     public void cancelSelectLineShape()
     {
 
     }
-
 }

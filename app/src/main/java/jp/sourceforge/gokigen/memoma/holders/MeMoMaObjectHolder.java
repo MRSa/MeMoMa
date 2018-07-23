@@ -63,21 +63,21 @@ public class MeMoMaObjectHolder
 	
 	public static final float FONTSIZE_DEFAULT = 12.0f;
 	
-    private MeMoMaConnectLineHolder connectLineHolder = null;
+    private final MeMoMaConnectLineHolder connectLineHolder;
     
-	private Hashtable<Integer, PositionObject> objectPoints = null;
+	private Hashtable<Integer, PositionObject> objectPoints;
 	private Integer serialNumber = 1;
 	private String  dataTitle = "";
 	private String  background = "";
 	private Context parent;
 	private final IOperationHistoryHolder historyHolder;
 
-    public MeMoMaObjectHolder(Context context, MeMoMaConnectLineHolder lineHolder, IOperationHistoryHolder historyHolder)
+    public MeMoMaObjectHolder(Context context)
     {
-		  objectPoints = new Hashtable<>();
-		  connectLineHolder = lineHolder;
-		  parent = context;
-		  this.historyHolder = historyHolder;
+		historyHolder = new OperationHistoryHolder(this);
+		connectLineHolder = new MeMoMaConnectLineHolder(historyHolder);
+		objectPoints = new Hashtable<>();
+		parent = context;
     }
 
     /**
@@ -87,9 +87,27 @@ public class MeMoMaObjectHolder
      */
     public boolean isEmpty()
     {
-		return (((connectLineHolder == null)||(objectPoints == null))||(objectPoints.isEmpty()));
+		return ((objectPoints == null))||(objectPoints.isEmpty());
     }
-    
+
+    /**
+     *   履歴の有無があるか (trueの場合、履歴あり）
+     *
+     */
+    public boolean isHistoryExist()
+    {
+        return (historyHolder.isHistoryExist());
+    }
+
+    /**
+     *   「ひとつ戻す」処理
+     *
+     */
+    public boolean undo()
+    {
+        return (historyHolder.undo());
+    }
+
     public MeMoMaConnectLineHolder getConnectLineHolder()
     {
     	return (connectLineHolder);
@@ -145,6 +163,9 @@ public class MeMoMaObjectHolder
     {
         objectPoints.clear();
         serialNumber = 1;
+
+        // 操作履歴をクリアする
+        historyHolder.reset();
     }
 
     public void setSerialNumber(int id)
