@@ -8,12 +8,13 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
 
 import jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView;
 import jp.sourceforge.gokigen.memoma.Main;

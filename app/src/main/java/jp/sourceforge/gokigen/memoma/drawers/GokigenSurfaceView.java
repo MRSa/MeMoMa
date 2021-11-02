@@ -9,7 +9,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import jp.sourceforge.gokigen.memoma.Main;
-import jp.sourceforge.gokigen.memoma.drawers.ICanvasDrawer;
 
 /**
  *  描画するくらす
@@ -89,17 +88,24 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     public boolean onTouchEvent(MotionEvent event)
     {
         boolean ret = false;
-    	if (canvasDrawer != null)
-    	{
-    	    ret = canvasDrawer.onTouchEvent(event);
-    	    if (ret)
-    	    {
-    	    	doDraw();
-    	    }
-    	}
-    	else
+        try
         {
-            super.performClick();
+            if (canvasDrawer != null)
+            {
+                ret = canvasDrawer.onTouchEvent(event);
+                if (ret)
+                {
+                    doDraw();
+                }
+            }
+            else
+            {
+                super.performClick();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
         return (ret);
     }
@@ -126,9 +132,7 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         }
         catch (Exception ex)
         {
-            //
-            //
-            //
+            ex.printStackTrace();
         }
     }
 
@@ -149,7 +153,6 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     public void doDraw()
     {
 		//Log.v(Main.APP_IDENTIFIER, "GokigenSurfaceView::doDraw()");
-
 		SurfaceHolder drawHolder = getHolder();
     	try
     	{

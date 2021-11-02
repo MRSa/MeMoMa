@@ -1,6 +1,6 @@
 package jp.sourceforge.gokigen.memoma.holders;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  *   オブジェクト間を接続するクラス

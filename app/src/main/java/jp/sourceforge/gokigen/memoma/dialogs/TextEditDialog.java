@@ -3,7 +3,6 @@ package jp.sourceforge.gokigen.memoma.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,14 +19,13 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class TextEditDialog
 {
-	private Context context = null;
+	private final Context context;
 	private ITextEditResultReceiver resultReceiver = null;
-	private int    icon = 0;
+	private final int    icon;
 	private String title = null;
 
 	/**
 	 *   コンストラクタ
-	 * @param arg
 	 */
 	public TextEditDialog(Context arg, int titleIcon)
 	{
@@ -37,8 +35,6 @@ public class TextEditDialog
 
 	/**
 	 *  クラスの準備
-	 * @param receiver
-	 * @param initialMessage
 	 */
 	public void prepare(Dialog layout, ITextEditResultReceiver receiver, String titleMessage, String initialMessage, boolean isSingleLine)
 	{
@@ -77,7 +73,6 @@ public class TextEditDialog
 	
     /**
      *   テキスト編集ダイアログを応答する
-     * @return
      */
     public Dialog getDialog()
     {
@@ -99,52 +94,28 @@ public class TextEditDialog
 
         builder.setView(layout);
         builder.setCancelable(false);
-        builder.setPositiveButton(context.getString(R.string.confirmYes), new DialogInterface.OnClickListener()
-              {
-                   public void onClick(DialogInterface dialog, int id)
-                   {
-                	   boolean ret = false;
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.finishTextEditDialog(editComment.getText().toString());
-                	   }
-                       if (ret == true)
-                       {
-                    	   dialog.dismiss();
-                       }
-                       else
-                       {
-                           dialog.cancel();
-                       }
-                       System.gc();
-                   }
-               });
-        builder.setNegativeButton(context.getString(R.string.confirmNo), new DialogInterface.OnClickListener()
-               {
-                   public void onClick(DialogInterface dialog, int id)
-                   {
-                	   boolean ret = false;
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.cancelTextEditDialog();
-                	   }
-                       if (ret == true)
-                       {
-                    	   dialog.dismiss();
-                       }
-                       else
-                       {
-                           dialog.cancel();
-                       }
-                       System.gc();
-                   }
-               });
+        builder.setPositiveButton(context.getString(R.string.confirmYes), (dialog, id) -> {
+            if (resultReceiver != null)
+            {
+                resultReceiver.finishTextEditDialog(editComment.getText().toString());
+            }
+            dialog.cancel();
+            System.gc();
+        });
+        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
+            if (resultReceiver != null)
+            {
+                resultReceiver.cancelTextEditDialog();
+            }
+            dialog.cancel();
+            System.gc();
+        });
         return (builder.create());    	
     }
 
     public interface ITextEditResultReceiver
     {
-        public abstract boolean finishTextEditDialog(String message);
-        public abstract boolean cancelTextEditDialog();
+        void finishTextEditDialog(String message);
+        void cancelTextEditDialog();
     }
 }

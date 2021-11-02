@@ -14,7 +14,7 @@ import android.graphics.RectF;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
-import 	android.view.GestureDetector;
+import android.view.GestureDetector;
 import android.view.ScaleGestureDetector;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -53,7 +53,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	// 以下の値は、MeMoMaListenerで初期値を設定する
 	private int objectStyle = MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE;
 	
-	private LineStyleHolder lineStyleHolder;
+	private final LineStyleHolder lineStyleHolder;
 
 	private float drawScale = 1.0f;    // 表示の倍率
 	private float drawTransX  = 0.0f;   // 並行移動距離 (X)
@@ -71,14 +71,14 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	private String backgroundBitmapUri = null;
 	private Bitmap backgroundBitmap = null;
 
-	private MeMoMaObjectHolder objectHolder;
-	private MeMoMaConnectLineHolder lineHolder;
-	private IObjectSelectionReceiver selectionReceiver;
+	private final MeMoMaObjectHolder objectHolder;
+	private final MeMoMaConnectLineHolder lineHolder;
+	private final IObjectSelectionReceiver selectionReceiver;
 
-	private GestureDetector gestureDetector;
-	private ScaleGestureDetector scaleGestureDetector;
+	private final GestureDetector gestureDetector;
+	private final ScaleGestureDetector scaleGestureDetector;
 
-	private Activity parent;
+	private final Activity parent;
 	
 	/**
       *   コンストラクタ

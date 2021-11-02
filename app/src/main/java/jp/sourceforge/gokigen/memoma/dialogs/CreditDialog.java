@@ -18,7 +18,7 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class CreditDialog
 {
-	private Activity context;
+	private final Activity context;
 
 	/**
 	 *   コンストラクタ

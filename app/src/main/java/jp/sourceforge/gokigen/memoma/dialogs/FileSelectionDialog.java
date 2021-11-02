@@ -3,10 +3,8 @@ package jp.sourceforge.gokigen.memoma.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import jp.sourceforge.gokigen.memoma.io.ExternalStorageFileUtility;
@@ -21,34 +19,29 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class FileSelectionDialog
 {
-	private Context context = null;
-	private IResultReceiver resultReceiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
-    private MeMoMaDataFileHolder dataFileHolder = null;
-    private String title = null;
-    private String fileExtension = null;
-    private Dialog dialogRef = null;
+	private final Context context;
+	private final IResultReceiver resultReceiver;
+    private final MeMoMaDataFileHolder dataFileHolder;
+    private final String title;
+    private final String fileExtension;
+    private Dialog dialogRef;
     
 	/**
 	 *    コンストラクタ
-	 * 
-	 * @param arg
+	 *
 	 */
 	public FileSelectionDialog(Context arg, String titleMessage, ExternalStorageFileUtility utility, String extension, IResultReceiver receiver)
 	{
 	    context = arg;	
 	    resultReceiver = receiver;
 		title = titleMessage;
-        fileUtility = utility;
         fileExtension = extension;
-        dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, fileUtility, extension);
+        dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, utility, extension);
 	}
 
 	/**
 	 *   ファイル一覧データをつくる！
-	 * 
-	 * @param currentFileName
-	 * @param extendDirectory
+	 *
 	 */
 	public void prepare(String currentFileName, String extendDirectory)
 	{
@@ -57,8 +50,7 @@ public class FileSelectionDialog
 
     /**
      *   ファイル選択ダイアログを応答する
-     *   
-     * @return
+     *
      */
     public Dialog getDialog()
     {
@@ -78,35 +70,27 @@ public class FileSelectionDialog
         builder.setView(layout);
 
         // アイテムを選択したときの処理
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            //@Override
-            public void onItemClick(AdapterView<?> parentView, View view, int position, long id)
-            {
-                ListView listView = (ListView) parentView;
-                String fileName = (String) listView.getItemAtPosition(position);
+        listView.setOnItemClickListener((parentView, view, position, id) -> {
+            ListView listView1 = (ListView) parentView;
+            String fileName = (String) listView1.getItemAtPosition(position);
 
-                /// リストが選択されたときの処理...データを開く
-         	   if (resultReceiver != null)
-        	   {
-        	       resultReceiver.selectedFileName(fileName + fileExtension);
-        	   }
-         	   if (dialogRef != null)
-         	   {
-         		   dialogRef.dismiss();
-                   dialogRef = null;
-         	   }
-               System.gc();
+            /// リストが選択されたときの処理...データを開く
+            if (resultReceiver != null)
+           {
+               resultReceiver.selectedFileName(fileName + fileExtension);
+           }
+            if (dialogRef != null)
+            {
+                dialogRef.dismiss();
+               dialogRef = null;
             }
+           System.gc();
         });
         builder.setCancelable(true);
-        builder.setNegativeButton(context.getString(R.string.confirmNo), new DialogInterface.OnClickListener()
-               {
-                   public void onClick(DialogInterface dialog, int id)
-                   {
-                       dialog.cancel();
-                       System.gc();
-                   }
-               });
+        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
+            dialog.cancel();
+            System.gc();
+        });
         dialogRef = builder.create();
         return (dialogRef);    	
     }
@@ -123,6 +107,6 @@ public class FileSelectionDialog
     	 *    ファイルが選択された！
     	 *    
     	 */
-        public abstract void selectedFileName(String fileName);
+        void selectedFileName(String fileName);
     }	
 }

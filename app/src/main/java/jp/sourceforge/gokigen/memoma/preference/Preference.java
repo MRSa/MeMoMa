@@ -8,8 +8,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import jp.sourceforge.gokigen.memoma.R;
 

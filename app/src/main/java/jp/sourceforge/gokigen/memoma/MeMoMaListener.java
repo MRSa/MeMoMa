@@ -12,8 +12,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -25,6 +23,10 @@ import android.view.View.OnKeyListener;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog;
 import jp.sourceforge.gokigen.memoma.dialogs.CreditDialog;
@@ -632,7 +634,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         parent.setTitle(memomaInfo);
 
         // アクションバーとファイル名の準備
-        android.support.v7.app.ActionBar bar = parent.getSupportActionBar();
+        ActionBar bar = parent.getSupportActionBar();
         if (bar != null)
         {
             dataInOutManager.prepare(objectHolder, bar, memomaInfo);
@@ -1220,12 +1222,12 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onRestoreInstanceState() : " + savedInstanceState.toString());
     }
 
-    public boolean finishTextEditDialog(String message)
+    public void finishTextEditDialog(String message)
     {
         if ((message == null)||(message.length() == 0))
         {
             // データが入力されていなかったので、何もしない。
-            return (false);
+            return;
         }
 
         try
@@ -1249,12 +1251,10 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         {
             e.printStackTrace();
         }
-        return (true);
     }
 
-    public boolean cancelTextEditDialog()
+    public void cancelTextEditDialog()
     {
-        return (false);
     }
 
     /**

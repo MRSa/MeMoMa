@@ -114,7 +114,7 @@ public class ObjectShapeDrawer
 
     static public float drawObjectDrum(Canvas canvas, RectF objectShape, Paint paint, Paint.Style paintStyle)
     {
-		float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 1.0f;
+		float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN;
 		// 円柱の描画
         Path path = new Path();
         path.moveTo(objectShape.left, objectShape.top);
@@ -140,13 +140,12 @@ public class ObjectShapeDrawer
         return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
     }
 
-    static public float drawObjectNoRegion(Canvas canvas, RectF objectShape, Paint paint)
+    static public void drawObjectNoRegion(Canvas canvas, RectF objectShape, Paint paint)
     {
 		// 何も表示しないとわからないので、ラベルが無いときには枠を表示する
         paint.setColor(Color.DKGRAY);
         canvas.drawRect(objectShape, paint);
         paint.setColor(Color.WHITE);
-        return (0.0f);
     }
 
     static public float drawObjectLoopStart(Canvas canvas, RectF objectShape, Paint paint)
@@ -245,6 +244,7 @@ public class ObjectShapeDrawer
     {
     	
     }
+
 	  /**
 	   *    矢印を描画する処理 (ツリー表示時)
 	   *

@@ -1,7 +1,8 @@
 package jp.sourceforge.gokigen.memoma.holders;
 
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 public class PositionObject
 {

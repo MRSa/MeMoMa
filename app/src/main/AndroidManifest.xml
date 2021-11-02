@@ -7,6 +7,7 @@
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@style/Theme.AppCompat">
 
         <activity android:name=".Main"
+            android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -17,6 +18,7 @@
         <activity android:name=".preference.Preference" android:label="@string/preference_name">
         </activity>
         <activity android:name=".extension.ExtensionActivity"
+            android:exported="true"
             android:label="@string/extent_name"
             android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:screenOrientation="landscape">
@@ -26,7 +28,7 @@
             </intent-filter>
         </activity>
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="jp.sourceforge.gokigen.memoma.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true"

@@ -32,12 +32,12 @@ public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
 	 *   データの更新
 	 * 
 	 */
-    public boolean finishTextEditDialog(String message)
+    public void finishTextEditDialog(String message)
     {
     	if ((message == null)||(message.length() == 0))
     	{
             // データが入力されていなかったので、何もしない。
-    		return (false);
+    		return;
     	}
     	
     	// 文字列を記録
@@ -57,15 +57,13 @@ public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
         	// リソースIDが指定されていない場合は、タイトルを更新する
         	parent.setTitle(message);
         }
-        
-        return (true);
+
     }
 
     /**
      *   データを更新しないとき...
      */
-    public boolean cancelTextEditDialog()
+    public void cancelTextEditDialog()
     {
-        return (false);
     }
 }

@@ -1,9 +1,6 @@
 package jp.sourceforge.gokigen.memoma;
 
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
@@ -17,13 +14,17 @@ import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager;
 
 import static android.os.Build.VERSION_CODES.KITKAT;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 /**
  *   メイン画面の処理
  * 
  * @author MRSa
  *
  */
-public class Main extends  AppCompatActivity
+public class Main extends AppCompatActivity
 {
     public static final String APP_IDENTIFIER = "Gokigen";
     public static final String APP_BASEDIR = "/MeMoMa";
@@ -296,14 +297,15 @@ public class Main extends  AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data);
         try
         {
             // 子画面からもらった情報の応答処理をイベント処理クラスに依頼する
-        	listener.onActivityResult(requestCode, resultCode, data);
+            listener.onActivityResult(requestCode, resultCode, data);
         }
         catch (Exception ex)
         {
-           ex.printStackTrace();
+            ex.printStackTrace();
         }
     }    
 }

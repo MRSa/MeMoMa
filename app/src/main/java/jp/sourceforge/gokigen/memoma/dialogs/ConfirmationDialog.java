@@ -3,7 +3,6 @@ package jp.sourceforge.gokigen.memoma.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -18,7 +17,7 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class ConfirmationDialog
 {
-	private Context context;
+	private final Context context;
 	private IResultReceiver resultReceiver = null;
     private String  message = "";
 	private String  title = "";
@@ -75,30 +74,22 @@ public class ConfirmationDialog
         }
         builder.setView(layout);
         builder.setCancelable(false);
-        builder.setPositiveButton(context.getString(R.string.confirmYes), new DialogInterface.OnClickListener()
-              {
-                   public void onClick(DialogInterface dialog, int id)
-                   {
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.acceptConfirmation();
-                	   }
-                       dialog.cancel();
-                       System.gc();
-                   }
-               });
-        builder.setNegativeButton(context.getString(R.string.confirmNo), new DialogInterface.OnClickListener()
-               {
-                   public void onClick(DialogInterface dialog, int id)
-                   {
-                	   if (resultReceiver != null)
-                	   {
-                	       resultReceiver.rejectConfirmation();
-                	   }
-                       dialog.cancel();
-                       System.gc();
-                   }
-               });
+        builder.setPositiveButton(context.getString(R.string.confirmYes), (dialog, id) -> {
+            if (resultReceiver != null)
+            {
+                resultReceiver.acceptConfirmation();
+            }
+            dialog.cancel();
+            System.gc();
+        });
+        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
+            if (resultReceiver != null)
+            {
+                resultReceiver.rejectConfirmation();
+            }
+            dialog.cancel();
+            System.gc();
+        });
         return (builder.create());    	
     }
 

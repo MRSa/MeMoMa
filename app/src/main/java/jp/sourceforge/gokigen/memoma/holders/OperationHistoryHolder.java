@@ -1,8 +1,9 @@
 package jp.sourceforge.gokigen.memoma.holders;
 
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 public class OperationHistoryHolder implements IOperationHistoryHolder
 {
