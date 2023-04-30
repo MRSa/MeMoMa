@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 
 /**
@@ -19,6 +18,7 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class TextEditDialog
 {
+    private final String TAG = toString();
 	private final Context context;
 	private ITextEditResultReceiver resultReceiver = null;
 	private final int    icon;
@@ -67,7 +67,7 @@ public class TextEditDialog
         catch (Exception ex)
         {
         	// ログだけ吐いて、何もしない
-        	Log.v(Main.APP_IDENTIFIER, "TextEditDialog::prepare() " + ex.toString());
+        	Log.v(TAG, "TextEditDialog::prepare() " + ex.toString());
         }
 	}
 	

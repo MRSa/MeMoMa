@@ -53,6 +53,8 @@ import jp.sourceforge.gokigen.memoma.preference.Preference;
  */
 public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyListener, IObjectSelectionReceiver, ConfirmationDialog.IResultReceiver, ObjectDataInputDialog.IResultReceiver, ItemSelectionDialog.ISelectionItemReceiver, TextEditDialog.ITextEditResultReceiver, ObjectAligner.IAlignCallback, SelectLineShapeDialog.IResultReceiver
 {
+    private final String TAG = toString();
+
     private static final int MENU_ID_PREFERENCES = (Menu.FIRST + 1);    // 設定画面の表示
     private static final int MENU_ID_ABOUT_GOKIGEN = (Menu.FIRST + 2);  // アプリケーションの情報表示
     private static final int MENU_ID_NEW = (Menu.FIRST + 3);                     // 新規作成
@@ -65,21 +67,18 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     private static final int MENU_ID_SHARE = (Menu.FIRST + 10);              // 画像の共有
     private static final int MENU_ID_UNDO = (Menu.FIRST + 11);              // 処理の UNDO
 
-    private AppCompatActivity parent;  // 親分
-    private TextEditDialog editTextDialog;   // テキスト編集用ダイアログ
-    private MeMoMaCanvasDrawer objectDrawer; // 画像の表示
-    private MeMoMaObjectHolder objectHolder;  // オブジェクトの保持クラス
-    //private SelectFeatureListener featureListener = null;  // 機能選択用のリスナ
+    private final AppCompatActivity parent;  // 親分
+    private final TextEditDialog editTextDialog;   // テキスト編集用ダイアログ
+    private final MeMoMaCanvasDrawer objectDrawer; // 画像の表示
+    private final MeMoMaObjectHolder objectHolder;  // オブジェクトの保持クラス
+    private final MeMoMaDataInOutManager dataInOutManager;
+    private final OperationModeHolder drawModeHolder;
+    private final LineStyleHolder lineStyleHolder;
 
-    private MeMoMaDataInOutManager dataInOutManager;
-
-    private OperationModeHolder drawModeHolder;
-    private LineStyleHolder lineStyleHolder;
-
-    private ConfirmationDialog confirmationDialog;
-    private ObjectDataInputDialog objectDataInputDialog;
-    private SelectLineShapeDialog lineSelectionDialog;
-    private ItemSelectionDialog itemSelectionDialog;
+    private final ConfirmationDialog confirmationDialog;
+    private final ObjectDataInputDialog objectDataInputDialog;
+    private final SelectLineShapeDialog lineSelectionDialog;
+    private final ItemSelectionDialog itemSelectionDialog;
 
     private Integer  selectedObjectKey = 0;
     private Integer  objectKeyToDelete = 0;
@@ -170,7 +169,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         // 「実行中」の表示を消す
         parent.setProgressBarIndeterminateVisibility(false);
 
-        //// 起動時にデータを読み出す
+        // 起動時にデータを読み出す
         prepareMeMoMaInfo();
     }
 
@@ -234,9 +233,9 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
                 {
                     try
                     {
-                        if (Build.VERSION.SDK_INT >= 19) {
-                            final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            parent.getContentResolver().takePersistableUriPermission(backgroundUri, takeFlags);
+                        if (Build.VERSION.SDK_INT >= 19)
+                        {
+                            parent.getContentResolver().takePersistableUriPermission(backgroundUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         }
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("backgroundUri", backgroundUri.toString());
@@ -253,7 +252,8 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
             }
             catch (Exception ex)
             {
-                Log.v(Main.APP_IDENTIFIER, "Ex:" + ex.toString() + " " + ex.getMessage());
+                Log.v(TAG, "Ex:" + ex.getMessage());
+                ex.printStackTrace();
             }
             return;
         }
@@ -268,7 +268,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
             String backgroundString = preferences.getString("backgroundUri", "");
             updateBackgroundImage(backgroundString);
 
-            Log.v(Main.APP_IDENTIFIER, "RETURENED PREFERENCES " + backgroundString);
+            Log.v(TAG, "RETURENED PREFERENCES " + backgroundString);
 
         }
         else if (requestCode == MENU_ID_EXTEND)
@@ -374,9 +374,9 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         int action = event.getAction();
         if ((action == KeyEvent.ACTION_DOWN)&&(keyCode == KeyEvent.KEYCODE_DPAD_CENTER))
         {
-            Log.v(Main.APP_IDENTIFIER, "KEY ENTER");
+            Log.v(TAG, "KEY ENTER");
         }
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onKey() ");
+        Log.v(TAG, "MeMoMaListener::onKey() ");
         return (false);
     }
 
@@ -716,7 +716,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     private void prepareObjectInputDialog(Dialog dialog)
     {
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::prepareObjectInputDialog(), key: " + selectedObjectKey);
+        Log.v(TAG, "MeMoMaListener::prepareObjectInputDialog(), key: " + selectedObjectKey);
 
         //  ダイアログの準備を行う
         objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey);
@@ -739,7 +739,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     private void prepareLineSelectionDialog(Dialog dialog)
     {
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::prepareLineSelectionDialog(), key: " + selectedObjectKey);
+        Log.v(TAG, "MeMoMaListener::prepareLineSelectionDialog(), key: " + selectedObjectKey);
 
         //  ダイアログの準備を行う
         lineSelectionDialog.prepareSelectLineShapeDialog(dialog, selectedObjectKey);
@@ -925,7 +925,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         catch (Exception ex)
         {
             //
-            Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::setButtonBorder(): " + ex.toString());
+            Log.v(TAG, "MeMoMaListener::setButtonBorder(): " + ex.toString());
         }
     }
 
@@ -962,7 +962,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     public void objectSelectedContext(Integer key)
     {
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::objectSelectedContext(),  key:" + key);
+        Log.v(TAG, "MeMoMaListener::objectSelectedContext(),  key:" + key);
         selectedContextKey = key;
 
         // オブジェクトのアイテム選択ダイアログを表示する...
@@ -991,7 +991,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         {
             // 選択されたオブジェクトを記憶する
             selectedObjectKey = key;
-            Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::objectSelected() key : " + key);
+            Log.v(TAG, "MeMoMaListener::objectSelected() key : " + key);
 
             // オブジェクトの詳細設定ダイアログを表示する...
             parent.showDialog(R.id.objectinput_dialog);
@@ -1081,7 +1081,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     public void acceptConfirmation()
     {
         //
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::acceptConfirmation()");
+        Log.v(TAG, "MeMoMaListener::acceptConfirmation()");
 
         // オブジェクトデータをクリアする。
         objectHolder.removeAllPositions();  // オブジェクトの保持クラス
@@ -1134,7 +1134,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
      */
     public  void rejectConfirmation()
     {
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::rejectConfirmation()");
+        Log.v(TAG, "MeMoMaListener::rejectConfirmation()");
     }
 
     /**
@@ -1173,7 +1173,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     public void itemSelected(int index, String itemValue)
     {
         //
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::itemSelected() : " + itemValue + " [" + index + "]");
+        Log.v(TAG, "MeMoMaListener::itemSelected() : " + itemValue + " [" + index + "]");
 
         if (index == ObjectOperationCommandHolder.OBJECTOPERATION_DELETE)
         {
@@ -1213,13 +1213,13 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
     public void onSaveInstanceState(Bundle outState)
     {
         /* ここで状態を保存 */
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onSaveInstanceState() : " + outState.toString() );
+        Log.v(TAG, "MeMoMaListener::onSaveInstanceState() : " + outState.toString() );
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState)
     {
         /* ここで状態を復元 */
-        Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::onRestoreInstanceState() : " + savedInstanceState.toString());
+        Log.v(TAG, "MeMoMaListener::onRestoreInstanceState() : " + savedInstanceState.toString());
     }
 
     public void finishTextEditDialog(String message)
@@ -1266,7 +1266,6 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
         int buttonId = LineStyleHolder.getLineShapeImageId(style, shape);
         final ImageButton lineStyleObj =parent.findViewById(R.id.LineStyleButton);
         lineStyleObj.setImageResource(buttonId);
-        // Log.v(Main.APP_IDENTIFIER, "MeMoMaListener::finishSelectLineShape() buttonId:" + buttonId);
     }
 
     /**

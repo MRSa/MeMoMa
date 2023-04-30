@@ -23,9 +23,12 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  *
  */
 public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
-{	
+{
+	private final String TAG = toString();
+
+	private final Context context;
 	private IResultReceiver receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
+	//private ExternalStorageFileUtility fileUtility = null;
 	private ISavingStatusHolder statusHolder = null;
 	
 	private String backgroundUri = null;
@@ -35,10 +38,10 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileSavingProcess(Context context, ISavingStatusHolder holder, ExternalStorageFileUtility utility,  IResultReceiver resultReceiver)
+    public MeMoMaFileSavingProcess(Context context, ISavingStatusHolder holder,  IResultReceiver resultReceiver)
     {
+		this.context = context;
     	receiver = resultReceiver;
-    	fileUtility = utility;
     	statusHolder = holder;
 
         //  プログレスダイアログ（「保存中...」）を表示する。
@@ -81,7 +84,7 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     	statusHolder.setSavingStatus(true);
 
     	// データの保管メイン
-    	MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(fileUtility, backgroundUri, userCheckboxString);
+    	MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(context, backgroundUri, userCheckboxString);
     	String result = savingEngine.saveObjects(datas[0]);
 
         System.gc();
@@ -118,7 +121,7 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
     	}
     	// プログレスダイアログを消す
     	savingDialog.dismiss();

@@ -15,6 +15,8 @@ import jp.sourceforge.gokigen.memoma.Main;
  */
 public class MeMoMaConnectLineHolder
 {
+    private final String TAG = toString();
+
 	private final IOperationHistoryHolder historyHolder;
     public static final int ID_NOTSPECIFY = -1;
     private Hashtable<Integer, ObjectConnector>  connectLines;
@@ -44,7 +46,7 @@ public class MeMoMaConnectLineHolder
         {
             historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_CONNECT_LINE, removeTarget);
         }
-        Log.v(Main.APP_IDENTIFIER, "DISCONNECT LINES : " + key);
+        Log.v(TAG, "DISCONNECT LINES : " + key);
         return (true);
     }
 
@@ -70,7 +72,7 @@ public class MeMoMaConnectLineHolder
         {
             return;
         }
-        Log.v(Main.APP_IDENTIFIER, "LINE " + conn.getKey() + " [" + conn.getFromObjectKey() + " -> " + conn.getToObjectKey() + "] ");
+        Log.v(TAG, "LINE " + conn.getKey() + " [" + conn.getFromObjectKey() + " -> " + conn.getToObjectKey() + "] ");
     }
 
     /**

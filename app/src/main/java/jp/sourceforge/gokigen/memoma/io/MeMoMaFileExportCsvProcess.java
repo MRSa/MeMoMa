@@ -31,8 +31,9 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  */
 public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
+    private final String TAG = toString();
+    private final Context context;
     private IResultReceiver receiver;
-    private ExternalStorageFileUtility fileUtility;
     private String exportedFileName = null;
 
     private ProgressDialog savingDialog;
@@ -40,10 +41,10 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     /**
      *   コンストラクタ
      */
-    public MeMoMaFileExportCsvProcess(Context context, ExternalStorageFileUtility utility,  IResultReceiver resultReceiver)
+    public MeMoMaFileExportCsvProcess(Context context,  IResultReceiver resultReceiver)
     {
+        this.context = context;
         receiver = resultReceiver;
-        fileUtility = utility;
 
         //  プログレスダイアログ（「保存中...」）を表示する。
         savingDialog = new ProgressDialog(context);
@@ -54,7 +55,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         savingDialog.show();
 
         // ファイルをバックアップするディレクトリを作成する
-        File dir = new File(fileUtility.getGokigenDirectory() + "/exported");
+        File dir = new File(context.getFilesDir() + "/exported");
         if (!dir.mkdir())
         {
             Log.v(toString(), "mkDir() fail. : " + dir.getAbsolutePath());
@@ -125,7 +126,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         catch (Exception e)
         {
             resultMessage = " ERR>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
+            Log.v(TAG, resultMessage);
             e.printStackTrace();
         }
         return (resultMessage);
@@ -140,7 +141,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
         // ファイル名の設定 ... (拡張子なし)
-        String fileName = fileUtility.getGokigenDirectory() + "/exported/" + datas[0].getDataTitle();
+        String fileName = context.getFilesDir() + "/exported/" + datas[0].getDataTitle();
 
         // データを保管する
         String result = exportToCsvFile(fileName, datas[0]);
@@ -176,7 +177,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         }
         catch (Exception ex)
         {
-            Log.v(Main.APP_IDENTIFIER, "MeMoMaFileExportCsvProcess::onPostExecute() : " + ex.toString());
+            Log.v(TAG, "MeMoMaFileExportCsvProcess::onPostExecute() : " + ex.toString());
         }
         // プログレスダイアログを消す
         savingDialog.dismiss();

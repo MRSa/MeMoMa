@@ -8,8 +8,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import jp.sourceforge.gokigen.memoma.Main;
-
 /**
  *  描画するくらす
  * 
@@ -18,6 +16,7 @@ import jp.sourceforge.gokigen.memoma.Main;
  */
 public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Callback
 {
+    private final String TAG = toString();
 	ICanvasDrawer canvasDrawer = null;
 	
 	/**
@@ -160,7 +159,7 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     		if (canvas == null)
     		{
     			// 描画領域が取れないから抜けてしまう
-        		Log.v(Main.APP_IDENTIFIER, "GokigenSurfaceView::doDraw()  canvas is null." );
+        		Log.v(TAG, "GokigenSurfaceView::doDraw()  canvas is null." );
     			return;
     		}
             canvas.save();
@@ -175,7 +174,7 @@ public class GokigenSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "ex.(doDraw())>" +  ex.toString() + " " + ex.getMessage());
+    		Log.v(TAG, "ex.(doDraw())>" +  ex.toString() + " " + ex.getMessage());
     	}
     }
 

@@ -4,20 +4,16 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.net.Uri;
-import android.provider.MediaStore;
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView;
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
@@ -25,9 +21,10 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingStatusHolder, MeMoMaFileSavingProcess.IResultReceiver, MeMoMaFileLoadingProcess.IResultReceiver,  ActionBar.OnNavigationListener, ObjectLayoutCaptureExporter.ICaptureLayoutExporter
 {
-	private Activity parent;
+	private final String TAG = toString();
+	private final AppCompatActivity parent;
 	private MeMoMaObjectHolder objectHolder = null;
-	private ExternalStorageFileUtility fileUtility;
+
     private MeMoMaDataFileHolder dataFileHolder = null;
 	
 	private boolean isSaving = false;	
@@ -37,10 +34,9 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	 *    コンストラクタ
 	 * 
 	 */
-	public MeMoMaDataInOutManager(Activity activity)
+	public MeMoMaDataInOutManager(AppCompatActivity activity)
 	{
 	    parent = activity;
-        fileUtility = new ExternalStorageFileUtility(Main.APP_BASEDIR);
 	}
 
 	/**
@@ -50,11 +46,10 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	public void prepare(MeMoMaObjectHolder objectHolder, ActionBar bar, String fileName)
 	{
         this.objectHolder = objectHolder;
-        //this.lineHolder = lineHolder;
-        
+
     	// データファイルフォルダを更新する
-        dataFileHolder = new MeMoMaDataFileHolder(parent, android.R.layout.simple_spinner_dropdown_item, fileUtility, ".xml");
-        int index = dataFileHolder.updateFileList(fileName, null);
+        dataFileHolder = new MeMoMaDataFileHolder(parent, android.R.layout.simple_spinner_dropdown_item, ".xml");
+        int index = dataFileHolder.updateFileList(fileName);
 
         try
 		{
@@ -82,7 +77,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 		if (dataFileHolder != null)
 		{
 			// データファイル一覧を更新する
-            int index = dataFileHolder.updateFileList(titleName, null);
+            int index = dataFileHolder.updateFileList(titleName);
 
             // タイトルをオブジェクトフォルダに記憶させる
     		objectHolder.setDataTitle(titleName);
@@ -97,22 +92,18 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
     /**
      *   データの保存を行う (同名のファイルが存在していた場合、 *.BAKにリネーム（上書き）してから保存する)
-     *   
-     *   
-     *   @param forceOverwrite  trueの時は、ファイル名が確定していたときは（確認せずに）上書き保存を自動で行う。
-     *   
      */
 	public void saveFile(String dataTitle, boolean forceOverwrite)
 	{
 		if (objectHolder == null)
 		{
-			Log.e(Main.APP_IDENTIFIER, "ERR>MeMoMaDataInOutManager::saveFile() : "  + dataTitle);
+			Log.e(TAG, "ERR>MeMoMaDataInOutManager::saveFile() : "  + dataTitle);
 			return;
 		}
 
 		// タイトルをオブジェクトフォルダに記憶させる
 		objectHolder.setDataTitle(dataTitle);
-		Log.v(Main.APP_IDENTIFIER, "MeMoMaDataInOutManager::saveFile() : "  + dataTitle);
+		Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : "  + dataTitle);
 
 		// 同期型でファイルを保存する。。。
 		String message = saveFileSynchronous();
@@ -121,15 +112,12 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
 	/**
 	 *    データファイルのフルパスを応答する
-	 * 
-	 *
-	 *
 	 */
 	public String getDataFileFullPath(String dataTitle, String extension)
 	{
-		return (fileUtility.getGokigenDirectory() + "/" + dataTitle + extension);
+		return (parent.getFilesDir() + "/" + dataTitle + extension);
 	}
-	
+
 	/**  保存中状態を設定する **/
     public void setSavingStatus(boolean isSaving)
     {
@@ -152,7 +140,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();    	
 
 		// ファイルリスト更新 ... (ここでやっちゃあ、AsyncTaskにしている意味ないなあ...)
-        dataFileHolder.updateFileList(objectHolder.getDataTitle(), null);
+        dataFileHolder.updateFileList(objectHolder.getDataTitle());
     }
 
     /**
@@ -180,8 +168,6 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
     /**
      *    ファイルからデータを読み込む。
-     * 
-     *
      */
     public void loadFile(String dataTitle)
     {
@@ -191,30 +177,26 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     
     /**
      *   ファイルからのデータ読み込み処理
-     * 
-     *
      */
 	private void loadFileWithName(String dataTitle)
 	{
-        if (objectHolder == null)
+		if (objectHolder == null)
 		{
-			Log.e(Main.APP_IDENTIFIER, "ERR>MeMoMaDataInOutManager::loadFile() : "  + dataTitle);
+			Log.e(TAG, "ERR>MeMoMaDataInOutManager::loadFile() : "  + dataTitle);
 			return;
 		}
 
 		// タイトルをオブジェクトフォルダに記憶させる
 		objectHolder.setDataTitle(dataTitle);
-		Log.v(Main.APP_IDENTIFIER, "MeMoMaDataInOutManager::loadFile() : "  + dataTitle);
+		Log.v(TAG, "MeMoMaDataInOutManager::loadFile() : "  + dataTitle);
 
 		// AsyncTaskを使ってデータを読み込む
-		MeMoMaFileLoadingProcess asyncTask = new MeMoMaFileLoadingProcess(parent, fileUtility, this);
+		MeMoMaFileLoadingProcess asyncTask = new MeMoMaFileLoadingProcess(parent, this);
         asyncTask.execute(objectHolder);
 	}
 
 	/**
 	 *    アクションバーを更新する...
-	 * 
-	 *
 	 */
 	private void prepareActionBar(ActionBar bar)
 	{
@@ -231,8 +213,6 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
 	/**
 	 *    ファイルを保存する...同期型で。
-	 * 
-	 *
 	 */
 	private String saveFileSynchronous()
 	{
@@ -240,11 +220,10 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
     	String backgroundUri = preferences.getString("backgroundUri","");
     	String userCheckboxString = preferences.getString("userCheckboxString","");
-    	MeMoMaFileSavingEngine saveEngine = new MeMoMaFileSavingEngine(fileUtility, backgroundUri, userCheckboxString);
+    	MeMoMaFileSavingEngine saveEngine = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
     	return (saveEngine.saveObjects(objectHolder));
 	}
-	
-	
+
 	/**
 	 * 
 	 * 
@@ -252,7 +231,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	public boolean onNavigationItemSelected(int itemPosition, long itemId)
 	{
 		String data = dataFileHolder.getItem(itemPosition);
-		Log.v(Main.APP_IDENTIFIER, "onNavigationItemSelected(" + itemPosition + "," + itemId + ") : " + data);
+		Log.v(TAG, "onNavigationItemSelected(" + itemPosition + "," + itemId + ") : " + data);
 
 		// 同期型で現在のファイルを保存する。。。
 		String message = saveFileSynchronous();
@@ -269,66 +248,51 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
         editor.apply();
 
 		// 選択したアイテムをロードする！
-        loadFileWithName(data);
+		loadFileWithName(data);
 
-		 return (true);
+		return (true);
 	}
 
 	/**
 	 *    スクリーンキャプチャを実施する
-	 * 
 	 */
 	public void doScreenCapture(String title, MeMoMaObjectHolder holder, MeMoMaCanvasDrawer drawer, boolean isShare)
 	{
 		isShareExportedData = isShare;
 		
     	// AsyncTaskを使ってデータをエクスポートする
-		ObjectLayoutCaptureExporter asyncTask = new ObjectLayoutCaptureExporter(parent, fileUtility, holder, drawer, this);
+		ObjectLayoutCaptureExporter asyncTask = new ObjectLayoutCaptureExporter(parent, holder, drawer, this);
         asyncTask.execute(title);
 	}
 	
     /**
      *    ファイルのエクスポート結果を受け取る
-     * 
      */
-	public void onCaptureLayoutExportedResult(String exportedFileName, String detail, int id)
+	public void onCaptureLayoutExportedResult(Uri exportedUri, String detail, int id)
     {
-		Log.v(Main.APP_IDENTIFIER, "MeMoMaDataInOutManager::onCaptureExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
+		Log.v(TAG, "MeMoMaDataInOutManager::onCaptureExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail + " " + exportedUri.toString());
 
 		// エクスポートしたことを伝達する
 		String outputMessage = parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail;
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
 
-        if (isShareExportedData)
-        {
-            // ギャラリーに受信したファイルを登録し、エクスポートしたファイルを共有する
-            try {
-                long now = System.currentTimeMillis();
-                ContentValues values = new ContentValues();
-                ContentResolver resolver = parent.getContentResolver();
-                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
-                values.put(MediaStore.Images.Media.DATA, exportedFileName);
-                values.put(MediaStore.Images.Media.DATE_ADDED, now);
-                values.put(MediaStore.Images.Media.DATE_TAKEN, now);
-                values.put(MediaStore.Images.Media.DATE_MODIFIED, now);
-                Uri insertedImage = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                if (insertedImage != null)
-                {
-                    shareContent(insertedImage, id);
-                }
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-        }
-    	isShareExportedData = false;
+		try
+		{
+			if (isShareExportedData)
+			{
+				// ギャラリーに受信したファイルを登録し、エクスポートしたファイルを共有する
+				shareContent(exportedUri, id);
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		isShareExportedData = false;
     }
 
     /**
      *    エクスポートしたファイルを共有する
-     *
      */
     private void shareContent(Uri imageName, int id)
     {

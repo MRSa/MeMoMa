@@ -72,4 +72,6 @@
     <string name="labelLineShapeSelection">形状</string>
     <string name="Title_SelectLineShape">接続線の設定</string>
     <string name="undo_operation">１つ戻す</string>
+    <string name="permission_not_granted">許可が得られませんでしたので終了します。</string>
+    <string name="permission_capture_error">許可を得るタイミングでエラーが発生しました。</string>
 </resources>

@@ -72,4 +72,6 @@
     <string name="labelLineShapeSelection">Line Shape</string>
     <string name="Title_SelectLineShape">Select a line style</string>
     <string name="undo_operation">Undo</string>
+    <string name="permission_not_granted">Permissions not granted by the user.</string>
+    <string name="permission_capture_error">Error Occurs at the request permission sequence.</string>
 </resources>

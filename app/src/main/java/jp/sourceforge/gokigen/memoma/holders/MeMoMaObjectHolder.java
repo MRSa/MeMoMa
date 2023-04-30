@@ -20,6 +20,7 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class MeMoMaObjectHolder
 {
+	private final String TAG = toString();
 	public static final int ID_NOTSPECIFY = -1;
 	
     public static final int DRAWSTYLE_RECTANGLE = 0;
@@ -155,7 +156,7 @@ public class MeMoMaObjectHolder
         {
             historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_OBJECT, removeTarget);
         }
-    	Log.v(Main.APP_IDENTIFIER, "REMOVE : " + key);
+    	Log.v(TAG, "REMOVE : " + key);
     	return (true);
     }
     
@@ -185,7 +186,7 @@ public class MeMoMaObjectHolder
     		return;
     	}
     	RectF posRect = position.getRect();
-        Log.v(Main.APP_IDENTIFIER, "[" + posRect.left + "," + posRect.top + "][" + posRect.right + "," + posRect.bottom + "] " + "label : " + position.getLabel() + " detail : " + position.getDetail());
+        Log.v(TAG, "[" + posRect.left + "," + posRect.top + "][" + posRect.right + "," + posRect.bottom + "] " + "label : " + position.getLabel() + " detail : " + position.getDetail());
     }
     
     

@@ -24,6 +24,7 @@ import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
  */
 public class SelectLineShapeDialog implements ImageButton.OnClickListener
 {
+    private final String TAG = toString();
 	private int lineThickness = LineStyleHolder.LINETHICKNESS_THIN;
 	private int lineStyle = LineStyleHolder.LINESTYLE_STRAIGHT_NO_ARROW;
 	private int lineShape = LineStyleHolder.LINESHAPE_NORMAL;
@@ -189,7 +190,7 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
         lineStyleHolder.setLineStyle(toSetLineStyle);
         lineStyleHolder.setLineThickness(toSetLineThickness);
         
-        Log.v(Main.APP_IDENTIFIER, ":::CHANGE LINE :::  shape:" + toSetLineShape + " style:" + toSetLineStyle + " thickness:" + toSetLineThickness);
+        Log.v(TAG, ":::CHANGE LINE :::  shape:" + toSetLineShape + " style:" + toSetLineStyle + " thickness:" + toSetLineThickness);
     }
 
     /**
@@ -218,7 +219,7 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
     	catch (Exception ex)
     	{
     		// 
-    		Log.v(Main.APP_IDENTIFIER, "setButtonBorder(): " + ex.toString());
+    		Log.v(TAG, "setButtonBorder(): " + ex.toString());
     	}
     	
     }

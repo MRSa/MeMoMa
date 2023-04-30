@@ -1,27 +1,24 @@
 package jp.sourceforge.gokigen.memoma.dialogs;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 /**
  *   テキストデータの反映
- * 
- * @author MRSa
- *
  */
 public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
 {
-	private Activity parent;
-	private String  textId;
-	private int     textResId;
+	private final AppCompatActivity parent;
+	private final String  textId;
+	private final int     textResId;
 	
     /**
      *    コンストラクタ
-     * 
      */
-	public TextEditReceiver(Activity argument, String prefId, int resId)
+	public TextEditReceiver(AppCompatActivity argument, String prefId, int resId)
     {
         textId = prefId;
         parent = argument;
@@ -30,7 +27,6 @@ public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
 	
 	/**
 	 *   データの更新
-	 * 
 	 */
     public void finishTextEditDialog(String message)
     {

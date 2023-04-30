@@ -32,9 +32,9 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  */
 public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-	private Context parent;
+    private final String TAG = toString();
+	private final Context parent;
 	private IResultReceiver receiver;
-	private ExternalStorageFileUtility fileUtility;
 
 	 private PositionObject position = null;
 	 private ObjectConnector line = null;
@@ -45,11 +45,10 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileLoadingProcess(Context context, ExternalStorageFileUtility utility, IResultReceiver resultReceiver)
+    public MeMoMaFileLoadingProcess(Context context, IResultReceiver resultReceiver)
     {
     	parent = context;
     	receiver = resultReceiver;
-    	fileUtility = utility;
     }
 
     /**
@@ -224,7 +223,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	}
         catch (Exception e)
         {
-            Log.v(Main.APP_IDENTIFIER, "ERR>parseStartTag() name:" + name + " " + e.toString());
+            Log.v(TAG, "ERR>parseStartTag() name:" + name + " " + e.toString());
         }
     }
     
@@ -241,7 +240,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
                 RectF posRect = position.getRect();
             	if ((posRect.left > posRect.right)||(posRect.top > posRect.bottom))
             	{
-            		Log.v(Main.APP_IDENTIFIER, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
+            		Log.v(TAG, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
             		position.setRectRight(posRect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X);
             		position.setRectBottom(posRect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y);
             	}
@@ -257,7 +256,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
         }
         catch (Exception e)
         {
-            Log.v(Main.APP_IDENTIFIER, "ERR>parseEndTag() name:" + name + " " + e.toString());
+            Log.v(TAG, "ERR>parseEndTag() name:" + name + " " + e.toString());
         }
     }
     
@@ -324,8 +323,8 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	 }
     	 catch (Exception e)
     	 {
-         	 resultMessage = " ERR>" + e.toString();
-             Log.v(Main.APP_IDENTIFIER, resultMessage);
+         	 resultMessage = " ERR>" + e.getMessage();
+             Log.v(TAG, resultMessage);
          	 e.printStackTrace();
     	 }
     	return (resultMessage);
@@ -340,7 +339,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
         // ファイル名の設定 ... (拡張子あり...保存時とは違う)
-    	String fileName = fileUtility.getGokigenDirectory() + "/" + datas[0].getDataTitle() + ".xml";
+    	String fileName = parent.getFilesDir() + "/" + datas[0].getDataTitle() + ".xml";
     	
     	// データを読みだす。
         String result = restoreToXmlFile(fileName, datas[0]);
@@ -390,7 +389,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.getMessage());
     	}
     }     
 	

@@ -6,6 +6,7 @@ import java.util.Enumeration;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
 import android.graphics.RectF;
 import android.util.Log;
 import android.util.Xml;
@@ -22,21 +23,21 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  *
  */
 public class MeMoMaFileSavingEngine
-{	
-	private ExternalStorageFileUtility fileUtility = null;
+{
+    private final String TAG = toString();
+    private final Context context;
 	private String backgroundUri = null;
 	private String userCheckboxString = null;    
 	
 	/**
 	 *   コンストラクタ
 	 */
-	MeMoMaFileSavingEngine(ExternalStorageFileUtility utility, String bgUri, String checkBoxLabel)
+	MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
     {
-    	// ファイルユーティリティを記憶する
-    	fileUtility = utility;
-    	
+        this.context = context;
+
     	// ファイルをバックアップするディレクトリを作成する
-    	File dir = new File(fileUtility.getGokigenDirectory() + "/backup");
+    	File dir = new File(context.getFilesDir() + "/backup");
     	dir.mkdir();
 
     	//  設定データ読み出し用...。
@@ -94,7 +95,7 @@ public class MeMoMaFileSavingEngine
 		if (!result)
 		{
             // バックアップファイルのコピー失敗をログに記述する
-            Log.v(Main.APP_IDENTIFIER, "rename failure : " + dirName +  backupFileName + ".xml");
+            Log.v(TAG, "rename failure : " + dirName +  backupFileName + ".xml");
 		}
     }
     
@@ -279,8 +280,8 @@ public class MeMoMaFileSavingEngine
         }
         catch (Exception e)
         {
-        	resultMessage = " ERR>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
+        	resultMessage = " " + e.getMessage();
+            Log.v(TAG, e.getMessage());
             e.printStackTrace();
         } 
         return (resultMessage);
@@ -288,24 +289,28 @@ public class MeMoMaFileSavingEngine
 
     /**
      *    オブジェクトを保存する
-     * 
-     *
      */
     public String saveObjects(MeMoMaObjectHolder objectHolder)
     {
 		// データタイトルがない場合...保存処理は行わない。
     	if (objectHolder.getDataTitle().length() <= 0)
         {
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
+    		Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
 
     		return ("");
         }
 
-    	// バックアップを保存する
-    	backupFiles(fileUtility.getGokigenDirectory() + "/" , objectHolder.getDataTitle());
+        if (objectHolder.isEmpty())
+        {
+            // データがない場合は保存しない
+            return("Data is empty, not saved.");
+        }
+
+    	//// バックアップを保存する
+    	//backupFiles(context.getFilesDir() + "/" , objectHolder.getDataTitle());
     	
         // ファイル名の設定 ... (拡張子なし)
-    	String fileName = fileUtility.getGokigenDirectory() + "/" + objectHolder.getDataTitle();
+    	String fileName = context.getFilesDir() + "/" + objectHolder.getDataTitle();
 
     	// データを保管する
         return (storeToXmlFile(fileName, objectHolder));

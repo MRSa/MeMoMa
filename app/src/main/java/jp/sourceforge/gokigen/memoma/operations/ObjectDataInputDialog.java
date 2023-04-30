@@ -37,6 +37,7 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  */
 public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ImageButton.OnClickListener
 {
+    private final String TAG = toString();
 	private final float FONTSIZE_SMALL = 5.0f;
 	private final float FONTSIZE_MIDDLE = 8.0f;
 	private final float FONTSIZE_LARGE = 12.0f;
@@ -360,7 +361,7 @@ public class ObjectDataInputDialog implements SeekBar.OnSeekBarChangeListener, C
     	catch (Exception ex)
     	{
     		// 
-    		Log.v(Main.APP_IDENTIFIER, "setButtonBorder(): " + ex.toString());
+    		Log.v(TAG, "setButtonBorder(): " + ex.toString());
     	}
     	
     }
