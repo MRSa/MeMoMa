@@ -21,7 +21,6 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *  
  *  AsyncTask
  *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
  *    Integer    : 途中経過を伝えるクラス(Progress)
@@ -34,7 +33,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 {
     private final String TAG = toString();
 	private final Context parent;
-	private IResultReceiver receiver;
+	private final IResultReceiver receiver;
 
 	 private PositionObject position = null;
 	 private ObjectConnector line = null;
@@ -323,9 +322,9 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	 }
     	 catch (Exception e)
     	 {
-         	 resultMessage = " ERR>" + e.getMessage();
+             resultMessage = " ERR " + e.getMessage();
              Log.v(TAG, resultMessage);
-         	 e.printStackTrace();
+             e.printStackTrace();
     	 }
     	return (resultMessage);
     }
@@ -333,7 +332,6 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     /**
      *  非同期処理
      *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     * 
      */
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
@@ -349,9 +347,8 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
         {
         	receiver.onLoadingProcess();
         }
-
-		System.gc();
-		return (result);
+        System.gc();
+        return (result);
     }
     /**
      *  非同期処理の進捗状況の更新

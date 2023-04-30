@@ -245,7 +245,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("MeMoMaInfo", data);
-        editor.apply();
+		editor.apply();
 
 		// 選択したアイテムをロードする！
 		loadFileWithName(data);
