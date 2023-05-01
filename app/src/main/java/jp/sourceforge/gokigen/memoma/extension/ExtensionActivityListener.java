@@ -1,5 +1,7 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
+import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,11 +9,15 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +29,9 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileExportCsvProcess;
@@ -30,26 +39,22 @@ import jp.sourceforge.gokigen.memoma.io.MeMoMaFileImportCsvProcess;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileLoadingProcess;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.R;
+import jp.sourceforge.gokigen.memoma.io.MeMoMaFileSavingEngine;
 import jp.sourceforge.gokigen.memoma.io.SharedIntentInvoker;
 import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayAdapter;
 import jp.sourceforge.gokigen.memoma.listitem.SymbolListArrayItem;
 
 /**
  *    リスト形式で表示・エクスポート
- * 
- * @author MRSa
- *
  */
 public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLoadingProcess.IResultReceiver, MeMoMaFileExportCsvProcess.IResultReceiver, FileSelectionDialog.IResultReceiver, MeMoMaFileImportCsvProcess.IResultReceiver
 {
     private final String TAG = toString();
+    private static final int PICK_CSV_FILE = 2020;
     private final int MENU_ID_EXPORT= (Menu.FIRST + 1);
     private final int MENU_ID_SHARE = (Menu.FIRST + 2);
     private final int MENU_ID_IMPORT = (Menu.FIRST + 3);
 
-    private static final String EXTENSION_DIRECTORY = "/exported";
-    
-    //private ExternalStorageFileUtility fileUtility;
 	private final MeMoMaObjectHolder objectHolder;
 	private FileSelectionDialog fileSelectionDialog = null;
 	
@@ -57,33 +62,25 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
 	private List<SymbolListArrayItem> listItems = null;
     
-    private final Activity parent;  // 親分
-	
+    private final AppCompatActivity parent;  // 親分
+
 	/**
      *  コンストラクタ
-     * @param argument parent activity
      */
-	ExtensionActivityListener(Activity argument)
+	ExtensionActivityListener(AppCompatActivity argument)
     {
         parent = argument;
-        //fileUtility = new ExternalStorageFileUtility(Main.APP_BASEDIR);
         objectHolder = new MeMoMaObjectHolder(parent);
     }
     /**
      *  起動時にデータを準備する
-     * 
-     * @param myIntent intent information
      */
     public void prepareExtraDatas(Intent myIntent)
     {
         try
         {
             // Intentで拾ったデータを読み出す (初期化データ)
-        	//fullPath = myIntent.getStringExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_FULLPATH);
         	objectHolder.setDataTitle(myIntent.getStringExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE));
-
-            // Preferenceに記憶されたデータがあればそれを取得する
-            // SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
          }
         catch (Exception ex)
         {
@@ -100,7 +97,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         // フィルタ設定ボタン
         final ImageButton filterButton = parent.findViewById(R.id.SetFilterButton);
         filterButton.setOnClickListener(this);
-
     }
 
     /**
@@ -116,25 +112,32 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public void prepareToStart()
     {
-		Log.v(TAG, "ExtensionActivityListener::prepareToStart() : "  + objectHolder.getDataTitle());
-
-		//  アクションバーを表示する
-        ActionBar bar = parent.getActionBar();
-        if (bar != null)
+        try
         {
-            bar.show();
-            bar.setTitle(objectHolder.getDataTitle());
-        }
+            Log.v(TAG, "ExtensionActivityListener::prepareToStart() : "  + objectHolder.getDataTitle());
 
-        // ファイルをロードする！
-		// (AsyncTaskを使ってデータを読み込む)
-		MeMoMaFileLoadingProcess asyncTask = new MeMoMaFileLoadingProcess(parent, this);
-        asyncTask.execute(objectHolder);
+            //  アクションバーを表示する
+            ActionBar bar = parent.getSupportActionBar();
+            if (bar != null)
+            {
+                bar.setIcon(R.drawable.icon1);
+                bar.setTitle(objectHolder.getDataTitle());
+                bar.show();
+            }
+
+            // ファイルをロードする！
+            // (AsyncTaskを使ってデータを読み込む)
+            MeMoMaFileLoadingProcess asyncTask = new MeMoMaFileLoadingProcess(parent, this);
+            asyncTask.execute(objectHolder);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
      *    詳細データを表示する。
-     *
      */
     private void showDetailData(String first, String second, String third)
     {
@@ -151,13 +154,58 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     
     /**
      *  他画面から戻ってきたとき...
-     *
-     *
      */
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData)
     {
-        // なにもしない...
-        Log.v(TAG, "rc: " + requestCode + " rs: " + resultCode + " it: "  + data.getDataString());
+        try
+        {
+            if ((requestCode == PICK_CSV_FILE)&&(resultCode == Activity.RESULT_OK))
+            {
+                if (resultData != null)
+                {
+                    Uri uri = resultData.getData();
+                    Log.v(TAG, "========== rc: " + requestCode + " rs: " + resultCode + " uri: "  + uri.toString());
+
+                    // Perform operations on the document using its URI.
+                    Thread thread = new Thread(() -> {
+                        ExtensionCsvImport importer = new ExtensionCsvImport(parent, objectHolder, uri);
+                        importer.importFromCsvFile();
+
+                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+                        String backgroundUri = preferences.getString("backgroundUri","");
+                        String userCheckboxString = preferences.getString("userCheckboxString","");
+
+                        // データの保管メイン
+                        MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
+                        String result = savingEngine.saveObjects(objectHolder);
+
+                        parent.runOnUiThread(() -> {
+                            try
+                            {
+                                onImportedResult(result);
+                            }
+                            catch (Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                        });
+                    });
+                    try
+                    {
+                        thread.start();
+                    }
+                    catch (Exception ee)
+                    {
+                        ee.printStackTrace();
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        // Log.v(TAG, "rc: " + requestCode + " rs: " + resultCode + " it: "  + resultData.getDataString());
     }
 
     /**
@@ -172,21 +220,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             Log.v(TAG, "Selected Filter");
         }
     }
-    
-/*
-    **
-     *   触られたときの処理
-     *
-     *
-    public boolean onTouch(View v, MotionEvent event)
-    {
-        Log.v(Main.APP_IDENTIFIER, " " + v.toString() + " " + event.toString());
-        // int id = v.getId();
-        // int action = event.getAction();
-
-        return (false);
-    }
-*/
 
     /**
      *   メニューへのアイテム追加
@@ -194,19 +227,25 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public Menu onCreateOptionsMenu(Menu menu)
     {
-    	MenuItem menuItem = menu.add(Menu.NONE, MENU_ID_SHARE, Menu.NONE, parent.getString(R.string.export_csv));
-    	menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);   /*  for Android 3.1  */
-    	menuItem.setIcon(android.R.drawable.ic_menu_share);
+        try
+        {
+            MenuItem menuItem = menu.add(Menu.NONE, MENU_ID_SHARE, Menu.NONE, parent.getString(R.string.export_csv));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menuItem.setIcon(android.R.drawable.ic_menu_share);
 
-    	menuItem = menu.add(Menu.NONE, MENU_ID_EXPORT, Menu.NONE, parent.getString(R.string.shareContent));
-    	menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);   /*  for Android 3.1  */
-    	menuItem.setIcon(android.R.drawable.ic_menu_save);
+            menuItem = menu.add(Menu.NONE, MENU_ID_EXPORT, Menu.NONE, parent.getString(R.string.shareContent));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            menuItem.setIcon(android.R.drawable.ic_menu_save);
 
-    	menuItem = menu.add(Menu.NONE, MENU_ID_IMPORT, Menu.NONE, parent.getString(R.string.import_csv));
-    	menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);   /*  for Android 3.1  */
-    	menuItem.setIcon(android.R.drawable.ic_menu_edit);
-
-    	return (menu);
+            menuItem = menu.add(Menu.NONE, MENU_ID_IMPORT, Menu.NONE, parent.getString(R.string.import_csv));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menuItem.setIcon(android.R.drawable.ic_menu_edit);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return (menu);
     }
     
     /**
@@ -215,9 +254,16 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public void onPrepareOptionsMenu(Menu menu)
     {
-    	menu.findItem(MENU_ID_SHARE).setVisible(true);
-    	menu.findItem(MENU_ID_EXPORT).setVisible(true);
-    	menu.findItem(MENU_ID_IMPORT).setVisible(true);
+        try
+        {
+            menu.findItem(MENU_ID_SHARE).setVisible(true);
+            menu.findItem(MENU_ID_EXPORT).setVisible(true);
+            menu.findItem(MENU_ID_IMPORT).setVisible(true);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -227,46 +273,57 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     public boolean onOptionsItemSelected(MenuItem item)
     {
     	boolean result;
-    	switch (item.getItemId())
-    	{
-          case MENU_ID_EXPORT:
-            // 表示中データのエクスポート
-  		    export_as_csv(false);
-    		result = true;
-    		break;
-
-          case MENU_ID_SHARE:
-        	export_as_csv(true);
-        	result = true;
-        	break;
-
-          case MENU_ID_IMPORT:
-        	// データのインポート
-        	importObjectFromCsv();
-        	result = true;
-        	break;
-
-    	  default:
-    		result = false;
-    		break;
-    	}
+        switch (item.getItemId())
+        {
+            case MENU_ID_EXPORT -> {
+                // 表示中データのエクスポート
+                export_as_csv(false);
+                result = true;
+            }
+            case MENU_ID_SHARE -> {
+                export_as_csv(true);
+                result = true;
+            }
+            case MENU_ID_IMPORT -> {
+                // データのインポート
+                importObjectFromCsv();
+                result = true;
+            }
+            default -> result = false;
+        }
     	return (result);
     }
 
 
     /**
      *   CSV形式でデータをインポートする
-     * 
      */
     private void importObjectFromCsv()
     {
-    	// データのインポート
-    	parent.showDialog(R.id.listdialog);    	
+        // ファイル選択のダイアログを取得する
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("text/*");
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, path);
+            }
+            parent.startActivityForResult(intent, PICK_CSV_FILE);
+        }
+        else
+        {
+            // 旧バージョンの Android での処理... （File Picker ってあったっけ？）
+
+
+        }
     }
 
     /**
      *   データをCSV形式で出力する
-     * 
      */
     private void export_as_csv(boolean isShare)
     {
@@ -279,7 +336,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     
     /**
      *  ダイアログの生成
-     * 
      */
     public Dialog onCreateDialog(int id)
     {
@@ -288,14 +344,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     		fileSelectionDialog = new FileSelectionDialog(parent, parent.getString(R.string.dialogtitle_selectcsv), ".csv",  this);
     		return (fileSelectionDialog.getDialog());
     	}
-
-      /*
-    	if (id == R.id.info_about_gokigen)
-    	{
-    		CreditDialog dialog = new CreditDialog(parent);
-    		return (dialog.getDialog());
-    	}
-      */
    	    return (null);
     }
 

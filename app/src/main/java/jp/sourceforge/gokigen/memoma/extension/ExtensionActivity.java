@@ -1,25 +1,25 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import jp.sourceforge.gokigen.memoma.R;
 
 /**
- * 
- * @author MRSa
  *
  */
-public class ExtensionActivity extends  Activity
+public class ExtensionActivity extends AppCompatActivity
 {
-	/** 起動コード **/
+	// 起動コード
     public static final String MEMOMA_EXTENSION_LAUNCH_ACTIVITY = "jp.sfjp.gokigen.memoma.extension.activity";
 
-    /** データ識別子(表示中データの保存ファイルへのフルパス) **/
+    // データ識別子(表示中データの保存ファイルへのフルパス)
     public static final String MEMOMA_EXTENSION_DATA_FULLPATH = "jp.sfjp.gokigen.memoma.extension.data.fullpath";
     public static final String MEMOMA_EXTENSION_DATA_TITLE = "jp.sfjp.gokigen.memoma.extension.data.title";
 
@@ -31,15 +31,22 @@ public class ExtensionActivity extends  Activity
     {
           super.onCreate(savedInstanceState);
 
-          // リスナクラスを生成する
-          listener = new ExtensionActivityListener(this);
+          try
+          {
+              // リスナクラスを生成する
+              listener = new ExtensionActivityListener(this);
 
-        // レイアウトを設定する
-        setContentView(R.layout.extensionview);
+              // レイアウトを設定する
+              setContentView(R.layout.extensionview);
 
-        // リスナクラスの準備
-        listener.prepareExtraDatas(getIntent());
-        listener.prepareListener();
+              // リスナクラスの準備
+              listener.prepareExtraDatas(getIntent());
+              listener.prepareListener();
+          }
+          catch (Exception e)
+          {
+              e.printStackTrace();
+          }
     }
 
     /**
@@ -48,7 +55,14 @@ public class ExtensionActivity extends  Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        menu = listener.onCreateOptionsMenu(menu);
+        try
+        {
+            menu = listener.onCreateOptionsMenu(menu);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     	return (super.onCreateOptionsMenu(menu));
     }
     
@@ -67,7 +81,14 @@ public class ExtensionActivity extends  Activity
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-    	listener.onPrepareOptionsMenu(menu);
+        try
+        {
+            listener.onPrepareOptionsMenu(menu);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     	return (super.onPrepareOptionsMenu(menu));
     }
 
@@ -104,6 +125,7 @@ public class ExtensionActivity extends  Activity
         catch (Exception ex)
         {
             // なにもしない
+            ex.printStackTrace();
         }
     }
 
@@ -114,8 +136,15 @@ public class ExtensionActivity extends  Activity
     @Override
     protected void onDestroy()
     {
-        listener.finishListener();
-        super.onDestroy();
+        try
+        {
+            listener.finishListener();
+            super.onDestroy();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -140,9 +169,9 @@ public class ExtensionActivity extends  Activity
      * 
      */
     @Override
-    protected void onSaveInstanceState(Bundle outState)
+    protected void onSaveInstanceState(@NonNull Bundle outState)
     {
-            super.onSaveInstanceState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     /**
@@ -171,7 +200,14 @@ public class ExtensionActivity extends  Activity
     @Override
     protected void onPrepareDialog(int id, Dialog dialog)
     {
-    	listener.onPrepareDialog(id, dialog);
+        try
+        {
+            listener.onPrepareDialog(id, dialog);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
     
     /**
@@ -180,14 +216,16 @@ public class ExtensionActivity extends  Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data);
         try
         {
             // 子画面からもらった情報の応答処理をイベント処理クラスに依頼する
-        	listener.onActivityResult(requestCode, resultCode, data);
+            listener.onActivityResult(requestCode, resultCode, data);
         }
         catch (Exception ex)
         {
             // 例外が発生したときには、何もしない。
+            ex.printStackTrace();
         }
     }    
 }

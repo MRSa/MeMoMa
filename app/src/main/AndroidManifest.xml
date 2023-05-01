@@ -13,9 +13,8 @@
         <activity android:name=".preference.Preference" android:label="@string/preference_name">
         </activity>
         <activity android:name=".extension.ExtensionActivity"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/extent_name"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="jp.sfjp.gokigen.memoma.extension.activity" />

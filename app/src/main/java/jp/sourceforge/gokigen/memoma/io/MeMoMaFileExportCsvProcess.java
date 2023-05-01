@@ -174,14 +174,10 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
-        // ファイル名の設定 ... (拡張子なし)
-        String fileName = context.getFilesDir() + "/exported/" + datas[0].getDataTitle();
-
         // データを保管する
-        String result = exportToCsvFile(fileName, datas[0]);
+        String result = exportToCsvFile(datas[0].getDataTitle(), datas[0]);
 
         System.gc();
-
         return (result);
     }
 

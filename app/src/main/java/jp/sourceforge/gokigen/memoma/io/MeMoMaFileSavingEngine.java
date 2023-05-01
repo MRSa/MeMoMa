@@ -29,7 +29,7 @@ public class MeMoMaFileSavingEngine
 	/**
 	 *   コンストラクタ
 	 */
-	MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
+	public MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
     {
         this.context = context;
 
