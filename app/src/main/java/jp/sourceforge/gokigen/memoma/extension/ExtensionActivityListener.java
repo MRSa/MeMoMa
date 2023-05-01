@@ -1,6 +1,5 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,7 +12,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.core.content.FileProvider;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +25,6 @@ import android.widget.Toast;
 
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog;
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileExportCsvProcess;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileImportCsvProcess;
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileLoadingProcess;
@@ -53,7 +50,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     private static final String EXTENSION_DIRECTORY = "/exported";
     
     //private ExternalStorageFileUtility fileUtility;
-	private MeMoMaObjectHolder objectHolder;
+	private final MeMoMaObjectHolder objectHolder;
 	private FileSelectionDialog fileSelectionDialog = null;
 	
 	private boolean isShareExportedData = false;
@@ -393,7 +390,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      *    ファイルのエクスポート結果を受け取る
      * 
      */
-    public void onExportedResult(String exportedFileName, String detail)
+    public void onExportedResult(Uri documentUri, String detail)
     {
 		Log.v(TAG, "ExtensionActivityListener::onExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
 
@@ -404,7 +401,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         if (isShareExportedData)
         {
         	// エクスポートしたファイルを共有する
-            shareContent(exportedFileName);
+            shareContent(documentUri);
         }
     	isShareExportedData = false;
     }
@@ -443,10 +440,8 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     
     /**
      *    エクスポートしたファイルを共有する
-     * 
-     *
      */
-    private void shareContent(String fileName)
+    private void shareContent(Uri documentUri)
     {
     	String message = "";
         try
@@ -465,12 +460,11 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             message = message + "number of objects : " + objectHolder.getCount() + "\n";
 
             // Share Intentを発行する。
-            Uri fileURI = FileProvider.getUriForFile(parent,"jp.sourceforge.gokigen.memoma.fileprovider", new File(fileName));
-            SharedIntentInvoker.shareContent(parent, MENU_ID_SHARE, title, message, fileURI, "text/plain");
+            SharedIntentInvoker.shareContent(parent, MENU_ID_SHARE, title, message, documentUri, "text/plain");
         }
         catch (Exception ex)
         {
-            Log.v(TAG, "shareContent (fileName : " + fileName + ")");
+            Log.v(TAG, "shareContent (fileName : " + objectHolder.getDataTitle() + ")");
             ex.printStackTrace();
         }
     }

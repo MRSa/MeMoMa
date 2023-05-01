@@ -34,7 +34,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     private final String TAG = toString();
     private final Context context;
     private final IResultReceiver receiver;
-    private String exportedFileName = null;
+    private Uri documentUri;
 
     private final ProgressDialog savingDialog;
 
@@ -82,7 +82,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             // エクスポートするファイル名を決定する
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_", Locale.US);
-            exportedFileName =  outFormat.format(calendar.getTime()) + baseName + ".csv";
+            String exportedFileName =  outFormat.format(calendar.getTime()) + baseName + ".csv";
 
             Uri extStorageUri;
             ContentValues values = new ContentValues();
@@ -103,7 +103,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             }
             Log.v(TAG, "---------- " + exportedFileName + " " + values);
 
-            Uri documentUri = resolver.insert(extStorageUri, values);
+            documentUri = resolver.insert(extStorageUri, values);
 
             if (documentUri == null)
             {
@@ -206,7 +206,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         {
             if (receiver != null)
             {
-                receiver.onExportedResult(exportedFileName, result);
+                receiver.onExportedResult(documentUri, result);
             }
         }
         catch (Exception ex)
@@ -226,6 +226,6 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     public interface IResultReceiver
     {
         /**  保存結果の報告 **/
-        void onExportedResult(String exportedFileName, String detail);
+        void onExportedResult(Uri documentUri, String detail);
     }
 }

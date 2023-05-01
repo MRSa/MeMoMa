@@ -6,6 +6,7 @@ import java.io.FileReader;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -307,6 +308,6 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     public interface IResultReceiver
     {
         /**  保存結果の報告 **/
-        public abstract void onImportedResult(String detail);
+        void onImportedResult(String fileName);
     }
 }
