@@ -29,13 +29,13 @@ public class MeMoMaFileSavingEngine
 	/**
 	 *   コンストラクタ
 	 */
-	public MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
+    public MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
     {
         this.context = context;
 
-    	//  設定データ読み出し用...。
-    	backgroundUri = bgUri;
-    	userCheckboxString = checkBoxLabel;
+        //  設定データ読み出し用...。
+        backgroundUri = bgUri;
+        userCheckboxString = checkBoxLabel;
     }
 
     /**

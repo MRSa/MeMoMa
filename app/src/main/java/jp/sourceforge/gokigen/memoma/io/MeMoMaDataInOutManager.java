@@ -269,12 +269,12 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
      *    ファイルのエクスポート結果を受け取る
      */
 	public void onCaptureLayoutExportedResult(Uri exportedUri, String detail, int id)
-    {
+	{
 		Log.v(TAG, "MeMoMaDataInOutManager::onCaptureExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail + " " + exportedUri.toString());
 
 		// エクスポートしたことを伝達する
 		String outputMessage = parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail;
-        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+		Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
 
 		try
 		{
@@ -289,7 +289,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 			e.printStackTrace();
 		}
 		isShareExportedData = false;
-    }
+	}
 
     /**
      *    エクスポートしたファイルを共有する

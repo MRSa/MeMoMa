@@ -193,10 +193,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     
     /**
      *    (CSV形式の)データを読み込んで格納する。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
+     *
      */
     private String importFromCsvFile(String fileName, MeMoMaObjectHolder objectHolder)
     {
@@ -208,7 +205,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             String dataLine = readRecord(buf);
             while (dataLine != null)
             {
-        		if (dataLine.startsWith(";") != true)
+        		if (!dataLine.startsWith(";"))
         		{
         			// データ行だった。ログに出力する！
                     parseRecord(dataLine, objectHolder);
@@ -219,7 +216,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         }
         catch (Exception e)
         {
-        	resultMessage = " ERR(import)>" + e.toString();
+        	resultMessage = " ERR(import) " + e.getMessage();
             Log.v(TAG, resultMessage);
             e.printStackTrace();
         } 

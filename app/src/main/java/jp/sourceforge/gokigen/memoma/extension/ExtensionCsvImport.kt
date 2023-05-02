@@ -8,7 +8,6 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 
-
 class ExtensionCsvImport(private val context: Context, private val objectHolder: MeMoMaObjectHolder, private val importUri: Uri)
 {
     fun importFromCsvFile()
@@ -144,5 +143,4 @@ class ExtensionCsvImport(private val context: Context, private val objectHolder:
     companion object {
         private val TAG = ExtensionCsvImport::class.java.simpleName
     }
-
 }

@@ -74,4 +74,7 @@
     <string name="undo_operation">Undo</string>
     <string name="permission_not_granted">Permissions not granted by the user.</string>
     <string name="permission_capture_error">Error Occurs at the request permission sequence.</string>
+    <string name="import_xml">Import from XML&#8230;</string>
+    <string name="export_xml">Export from XML&#8230;</string>
+    <string name="delete_content">Delete Content&#8230;</string>
 </resources>

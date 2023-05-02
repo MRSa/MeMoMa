@@ -1,6 +1,5 @@
 package jp.sourceforge.gokigen.memoma.extension;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -63,9 +62,9 @@ public class ExtensionActivity extends AppCompatActivity
         {
             e.printStackTrace();
         }
-    	return (super.onCreateOptionsMenu(menu));
+        return (super.onCreateOptionsMenu(menu));
     }
-    
+
     /**
      *  メニューアイテムの選択
      */
@@ -89,7 +88,7 @@ public class ExtensionActivity extends AppCompatActivity
         {
             e.printStackTrace();
         }
-    	return (super.onPrepareOptionsMenu(menu));
+        return (super.onPrepareOptionsMenu(menu));
     }
 
     /**
@@ -183,33 +182,6 @@ public class ExtensionActivity extends AppCompatActivity
         super.onRestoreInstanceState(savedInstanceState);
     }
 
-    /**
-     *  ダイアログ表示の準備
-     * 
-     */
-    @Override
-    protected Dialog onCreateDialog(int id)
-    {
-    	return (listener.onCreateDialog(id));
-    }
-
-    /**
-     *  ダイアログ表示の準備
-     * 
-     */
-    @Override
-    protected void onPrepareDialog(int id, Dialog dialog)
-    {
-        try
-        {
-            listener.onPrepareDialog(id, dialog);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
     /**
      *  子画面から応答をもらったときの処理
      */

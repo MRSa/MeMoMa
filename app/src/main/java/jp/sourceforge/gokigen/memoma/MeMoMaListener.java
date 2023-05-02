@@ -620,6 +620,7 @@ public class MeMoMaListener implements OnClickListener, OnTouchListener, OnKeyLi
 
         // データ表示用Activityを起動する
         parent.startActivityForResult(intent, MENU_ID_EXTEND);
+        //parent.startActivity(intent);
     }
 
     /**

@@ -72,6 +72,9 @@
     <string name="labelLineShapeSelection">形状</string>
     <string name="Title_SelectLineShape">接続線の設定</string>
     <string name="undo_operation">１つ戻す</string>
-    <string name="permission_not_granted">許可が得られませんでしたので終了します。</string>
+    <string name="permission_not_granted">許可が得られませんでした。</string>
     <string name="permission_capture_error">許可を得るタイミングでエラーが発生しました。</string>
+    <string name="import_xml">XMLファイルから取り込み&#8230;</string>
+    <string name="export_xml">XMLファイルとして出力&#8230;</string>
+    <string name="delete_content">データの削除&#8230;</string>
 </resources>

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -23,7 +22,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -51,17 +49,19 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 {
     private final String TAG = toString();
     private static final int PICK_CSV_FILE = 2020;
+    private static final int PICK_XML_FILE = 2030;
+
     private final int MENU_ID_EXPORT= (Menu.FIRST + 1);
-    private final int MENU_ID_SHARE = (Menu.FIRST + 2);
-    private final int MENU_ID_IMPORT = (Menu.FIRST + 3);
+    private final int MENU_ID_EXPORT_XML = (Menu.FIRST + 2);
+    private final int MENU_ID_SHARE = (Menu.FIRST + 3);
+    private final int MENU_ID_IMPORT = (Menu.FIRST + 4);
+    private final int MENU_ID_IMPORT_XML = (Menu.FIRST + 5);
+    private final int MENU_ID_DELETE = (Menu.FIRST + 6);
 
 	private final MeMoMaObjectHolder objectHolder;
-	private FileSelectionDialog fileSelectionDialog = null;
-	
+	//private FileSelectionDialog fileSelectionDialog = null;
 	private boolean isShareExportedData = false;
-
 	private List<SymbolListArrayItem> listItems = null;
-    
     private final AppCompatActivity parent;  // 親分
 
 	/**
@@ -84,13 +84,12 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
          }
         catch (Exception ex)
         {
-            Log.v(TAG, "Exception :" + ex.toString());
+            Log.v(TAG, "Exception :" + ex.getMessage());
         }        
     }
 
     /**
      *  がっつりこのクラスにイベントリスナを接続する
-     * 
      */
     public void prepareListener()
     {
@@ -151,7 +150,95 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     {
     	
     }
-    
+
+    private void imporObjectFromCsv(final Uri uri)
+    {
+        try
+        {
+            // Perform operations on the document using its URI.
+            Thread thread = new Thread(() -> {
+                ExtensionCsvImport importer = new ExtensionCsvImport(parent, objectHolder, uri);
+                importer.importFromCsvFile();
+
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+                String backgroundUri = preferences.getString("backgroundUri","");
+                String userCheckboxString = preferences.getString("userCheckboxString","");
+
+                // データの保管メイン
+                MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
+                String result = savingEngine.saveObjects(objectHolder);
+                parent.runOnUiThread(() -> {
+                    try
+                    {
+                        onImportedResult(result);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                });
+            });
+            thread.start();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void importDataFromXml(final Uri uri)
+    {
+        try
+        {
+            // Perform operations on the document using its URI.
+            Thread thread = new Thread(() -> {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+                String backgroundUri = preferences.getString("backgroundUri","");
+                String userCheckboxString = preferences.getString("userCheckboxString","");
+
+                // データの保管を実施する (現状)
+                MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
+                String result0 = savingEngine.saveObjects(objectHolder);
+                Log.v(TAG, "Saved : " + result0);
+
+                //
+                ExtensionXmlImport importer = new ExtensionXmlImport(parent, objectHolder, uri);
+                String result1 = importer.importFromXmlFile();
+
+                // データの保管を実施する (新規)
+                MeMoMaFileSavingEngine savingEngine2 = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
+                String result = savingEngine2.saveObjects(objectHolder) + " " + result1;
+                Log.v(TAG, "=== Data Saved : " + objectHolder.getDataTitle() + " " + result + " " + result1);
+                parent.runOnUiThread(() -> {
+                    try
+                    {
+                        // 読み込んだファイル名をタイトルに設定する
+                        parent.setTitle(objectHolder.getDataTitle());
+
+                        // タイトルバーの更新...
+                        ActionBar bar = parent.getSupportActionBar();
+                        if (bar != null)
+                        {
+                            bar.setIcon(R.drawable.icon1);
+                            bar.setTitle(objectHolder.getDataTitle());
+                            bar.show();
+                        }
+                        onImportedResultXml(result);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                });
+            });
+            thread.start();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     /**
      *  他画面から戻ってきたとき...
      */
@@ -159,44 +246,22 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     {
         try
         {
-            if ((requestCode == PICK_CSV_FILE)&&(resultCode == Activity.RESULT_OK))
+            if (resultCode == Activity.RESULT_OK)
             {
                 if (resultData != null)
                 {
                     Uri uri = resultData.getData();
-                    Log.v(TAG, "========== rc: " + requestCode + " rs: " + resultCode + " uri: "  + uri.toString());
-
-                    // Perform operations on the document using its URI.
-                    Thread thread = new Thread(() -> {
-                        ExtensionCsvImport importer = new ExtensionCsvImport(parent, objectHolder, uri);
-                        importer.importFromCsvFile();
-
-                        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
-                        String backgroundUri = preferences.getString("backgroundUri","");
-                        String userCheckboxString = preferences.getString("userCheckboxString","");
-
-                        // データの保管メイン
-                        MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString);
-                        String result = savingEngine.saveObjects(objectHolder);
-
-                        parent.runOnUiThread(() -> {
-                            try
-                            {
-                                onImportedResult(result);
-                            }
-                            catch (Exception e)
-                            {
-                                e.printStackTrace();
-                            }
-                        });
-                    });
-                    try
+                    if (requestCode == PICK_CSV_FILE)
                     {
-                        thread.start();
+                        imporObjectFromCsv(uri);
                     }
-                    catch (Exception ee)
+                    else if (requestCode == PICK_XML_FILE)
                     {
-                        ee.printStackTrace();
+                        importDataFromXml(uri);
+                    }
+                    else
+                    {
+                        Log.v(TAG, "========== rc: " + requestCode + " rs: " + resultCode + " uri: "  + uri.toString());
                     }
                 }
             }
@@ -240,6 +305,19 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             menuItem = menu.add(Menu.NONE, MENU_ID_IMPORT, Menu.NONE, parent.getString(R.string.import_csv));
             menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             menuItem.setIcon(android.R.drawable.ic_menu_edit);
+
+            menuItem = menu.add(Menu.NONE, MENU_ID_EXPORT_XML, Menu.NONE, parent.getString(R.string.export_xml));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menuItem.setIcon(android.R.drawable.ic_menu_send);
+
+            menuItem = menu.add(Menu.NONE, MENU_ID_IMPORT_XML, Menu.NONE, parent.getString(R.string.import_xml));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menuItem.setIcon(android.R.drawable.ic_menu_add);
+
+            menuItem = menu.add(Menu.NONE, MENU_ID_DELETE, Menu.NONE, parent.getString(R.string.delete_content));
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menuItem.setIcon(android.R.drawable.ic_menu_delete);
+
         }
         catch (Exception e)
         {
@@ -258,7 +336,10 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         {
             menu.findItem(MENU_ID_SHARE).setVisible(true);
             menu.findItem(MENU_ID_EXPORT).setVisible(true);
+            menu.findItem(MENU_ID_EXPORT_XML).setVisible(true);
             menu.findItem(MENU_ID_IMPORT).setVisible(true);
+            menu.findItem(MENU_ID_IMPORT_XML).setVisible(true);
+            menu.findItem(MENU_ID_DELETE).setVisible(true);
         }
         catch (Exception e)
         {
@@ -280,6 +361,11 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
                 export_as_csv(false);
                 result = true;
             }
+            case MENU_ID_EXPORT_XML -> {
+                // 表示中データのエクスポート
+                export_as_xml();
+                result = true;
+            }
             case MENU_ID_SHARE -> {
                 export_as_csv(true);
                 result = true;
@@ -289,9 +375,70 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
                 importObjectFromCsv();
                 result = true;
             }
+            case MENU_ID_IMPORT_XML -> {
+                // データのインポート(XML形式)
+                importObjectFromXml();
+                result = true;
+            }
+            case MENU_ID_DELETE -> {
+                // データの削除
+                deleteContent();
+                result = true;
+            }
             default -> result = false;
         }
     	return (result);
+    }
+
+    /**
+     *   XML形式でデータをインポートする
+     */
+    private void importObjectFromXml()
+    {
+        try
+        {
+            // ファイル選択のダイアログを取得する
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/*");
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                {
+                    String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
+                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, path);
+                }
+                parent.startActivityForResult(intent, PICK_XML_FILE);
+            }
+            else
+            {
+                // 旧バージョンの Android での処理... （File Picker ってあったっけ？）
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     *   データを削除する
+     */
+    private void deleteContent()
+    {
+        try
+        {
+            //  データの一覧を取得する
+
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
 
@@ -333,47 +480,43 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     	MeMoMaFileExportCsvProcess asyncTask = new MeMoMaFileExportCsvProcess(parent, this);
         asyncTask.execute(objectHolder);
     }
-    
-    /**
-     *  ダイアログの生成
-     */
-    public Dialog onCreateDialog(int id)
-    {
-    	if (id == R.id.listdialog)
-    	{
-    		fileSelectionDialog = new FileSelectionDialog(parent, parent.getString(R.string.dialogtitle_selectcsv), ".csv",  this);
-    		return (fileSelectionDialog.getDialog());
-    	}
-   	    return (null);
-    }
 
     /**
-     *    ファイル選択ダイアログの表示を準備する
-     * 
+     *   データをXML形式で出力する
      */
-    private void prepareFileSelectionDialog(Dialog dialog)
+    private void export_as_xml()
     {
         try
         {
-            Log.v(TAG, " " + dialog.toString());
-            fileSelectionDialog.prepare();
+            Thread thread = new Thread(() -> {
+                try
+                {
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+                    String backgroundUri = preferences.getString("backgroundUri", "");
+                    String userCheckboxString = preferences.getString("userCheckboxString", "");
+                    ExtensionXmlExport exporter = new ExtensionXmlExport(parent, objectHolder, backgroundUri, userCheckboxString);
+                    final String result = exporter.exportToXmlFile();
+                    parent.runOnUiThread(() -> {
+                        try
+                        {
+                            onExportedResultXml(result);
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+                catch (Exception ee)
+                {
+                    ee.printStackTrace();
+                }
+            });
+            thread.start();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     *  ダイアログ表示の準備
-     * 
-     */
-    public void onPrepareDialog(int id, Dialog dialog)
-    {
-        if (id == R.id.listdialog)
-        {
-        	// CSVインポートダイアログを準備する
-        	prepareFileSelectionDialog(dialog);
         }
     }
 
@@ -440,18 +583,18 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public void onExportedResult(Uri documentUri, String detail)
     {
-		Log.v(TAG, "ExtensionActivityListener::onExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
+        Log.v(TAG, "ExtensionActivityListener::onExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
 
-		// エクスポートしたことを伝達する
-		String outputMessage = parent.getString(R.string.export_csv) + " " + objectHolder.getDataTitle() + " " + detail;
+        // エクスポートしたことを伝達する
+        String outputMessage = parent.getString(R.string.export_csv) + " " + objectHolder.getDataTitle() + " " + detail;
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-        
+
         if (isShareExportedData)
         {
-        	// エクスポートしたファイルを共有する
+            // エクスポートしたファイルを共有する
             shareContent(documentUri);
         }
-    	isShareExportedData = false;
+        isShareExportedData = false;
     }
     
     /**
@@ -467,16 +610,12 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             listView.setAdapter(adapter);
 
             // アイテムを選択したときの処理
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                //@Override
-                public void onItemClick(AdapterView<?> parentView, View view, int position, long id)
-                {
-                    ListView listView = (ListView) parentView;
-                    SymbolListArrayItem item = (SymbolListArrayItem) listView.getItemAtPosition(position);
+            listView.setOnItemClickListener((parentView, view, position, id) -> {
+                ListView listView1 = (ListView) parentView;
+                SymbolListArrayItem item = (SymbolListArrayItem) listView1.getItemAtPosition(position);
 
-                    /// リストが選択されたときの処理...データを開く
-                    showDetailData(item.getTextResource1st(), item.getTextResource2nd(), item.getTextResource3rd());
-                }
+                /// リストが選択されたときの処理...データを開く
+                showDetailData(item.getTextResource1st(), item.getTextResource2nd(), item.getTextResource3rd());
             });
             System.gc();   // いらない（参照が切れた）クラスを消したい
     	}
@@ -544,5 +683,27 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         // 一覧のリストを作りなおす
         onLoadingProcess();
         updateObjectList();
-    }    
+    }
+
+    private void onImportedResultXml(String detail)
+    {
+        Log.v(TAG, "ExtensionActivityListener::onImportedResultXml() '"  + objectHolder.getDataTitle() +"' : " + detail);
+
+        // インポートしたことを伝達する
+        String outputMessage = parent.getString(R.string.import_xml) + " " + objectHolder.getDataTitle() + " " + detail;
+        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+
+        // 一覧のリストを作りなおす
+        onLoadingProcess();
+        updateObjectList();
+    }
+    private void onExportedResultXml(String detail)
+    {
+        Log.v(TAG, "ExtensionActivityListener::onExportedResultXml() '"  + objectHolder.getDataTitle() +"' : " + detail);
+
+        // エクスポートしたことを伝達する
+        String outputMessage = parent.getString(R.string.export_xml) + " " + objectHolder.getDataTitle() + " " + detail;
+        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+    }
+
 }

@@ -1,13 +1,18 @@
 package jp.sourceforge.gokigen.memoma
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.Window
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager
 
 /**
@@ -42,6 +47,19 @@ class Main : AppCompatActivity()
         {
             e.printStackTrace()
         }
+
+        try
+        {
+            if (!allPermissionsGranted())
+            {
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+
         Log.v(TAG, " START MEMOMA...");
     }
 
@@ -94,7 +112,9 @@ class Main : AppCompatActivity()
         }
         return false
     }
-
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    }
     /**
      * 画面が裏に回ったときの処理
      */
@@ -227,8 +247,24 @@ class Main : AppCompatActivity()
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS)
+        {
+            if (!allPermissionsGranted())
+            {
+                Toast.makeText(this, getString(R.string.permission_not_granted), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     companion object {
         const val APP_NAMESPACE = "gokigen"
         private val TAG = Main::class.java.simpleName
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+        )
     }
 }
