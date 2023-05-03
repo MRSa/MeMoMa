@@ -2,6 +2,7 @@ package jp.sourceforge.gokigen.memoma.extension;
 
 import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -458,8 +459,33 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         try
         {
             //  データの一覧を取得する
+            FileSelectionDialog dialog = new FileSelectionDialog(parent, parent.getString(R.string.delete_content), ".xml", fileName -> {
+                // fileNameのファイルを削除する...
+                Thread thread = new Thread(() -> {
+                    // ファイル削除の実処理
+                    String targetFile = parent.getFilesDir() + "/" + fileName;
+                    if (!(new File(targetFile).delete()))
+                    {
+                        Log.v(TAG, "Content Delete Failure : " + fileName);
+                    }
+                });
+                try
+                {
+                    // 削除実処理の実行
+                    thread.start();
+                    parent.runOnUiThread(() -> {
+                        String outputMessage = parent.getString(R.string.delete_content) + " " + fileName;
 
-
+                        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+                    });
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            });
+            dialog.prepare();
+            dialog.getDialog().show();
         }
         catch (Exception e)
         {
@@ -577,10 +603,12 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
 	            listItems.add(listItem);
 	        }
-	    } catch (Exception ex)
+	    }
+        catch (Exception ex)
 	    {
 	        // 例外発生...ログを吐く
-	    	Log.v(TAG, "ExtensionActivityListener::onLoadingProcess() : " + ex.toString());
+	    	Log.v(TAG, "ExtensionActivityListener::onLoadingProcess() : " + ex.getMessage());
+            ex.printStackTrace();
 	    }	
 	}
 

@@ -30,13 +30,13 @@ public class FileSelectionDialog
 	 *
 	 */
 	public FileSelectionDialog(Context arg, String titleMessage, String extension, IResultReceiver receiver)
-	{
-	    context = arg;	
-	    resultReceiver = receiver;
-		title = titleMessage;
+    {
+        context = arg;
+        resultReceiver = receiver;
+        title = titleMessage;
         fileExtension = extension;
         dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, extension);
-	}
+    }
 
 	/**
 	 *   ファイル一覧データをつくる！
@@ -58,7 +58,7 @@ public class FileSelectionDialog
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         
-        final ListView  listView = (ListView)  layout.findViewById(R.id.ListDataFileName);
+        final ListView  listView = layout.findViewById(R.id.ListDataFileName);
         listView.setAdapter(dataFileHolder);
 
         // 表示するデータ（ダイアログタイトル）を準備する
