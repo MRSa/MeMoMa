@@ -21,8 +21,7 @@ public class OperationHistoryHolder implements IOperationHistoryHolder
     @Override
     public void addHistory(int key, ChangeKind kind, Object object)
     {
-        Log.v(TAG, "addHistory() KEY : " + key + " KIND : " + kind.toString() + " OBJ : " + object.toString());
-
+        // Log.v(TAG, "addHistory() KEY : " + key + " KIND : " + kind.toString() + " OBJ : " + object.toString());
         try
         {
             if (kind == ChangeKind.RECTANGLE)
@@ -30,7 +29,7 @@ public class OperationHistoryHolder implements IOperationHistoryHolder
                 // オブジェクトが移動したとき、１つだけ記録する
                 previousKey = key;
                 previousRect = (RectF) object;
-                Log.v(TAG, " id : " + previousKey + "(" + previousRect.left + "," + previousRect.top + ")-(" + previousRect.right + "," + previousRect.bottom + ")");
+                // Log.v(TAG, " id : " + previousKey + "(" + previousRect.left + "," + previousRect.top + ")-(" + previousRect.right + "," + previousRect.bottom + ")");
             }
             else
             {

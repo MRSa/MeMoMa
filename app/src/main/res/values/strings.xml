@@ -14,7 +14,7 @@
     <string name="load_data">Load&#8230;</string>
     <string name="save_data">Save&#8230;</string>
     <string name="align_data">Align&#8230;</string>
-    <string name="capture_data">Capture&#8230;</string>
+    <string name="capture_data">Save as Picture&#8230;</string>
     <string name="export_csv">Export as CSV&#8230;</string>
     <string name="import_csv">Append from CSV&#8230;</string>
     <string name="background_data">Select Background&#8230;</string>

@@ -14,7 +14,7 @@
     <string name="load_data">読込&#8230;</string>
     <string name="save_data">保存&#8230;</string>
     <string name="align_data">整列&#8230;</string>
-    <string name="capture_data">キャプチャ&#8230;</string>
+    <string name="capture_data">画像として保存&#8230;</string>
     <string name="export_csv">CSV形式で保存&#8230;</string>
     <string name="import_csv">CSVファイルから追加&#8230;</string>
     <string name="background_data">背景画像&#8230;</string>
