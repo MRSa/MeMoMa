@@ -232,7 +232,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  screenWidth = width;
 		  screenHeight = height;
 
-          Log.v(TAG, "changedScreenProperty() " + "x:" + width + " , " + "y:" + height);
+          Log.v(TAG, "changedScreenProperty() " + "x:" + screenWidth + " , " + "y:" + screenHeight);
 	  }
 
 

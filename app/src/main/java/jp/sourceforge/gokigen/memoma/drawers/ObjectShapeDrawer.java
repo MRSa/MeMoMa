@@ -19,7 +19,6 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 public class ObjectShapeDrawer
 {
 
-
     static public float drawObjectOval(Canvas canvas, RectF objectShape, Paint paint)
     {
         // 楕円形の描画
@@ -240,11 +239,6 @@ public class ObjectShapeDrawer
         return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
     }
 
-    static public void drawLineStraight(Canvas canvas)
-    {
-    	
-    }
-
 	  /**
 	   *    矢印を描画する処理 (ツリー表示時)
 	   *
@@ -305,68 +299,68 @@ public class ObjectShapeDrawer
 	     *    オブジェクトのラベルを表示する
 	     *
 	     */
-	    public static void drawTextLabel(Canvas canvas, Paint paint, PositionObject pos, RectF region, int displayObjectInformation, float offsetX, float offsetY)
-	    {
-    		// タイトルの先頭部分を表示する場合...
-        	String labelToShow = pos.getLabel();
-        	if (displayObjectInformation == 0)
-        	{
-            	float width = region.width() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN_WIDTH;
-                int textLen = paint.breakText(pos.getLabel(), true, width, null);  // 省略文字を追加するから、そのぶん減らす
-            	labelToShow = labelToShow.substring(0, textLen);
-            	if (!labelToShow.equals(pos.getLabel()))
-            	{
-            		// truncate した場合には、省略文字を出す。
-            		labelToShow = labelToShow + "...";
-            	}
-        	}
+      public static void drawTextLabel(Canvas canvas, Paint paint, PositionObject pos, RectF region, int displayObjectInformation, float offsetX, float offsetY)
+      {
+          // タイトルの先頭部分を表示する場合...
+          String labelToShow = pos.getLabel();
+          if (displayObjectInformation == 0)
+          {
+              float width = region.width() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN_WIDTH;
+              int textLen = paint.breakText(pos.getLabel(), true, width, null);  // 省略文字を追加するから、そのぶん減らす
+              labelToShow = labelToShow.substring(0, textLen);
+              if (!labelToShow.equals(pos.getLabel()))
+              {
+                  // truncate した場合には、省略文字を出す。
+                  labelToShow = labelToShow + "...";
+              }
+          }
 
-        	if (Paint.Style.valueOf(pos.getPaintStyle()) != Paint.Style.STROKE)
-	        {
-	    	    // オブジェクトを塗りつぶすのときは、文字の色を設定する
-	            paint.setColor(pos.getLabelColor());
-	        }
-	        
-	        // 文字をちょっと影付きにする
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-	        paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY);
-	        
-	        // ユーザチェックの描画
-	        if (pos.getUserChecked())
-	        {
-	        	canvas.drawText("*", region.centerX(), region.top + (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2.0f), paint);
-	       }
-	        
-	        // 強調表示
-	        if (pos.getstrokeWidth() != 0.0f)
-	        {
-	        	// そのまま表示すると、読めないので、太さを調整し、アンダーラインを引くことにする
-	        	paint.setStrokeWidth(0.0f);
-	            paint.setSubpixelText(true);
-	            paint.setUnderlineText (true);
-	        }
+          if (Paint.Style.valueOf(pos.getPaintStyle()) != Paint.Style.STROKE)
+          {
+              // オブジェクトを塗りつぶすのときは、文字の色を設定する
+              paint.setColor(pos.getLabelColor());
+          }
 
-	        if (displayObjectInformation == 0)
-	        {            
-	        	// １行分しか表示しない場合...そのまま表示して終了する
-	            canvas.drawText(labelToShow, (region.left + offsetX),   (region.centerY() + offsetY), paint);
-	            return;
-	        }
-	        
-	        float tall = paint.getFontMetrics().top + 1.0f;
-	        float posX = (region.left + offsetX);
-	        float posY =  (region.centerY() + offsetY);
-	        float width = region.right - region.left - 12.0f;  // 幅
+          // 文字をちょっと影付きにする
+          paint.setStyle(Paint.Style.FILL_AND_STROKE);
+          paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY);
 
-	        int startChar  = 0;
-	        int endChar = pos.getLabel().length();
-	        do
-	        {
-	            int textLen = paint.breakText(pos.getLabel(), startChar, endChar, true, width, null);
-	            canvas.drawText(labelToShow, startChar, (startChar +textLen), posX, posY, paint);
+          // ユーザチェックの描画
+          if (pos.getUserChecked())
+          {
+              canvas.drawText("*", region.centerX(), region.top + (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2.0f), paint);
+          }
 
-	            posY = posY - tall;
-	            startChar = startChar + textLen;
-	        } while (startChar < endChar);  
-	    }
+          // 強調表示
+          if (pos.getstrokeWidth() != 0.0f)
+          {
+              // そのまま表示すると、読めないので、太さを調整し、アンダーラインを引くことにする
+              paint.setStrokeWidth(0.0f);
+              paint.setSubpixelText(true);
+              paint.setUnderlineText (true);
+          }
+
+          if (displayObjectInformation == 0)
+          {
+              // １行分しか表示しない場合...そのまま表示して終了する
+              canvas.drawText(labelToShow, (region.left + offsetX),   (region.centerY() + offsetY), paint);
+              return;
+          }
+
+          float tall = paint.getFontMetrics().top + 1.0f;
+          float posX = (region.left + offsetX);
+          float posY =  (region.centerY() + offsetY);
+          float width = region.right - region.left - 12.0f;  // 幅
+
+          int startChar  = 0;
+          int endChar = pos.getLabel().length();
+          do
+          {
+              int textLen = paint.breakText(pos.getLabel(), startChar, endChar, true, width, null);
+              canvas.drawText(labelToShow, startChar, (startChar +textLen), posX, posY, paint);
+
+              posY = posY - tall;
+              startChar = startChar + textLen;
+          } while (startChar < endChar);
+      }
 }
