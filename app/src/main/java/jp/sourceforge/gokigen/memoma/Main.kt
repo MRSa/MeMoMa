@@ -142,6 +142,7 @@ class Main : AppCompatActivity()
         {
             // 動作準備するようイベント処理クラスに指示する
             listener.prepareToStart()
+            listener.updateContentList()
         }
         catch (ex: Exception)
         {

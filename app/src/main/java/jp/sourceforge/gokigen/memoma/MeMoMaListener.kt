@@ -168,6 +168,22 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     }
 
     /**
+     *   コンテンツ一覧の更新
+     */
+    fun updateContentList()
+    {
+        try
+        {
+            dataInOutManager.updateFileList(objectHolder.dataTitle, parent.supportActionBar)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+
+    /**
      * 終了準備
      */
     fun shutdown()
