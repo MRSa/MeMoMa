@@ -2,6 +2,7 @@ package jp.sourceforge.gokigen.memoma.extension;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,6 +16,7 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class ExtensionActivity extends AppCompatActivity
 {
+    private final String TAG = toString();
 	// 起動コード
     public static final String MEMOMA_EXTENSION_LAUNCH_ACTIVITY = "jp.sfjp.gokigen.memoma.extension.activity";
 
@@ -30,6 +32,7 @@ public class ExtensionActivity extends AppCompatActivity
     {
           super.onCreate(savedInstanceState);
 
+          Log.v(TAG, "ExtensionActivity::onCreate()");
           try
           {
               // リスナクラスを生成する

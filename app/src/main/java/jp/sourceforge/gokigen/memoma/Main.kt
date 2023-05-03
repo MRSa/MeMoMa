@@ -209,7 +209,7 @@ class Main : AppCompatActivity()
      * ダイアログ表示の準備
      *
      */
-    override fun onCreateDialog(id: Int): Dialog
+    override fun onCreateDialog(id: Int): Dialog?
     {
         return listener.onCreateDialog(id)
     }

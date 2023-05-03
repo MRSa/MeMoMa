@@ -12,6 +12,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
@@ -47,7 +48,7 @@ public class MeMoMaFileSavingEngine
     	String resultMessage = "";
         try
         {
-            FileWriter writer = new FileWriter(new File(fileName + ".xml"));    	
+            FileWriter writer = new FileWriter(fileName + ".xml");
             XmlSerializer serializer = Xml.newSerializer();
 
             serializer.setOutput(writer);
@@ -235,14 +236,32 @@ public class MeMoMaFileSavingEngine
     	if (objectHolder.getDataTitle().length() == 0)
         {
     		Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
-
     		return ("");
         }
 
         if (objectHolder.isEmpty())
         {
+            try
+            {
+                // ファイルの存在を確認
+                String fileName = context.getFilesDir() + "/" + objectHolder.getDataTitle() + ".xml";
+                File checkFile = new File(fileName);
+                if (!checkFile.exists())
+                {
+                    // ファイルが存在しない場合、新規ファイルを作成する
+                    if (checkFile.createNewFile())
+                    {
+                        Log.v(TAG, "create New File.");
+                        return (context.getString(R.string.createnew));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
             // データがない場合は保存しない
-            return("Data is empty, not saved.");
+            return(context.getString(R.string.none_object));
         }
 
     	// データを保管する （ファイル名の設定は、拡張子なし

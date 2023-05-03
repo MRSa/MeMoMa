@@ -77,7 +77,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         this.context = context;
         receiver = resultReceiver;
         objectHolder = holder;
-    	canvasDrawer = drawer;
+        canvasDrawer = drawer;
 
         // 現在の画面サイズを取得
         Display display = context.getWindowManager().getDefaultDisplay();

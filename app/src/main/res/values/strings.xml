@@ -77,4 +77,7 @@
     <string name="import_xml">Import from XML&#8230;</string>
     <string name="export_xml">Export from XML&#8230;</string>
     <string name="delete_content">Delete Content&#8230;</string>
+    <string name="none_object">Object is empty, not saved.</string>
+    <string name="import_xml_information">Please select again the data imported from the XML file on the main screen.</string>
+
 </resources>

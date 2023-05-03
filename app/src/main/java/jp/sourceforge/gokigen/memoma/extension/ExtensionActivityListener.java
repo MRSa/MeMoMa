@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
@@ -79,14 +80,39 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
     {
         try
         {
+            String dataTitle = myIntent.getStringExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE);
+
+            SharedPreferences preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(parent);
+            String prefTitleString = preferences.getString("content_data_title", "");
+            if (prefTitleString.length() > 0)
+            {
+                // Preferenceに タイトル名が記録されていたら、上書きする
+                dataTitle = prefTitleString;
+            }
             // Intentで拾ったデータを読み出す (初期化データ)
-        	objectHolder.setDataTitle(myIntent.getStringExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE));
-         }
+            objectHolder.setDataTitle(dataTitle);
+        }
         catch (Exception ex)
         {
             Log.v(TAG, "Exception :" + ex.getMessage());
-        }        
+        }
     }
+
+    private void setPreferenceString(String title)
+    {
+        try
+        {
+            SharedPreferences preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(parent);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString("content_data_title", title);
+            editor.apply();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      *  がっつりこのクラスにイベントリスナを接続する
@@ -103,7 +129,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public void finishListener()
     {
-
+        //setPreferenceString("");
     }
 
     /**
@@ -148,7 +174,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public void shutdown()
     {
-    	
+        //setPreferenceString("");
     }
 
     private void imporObjectFromCsv(final Uri uri)
@@ -353,7 +379,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      */
     public boolean onOptionsItemSelected(MenuItem item)
     {
-    	boolean result;
+        boolean result;
         switch (item.getItemId())
         {
             case MENU_ID_EXPORT -> {
@@ -387,7 +413,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             }
             default -> result = false;
         }
-    	return (result);
+        return (result);
     }
 
     /**
@@ -562,7 +588,7 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
      *    ファイルのロード結果を受け取る
      * 
      */
-    public void onLoadedResult(String detail)
+    public void onLoadedResult(boolean isError, String detail)
     {
 		Log.v(TAG, "ExtensionActivityListener::onLoadedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
 
@@ -687,11 +713,26 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
     private void onImportedResultXml(String detail)
     {
-        Log.v(TAG, "ExtensionActivityListener::onImportedResultXml() '"  + objectHolder.getDataTitle() +"' : " + detail);
+        String title = objectHolder.getDataTitle();
+        Log.v(TAG, "ExtensionActivityListener::onImportedResultXml() '"  + title + "' : " + detail);
 
-        // インポートしたことを伝達する
-        String outputMessage = parent.getString(R.string.import_xml) + " " + objectHolder.getDataTitle() + " " + detail;
-        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+        // インポート時の注意事項ダイアログを表示する
+        parent.runOnUiThread(() -> {
+            //  ダイアログで情報を表示する。
+            new AlertDialog.Builder(parent)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle(parent.getString(R.string.import_xml) + " (" + objectHolder.getDataTitle() + ")")
+                    .setMessage(parent.getString(R.string.import_xml_information))
+                    .setPositiveButton(parent.getString(R.string.confirmYes), null)
+                    .show();
+
+            // インポートしたことを伝達する
+            String outputMessage = parent.getString(R.string.import_xml) + " " + objectHolder.getDataTitle() + " " + detail;
+            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+        });
+
+        // タイトルを更新
+        setPreferenceString(title);
 
         // 一覧のリストを作りなおす
         onLoadingProcess();

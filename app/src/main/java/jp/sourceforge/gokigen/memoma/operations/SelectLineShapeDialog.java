@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
 
@@ -463,19 +462,19 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
      */
     public void onClick(View v)
     {
-    	int id = v.getId();
-    	
-    	// 押されたボタンが接続線の太さだった場合...
+        int id = v.getId();
+
+        // 押されたボタンが接続線の太さだった場合...
         if ((id == R.id.btnLineThicknessThin)||(id == R.id.btnLineThicknessMiddle)||(id == R.id.btnLineThicknessHeavy))
         {
-        	updateButtonHighlightLineThickness(id);
-        	updateLineThickness(id);
-        	return;
+            updateButtonHighlightLineThickness(id);
+            updateLineThickness(id);
+            return;
         }
 
         // 線の形状を更新した場合...
         updateButtonHighlightLineShape(id);
-    	updateLineStyle(id);
+        updateLineStyle(id);
     }
 
     public interface IResultReceiver

@@ -112,12 +112,12 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     	{
             if (receiver != null)
             {
-            	receiver.onSavedResult(result);
+            	receiver.onSavedResult(!(result.isEmpty()), result);
             }
     	}
     	catch (Exception ex)
     	{
-    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.getMessage());
     	}
     	// プログレスダイアログを消す
     	savingDialog.dismiss();
@@ -133,7 +133,7 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     public interface IResultReceiver
     {
         // 保存結果の報告
-		void onSavedResult(String detail);
+		void onSavedResult(boolean isError, String detail);
     }
 
     /**

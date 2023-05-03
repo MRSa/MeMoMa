@@ -24,13 +24,13 @@ public class MeMoMaDataFileHolder extends ArrayAdapter<String> implements Filena
 	 * 
 	 */
     public MeMoMaDataFileHolder(Context context, int textViewRscId, String extension)
-    {
-    	super(context, textViewRscId);
+	{
+		super(context, textViewRscId);
 		this.context = context;
 		fileExtension = extension;
-    }
-    
-    /**
+	}
+
+	/**
      *    ファイル一覧を生成する。
      * 
      */

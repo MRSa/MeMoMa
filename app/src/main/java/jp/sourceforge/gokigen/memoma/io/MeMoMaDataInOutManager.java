@@ -107,7 +107,7 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
 		// 同期型でファイルを保存する。。。
 		String message = saveFileSynchronous();
-		onSavedResult(message);
+		onSavedResult((message.length() != 0), message);
 	}
 
 	/**
@@ -133,11 +133,15 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 	/**
 	 *    保存終了時の処理
 	 */
-    public  void onSavedResult(String detail)
+    public  void onSavedResult(boolean isError, String detail)
     {
         // 保存したことを伝達する
 		String outputMessage = parent.getString(R.string.save_data) + " " + objectHolder.getDataTitle() + " " + detail;
-        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();    	
+		if (isError)
+		{
+			Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+		}
+		Log.v(TAG, outputMessage);
 
 		// ファイルリスト更新 ... (ここでやっちゃあ、AsyncTaskにしている意味ないなあ...)
         dataFileHolder.updateFileList(objectHolder.getDataTitle());
@@ -146,11 +150,15 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
     /**
 	 *    読み込み終了時の処理
 	 */
-    public  void onLoadedResult(String detail)
+    public  void onLoadedResult(boolean isError, String detail)
     {
         // 読み込みしたことを伝達する
 		String outputMessage = parent.getString(R.string.load_data) + " " + objectHolder.getDataTitle() + " " + detail;
-        Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+		if (isError)
+		{
+			Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+		}
+		Log.v(TAG, outputMessage);
 
     	// 画面を再描画する
     	final GokigenSurfaceView surfaceview = parent.findViewById(R.id.GraphicView);
@@ -235,16 +243,13 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
 
 		// 同期型で現在のファイルを保存する。。。
 		String message = saveFileSynchronous();
-		if (message.length() != 0)
-		{
-            onSavedResult(message);
-		}
-		
-    	// 選択したファイル名をタイトルに反映し、またPreferenceにも記憶する
-        parent.setTitle(data);
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("MeMoMaInfo", data);
+		onSavedResult((message.length() != 0), message);
+
+		// 選択したファイル名をタイトルに反映し、またPreferenceにも記憶する
+		parent.setTitle(data);
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+		SharedPreferences.Editor editor = preferences.edit();
+		editor.putString("MeMoMaInfo", data);
 		editor.apply();
 
 		// 選択したアイテムをロードする！

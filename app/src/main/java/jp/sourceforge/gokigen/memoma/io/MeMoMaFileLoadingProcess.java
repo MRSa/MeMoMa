@@ -278,9 +278,13 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     		 File inputFile = new File(fileName);
     		 if (!inputFile.exists())
     		 {
-    			 // ファイルがなかったときには、「ファイルなし」と報告する。
-    			 resultMessage = "ERR>File not found.";
-    			 return (resultMessage);
+                 // ファイルが見つからないときは、存在しないファイルを生成する
+                 if (!inputFile.createNewFile())
+                 {
+                     // ファイルの新規作成が失敗したときには、「ファイルなし」と報告する。
+                     resultMessage = "ERR>File not found.";
+                     return (resultMessage);
+                 }
     		 }
     		 // ファイルの読み込み
     		 FileReader reader = new FileReader(inputFile);
@@ -381,7 +385,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 
             if (receiver != null)
             {
-            	receiver.onLoadedResult(result);
+            	receiver.onLoadedResult(!(result.isEmpty()), result);
             }
     	}
     	catch (Exception ex)
@@ -402,6 +406,6 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	void onLoadingProcess();
     	
         /**  保存結果の報告 **/
-        void onLoadedResult(String detail);
+        void onLoadedResult(boolean isError, String detail);
     }
 }
