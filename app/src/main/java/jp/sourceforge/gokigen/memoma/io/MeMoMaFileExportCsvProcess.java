@@ -1,49 +1,52 @@
 package jp.sourceforge.gokigen.memoma.io;
 
+import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
+
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Locale;
 
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *
- *  AsyncTask
- *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
- *    Integer    : 途中経過を伝えるクラス(Progress)
- *    String     : 処理結果を伝えるクラス(Result)
- *
- * @author MRSa
- *
  */
 public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-    private IResultReceiver receiver;
-    private ExternalStorageFileUtility fileUtility;
-    private String exportedFileName = null;
+    private final String TAG = toString();
+    private final Context context;
+    private final IResultReceiver receiver;
+    private Uri documentUri;
 
-    private ProgressDialog savingDialog;
+    private final ProgressDialog savingDialog;
 
     /**
      *   コンストラクタ
      */
-    public MeMoMaFileExportCsvProcess(Context context, ExternalStorageFileUtility utility,  IResultReceiver resultReceiver)
+    public MeMoMaFileExportCsvProcess(Context context,  IResultReceiver resultReceiver)
     {
+        this.context = context;
         receiver = resultReceiver;
-        fileUtility = utility;
 
         //  プログレスダイアログ（「保存中...」）を表示する。
         savingDialog = new ProgressDialog(context);
@@ -53,12 +56,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         savingDialog.setCancelable(false);
         savingDialog.show();
 
-        // ファイルをバックアップするディレクトリを作成する
-        File dir = new File(fileUtility.getGokigenDirectory() + "/exported");
-        if (!dir.mkdir())
-        {
-            Log.v(toString(), "mkDir() fail. : " + dir.getAbsolutePath());
-        }
+
     }
 
     /**
@@ -68,22 +66,59 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     @Override
     protected void onPreExecute()
     {
+
     }
 
     /**
      *    データを(CSV形式で)保管する。
      *
      */
-    private String exportToCsvFile(String fileName, MeMoMaObjectHolder objectHolder)
+    private String exportToCsvFile(String baseName, MeMoMaObjectHolder objectHolder)
     {
         String resultMessage = "";
         try
         {
+            String outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
+            ContentResolver resolver = context.getContentResolver();
+
             // エクスポートするファイル名を決定する
             Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-            exportedFileName = fileName + "_" + outFormat.format(calendar.getTime()) + ".csv";
-            FileWriter writer = new FileWriter(new File(exportedFileName));
+            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_", Locale.US);
+            String exportedFileName =  outFormat.format(calendar.getTime()) + baseName + ".csv";
+
+            Uri extStorageUri;
+            OutputStreamWriter writer;
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Downloads.TITLE, exportedFileName);
+            values.put(MediaStore.Downloads.DISPLAY_NAME, exportedFileName);
+            values.put(MediaStore.Downloads.MIME_TYPE, "text/csv"); // text/plain or text/csv
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + APP_NAMESPACE);
+                values.put(MediaStore.Downloads.IS_PENDING, true);
+                extStorageUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+
+                Log.v(TAG, "---------- " + exportedFileName + " " + values);
+
+                documentUri = resolver.insert(extStorageUri, values);
+
+                if (documentUri == null)
+                {
+                    resultMessage = "documentUri is NULL.";
+                    return (resultMessage);
+                }
+                OutputStream outputStream = resolver.openOutputStream(documentUri, "wa");
+                writer = new OutputStreamWriter(outputStream);
+            }
+            else
+            {
+                File path = new File(outputDir);
+                path.mkdir();
+                values.put(MediaStore.Downloads.DATA, path.getAbsolutePath() + File.separator + exportedFileName);
+                File targetFile = new File(outputDir + File.separator + exportedFileName);
+                FileOutputStream outputStream = new FileOutputStream(targetFile);
+                writer = new OutputStreamWriter(outputStream);
+            }
 
             //  データのタイトルを出力
             String str = "; label,detail,userChecked,shape,style,centerX,centerY,width,height,;!<_$ (';!<_$' is a record Separator)\r\n";
@@ -121,11 +156,17 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             }
             writer.flush();
             writer.close();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                values.put(MediaStore.Downloads.IS_PENDING, false);
+                resolver.update(documentUri, values, null, null);
+            }
         }
         catch (Exception e)
         {
-            resultMessage = " ERR>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
+            resultMessage = " ERR " + e.getMessage() + " " + documentUri;
+            Log.v(TAG, resultMessage);
             e.printStackTrace();
         }
         return (resultMessage);
@@ -139,14 +180,10 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
-        // ファイル名の設定 ... (拡張子なし)
-        String fileName = fileUtility.getGokigenDirectory() + "/exported/" + datas[0].getDataTitle();
-
         // データを保管する
-        String result = exportToCsvFile(fileName, datas[0]);
+        String result = exportToCsvFile(datas[0].getDataTitle(), datas[0]);
 
         System.gc();
-
         return (result);
     }
 
@@ -171,12 +208,12 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         {
             if (receiver != null)
             {
-                receiver.onExportedResult(exportedFileName, result);
+                receiver.onExportedResult(documentUri, result);
             }
         }
         catch (Exception ex)
         {
-            Log.v(Main.APP_IDENTIFIER, "MeMoMaFileExportCsvProcess::onPostExecute() : " + ex.toString());
+            Log.v(TAG, "MeMoMaFileExportCsvProcess::onPostExecute() : " + ex.toString());
         }
         // プログレスダイアログを消す
         savingDialog.dismiss();
@@ -191,6 +228,6 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     public interface IResultReceiver
     {
         /**  保存結果の報告 **/
-        void onExportedResult(String exportedFileName, String detail);
+        void onExportedResult(Uri documentUri, String detail);
     }
 }

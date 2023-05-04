@@ -1,7 +1,6 @@
 package jp.sourceforge.gokigen.memoma.drawers;
 
 import java.util.Enumeration;
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -19,11 +18,12 @@ import android.view.ScaleGestureDetector;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 import jp.sourceforge.gokigen.memoma.operations.IObjectSelectionReceiver;
 import jp.sourceforge.gokigen.memoma.io.ImageLoader;
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
@@ -38,8 +38,12 @@ import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder;
  */
 public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGestureListener, ScaleGestureDetector.OnScaleGestureListener, SeekBar.OnSeekBarChangeListener
 {
+	private final String TAG = toString();
+
 	public static final float OBJECTLABEL_MARGIN = 8.0f;
 	public static final float OBJECTLABEL_MARGIN_WIDTH = 24.0f;
+
+	public static final int DATALABEL_TEXT_SIZE = 30;
 
 	public static final int BACKGROUND_COLOR_DEFAULT = 0xff004000;
 	private int backgroundColor = BACKGROUND_COLOR_DEFAULT;
@@ -78,13 +82,13 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	private final GestureDetector gestureDetector;
 	private final ScaleGestureDetector scaleGestureDetector;
 
-	private final Activity parent;
+	private final AppCompatActivity parent;
 	
 	/**
       *   コンストラクタ
       *   
       */
-	  public MeMoMaCanvasDrawer(Activity argument, MeMoMaObjectHolder object, LineStyleHolder styleHolder, IObjectSelectionReceiver receiver)
+	  public MeMoMaCanvasDrawer(AppCompatActivity argument, MeMoMaObjectHolder object, LineStyleHolder styleHolder, IObjectSelectionReceiver receiver)
 	  {
 		  objectHolder = object;
 		  lineHolder = objectHolder.getConnectLineHolder();
@@ -103,8 +107,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *   オブジェクトの形状を変更する
 	   *   (ここで指定された形状のチェックを行っておく。)
-	   * 
-	   *
 	   */
 	  public void setObjectStyle(int style)
 	  {
@@ -156,14 +158,14 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  try
 		  {
 			  // とりあえず設定する情報をログに残してみる
-			  Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : w:" + width + " , h:"+ height + " " + uri);
+			  Log.v(TAG, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : w:" + width + " , h:"+ height + " " + uri);
 
 			  // 背景画像を取得して設定する。
 			  backgroundBitmap = ImageLoader.getBitmapFromUri(parent, ImageLoader.parseUri(uri), width, height);
 		  }
 		  catch (Exception ex)
 		  {
-			  Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : " + uri + " , "+ ex.toString());
+			  Log.v(TAG, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : " + uri + " , "+ ex.getMessage());
 			  ex.printStackTrace();
 			  backgroundBitmap = null;
 			  backgroundBitmapUri = "";
@@ -173,8 +175,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  
 	  /**
 	   *   背景画像を設定する
-	   *   
-	   *
 	   */
 	  public void setBackgroundUri(String uri)
 	  {
@@ -183,8 +183,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  
 	  /**
 	   *   背景色を(文字列で)設定する
-	   * 
-	   *
 	   */
 	  public void setBackgroundColor(String colorString)
 	  {
@@ -207,7 +205,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   */
 	  public void prepareToStart(int width, int height)
 	  {
-          Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::prepareToStart() " + "x:" + width + " , " + "y:" + height);
+          Log.v(TAG, "MeMoMaCanvasDrawer::prepareToStart() " + "x:" + width + " , " + "y:" + height);
 
           // 背景画像を更新する
 		  //updateBackgroundBitmap(backgroundBitmapUri, width, height);
@@ -230,7 +228,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  screenWidth = width;
 		  screenHeight = height;
 
-          Log.v(Main.APP_IDENTIFIER, "changedScreenProperty() " + "x:" + width + " , " + "y:" + height);
+          Log.v(TAG, "changedScreenProperty() " + "x:" + screenWidth + " , " + "y:" + screenHeight);
 	  }
 
 
@@ -275,7 +273,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	    	catch (Exception ex)
 	    	{
 	    		// 例外発生...でもそのときには何もしない
-	    		Log.v(Main.APP_IDENTIFIER, "drawOnCanvas() ex: " + ex.getMessage());
+	    		Log.v(TAG, "drawOnCanvas() ex: " + ex.getMessage());
 	    	}
 	  }
 
@@ -285,48 +283,47 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   */
 	  public void drawOnBitmapCanvas(Canvas canvas, float offsetX, float offsetY)
 	  {
-	    	try
-	    	{
-	    		Paint paint = new Paint();
+		  try
+		  {
+			  Paint paint = new Paint();
 
-	    		// 画面全体をクリアする
-	    		canvas.drawColor(backgroundColor);	    			
-	    		
-	    		// 背景画像が設定されていた場合は、背景画像を描画する
-	    		if (backgroundBitmap != null)
-	    		{
-	    		    canvas.drawBitmap(backgroundBitmap, offsetX, offsetY, paint);
-	    		}
+			  // 画面全体をクリアする
+			  canvas.drawColor(backgroundColor);
 
-	    		// オブジェクト間の接続線をすべて表示する
-	    		drawConnectionLines(canvas, offsetX, offsetY);
-	    		
-                // オブジェクトをすべて表示
-	    		drawObjects(canvas, offsetX, offsetY);
-	    		
-	    		// タイトルとめもまのアイコンを表示する : 文字の色は黒でいいのかな...
-	    		Bitmap bitmap = BitmapFactory.decodeResource(parent.getResources(), R.drawable.icon1);
-	    		canvas.drawBitmap(bitmap, 2.0f, 2.0f, paint);
+			  // 背景画像が設定されていた場合は、背景画像を描画する
+			  if (backgroundBitmap != null)
+			  {
+				  canvas.drawBitmap(backgroundBitmap, offsetX, offsetY, paint);
+			  }
 
-                // 文字をライトグレー、ちょっと影付きにする
-                paint.setColor(Color.LTGRAY);
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+			  // オブジェクト間の接続線をすべて表示する
+			  drawConnectionLines(canvas, offsetX, offsetY);
 
-	    		canvas.drawText(objectHolder.getDataTitle(), (bitmap.getWidth() + 10.0f), 32.0f, paint);
+			  // オブジェクトをすべて表示
+			  drawObjects(canvas, offsetX, offsetY);
 
-	    	}
-	    	catch (Exception ex)
-	    	{
-	    		// 例外発生...でもそのときには何もしない
-	    		Log.v(Main.APP_IDENTIFIER, "drawOnBitmapCanvas() ex: " + ex.toString() + " " + ex.getMessage());
-	    	}
+			  // タイトルとめもまのアイコンを表示する : 文字の色は黒でいいのかな...
+			  Bitmap bitmap = BitmapFactory.decodeResource(parent.getResources(), R.drawable.icon1);
+			  canvas.drawBitmap(bitmap, 2.0f, 2.0f, paint);
+
+			  // 文字をライトグレー、ちょっと影付きにする
+			  paint.setColor(Color.LTGRAY);
+			  paint.setStyle(Paint.Style.FILL_AND_STROKE);
+			  paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+			  paint.setTextSize(DATALABEL_TEXT_SIZE);
+
+			  canvas.drawText(objectHolder.getDataTitle(), (bitmap.getWidth() + 10.0f), 32.0f, paint);
+
+		  }
+		  catch (Exception ex)
+		  {
+			  // 例外発生...でもそのときには何もしない
+			  Log.v(TAG, "drawOnBitmapCanvas() ex: " + " " + ex.getMessage());
+		  }
 	  }
 
 	  /**
 	   *    オブジェクト間の接続線を表示する
-	   * 
-	   *
 	   */
 	  private void drawConnectionLines(Canvas canvas, float offsetX, float offsetY)
 	  {
@@ -355,7 +352,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	            else
 	            {
 	            	// ここは呼ばれないはず。。。消したはずのものが残っている
-	            	Log.v(Main.APP_IDENTIFIER, "DETECTED DELETED LINE");
+	            	Log.v(TAG, "DETECTED DELETED LINE");
 	            }
 	        }
 	  }
@@ -519,14 +516,12 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  catch (Exception ex)
 		  {
 			  // なにもしない
-			  Log.v(Main.APP_IDENTIFIER, "EXCEPTION :" + ex.toString());
+			  Log.v(TAG, "EXCEPTION :" + ex.getMessage());
 		  }
 	  }	  
 	  
     /**
      *   オブジェクトを動かしている最中かどうかの判定を行う。
-     * 
-     *
      * @return  trueなら、動かしている最中
      */
     private boolean isFlicking(Canvas canvas)
@@ -536,8 +531,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
     /**
      *   フリック時の軌跡と現在地点を表示する
-     * 
-     *
      */
     private void drawTrackAndPositions(Canvas canvas)
     {
@@ -716,8 +709,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
     /**
      *   オブジェクトをすべて表示する
-     *
-     *
      */
     private void drawObjects(Canvas canvas , float offsetX, float offsetY)
     {
@@ -799,7 +790,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
                 if ((tempPosX == Float.MIN_VALUE)||(tempPosY == Float.MIN_VALUE)||(downPosX == Float.MIN_VALUE)||(downPosY == Float.MIN_VALUE))
                 {
                 	// タッチが２つ揃っていないので、何もしない。
-            		Log.v(Main.APP_IDENTIFIER, "onTouchUp : (" + downPosX + "," + downPosY + ") [" + drawScale + "] (" + tempPosX + "," + tempPosY + ") [" + drawTransX + "," + drawTransY + "]");
+            		Log.v(TAG, "onTouchUp : (" + downPosX + "," + downPosY + ") [" + drawScale + "] (" + tempPosX + "," + tempPosY + ") [" + drawTransX + "," + drawTransY + "]");
                     return (false);	
                 }
 
@@ -835,13 +826,13 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
     		if (((diffX > 2.0f)||(diffY > 2.0f))||(longPress))
     		{
     	        // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
-    	    	Log.v(Main.APP_IDENTIFIER, "MOVE OBJECT : (" + diffX + "," + diffY + ")");
+    	    	Log.v(TAG, "MOVE OBJECT : (" + diffX + "," + diffY + ")");
     			moveObjectPosition(x, y);
     			return (true);
     		}
 
             //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。
-    		Log.v(Main.APP_IDENTIFIER, " ITEM SELECTED :" + x + "," + y);
+    		Log.v(TAG, " ITEM SELECTED :" + x + "," + y);
     		if (selectionReceiver != null)
     		{
     			// アイテムが選択されたよ！と教える
@@ -916,7 +907,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
             isDraw = gestureDetector.onTouchEvent(event);
             if (isDraw)
             {
-            	Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onTouchEvent() : isDraw == true");
+            	Log.v(TAG, "MeMoMaCanvasDrawer::onTouchEvent() : isDraw == true");
             	return (true);
             }
 
@@ -970,7 +961,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 			  RectF posRect = pos.getRect();
 			  if (posRect.contains(x, y))
 			  {
-				      Log.v(Main.APP_IDENTIFIER, "SELECTED :"  + posRect.centerX() + "," + posRect.centerY() +  " KEY :" + key);
+				      Log.v(TAG, "SELECTED :"  + posRect.centerX() + "," + posRect.centerY() +  " KEY :" + key);
 				      return (pos);
 			  }
 			  //Log.v(Main.APP_IDENTIFIER, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
@@ -985,7 +976,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   */
       private void disconnectObjects(float startX, float startY, float endX, float endY)
       {
-    	    Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::disconnectObjects() [" + startX + "," + startY +"]-[" + endX + "," + endY + "]");
+    	    Log.v(TAG, "MeMoMaCanvasDrawer::disconnectObjects() [" + startX + "," + startY +"]-[" + endX + "," + endY + "]");
 		    try
 		    {
 		    	Enumeration<Integer> keys = lineHolder.getLineKeys();
@@ -1125,7 +1116,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
           drawScale = preferences.getFloat("drawScale", 1.0f);
           drawTransX = preferences.getFloat("drawTransX", 0.0f);
           drawTransY = preferences.getFloat("drawTransY", 0.0f);
-    	  Log.v(Main.APP_IDENTIFIER, "restoreTranslateAndZoomScale() : x" + drawScale + " X:" + drawTransX + " Y: " + drawTransY);
+    	  Log.v(TAG, "restoreTranslateAndZoomScale() : x" + drawScale + " X:" + drawTransX + " Y: " + drawTransY);
       }
 
       /**
@@ -1151,7 +1142,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
        */
       public void onLongPress(MotionEvent event)
       {
-    	  Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onLongPress() "  + event.getX()  + "," + event.getY());   
+    	  Log.v(TAG, "MeMoMaCanvasDrawer::onLongPress() "  + event.getX()  + "," + event.getY());
 
     	  // タッチ位置をオブジェクト画像の座標に変換する
     	  float x = (event.getX() - drawTransX) / drawScale;
@@ -1227,8 +1218,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
       /**
        *   （ScaleGestureDetector.OnScaleGestureListener の実装）
-       * 
-       *
        */
       public boolean onScale(ScaleGestureDetector detector)
       {
@@ -1251,8 +1240,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
       /**
        *   （ScaleGestureDetector.OnScaleGestureListener の実装）
-       *   
-       * 
        */
       public  boolean	 onScaleBegin(ScaleGestureDetector detector)
       {

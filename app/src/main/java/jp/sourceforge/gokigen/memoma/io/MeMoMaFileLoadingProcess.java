@@ -21,7 +21,6 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *  
  *  AsyncTask
  *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
  *    Integer    : 途中経過を伝えるクラス(Progress)
@@ -32,9 +31,9 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  */
 public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-	private Context parent;
-	private IResultReceiver receiver;
-	private ExternalStorageFileUtility fileUtility;
+    private final String TAG = toString();
+	private final Context parent;
+	private final IResultReceiver receiver;
 
 	 private PositionObject position = null;
 	 private ObjectConnector line = null;
@@ -45,11 +44,10 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileLoadingProcess(Context context, ExternalStorageFileUtility utility, IResultReceiver resultReceiver)
+    public MeMoMaFileLoadingProcess(Context context, IResultReceiver resultReceiver)
     {
     	parent = context;
     	receiver = resultReceiver;
-    	fileUtility = utility;
     }
 
     /**
@@ -224,7 +222,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	}
         catch (Exception e)
         {
-            Log.v(Main.APP_IDENTIFIER, "ERR>parseStartTag() name:" + name + " " + e.toString());
+            Log.v(TAG, "ERR>parseStartTag() name:" + name + " " + e.toString());
         }
     }
     
@@ -241,7 +239,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
                 RectF posRect = position.getRect();
             	if ((posRect.left > posRect.right)||(posRect.top > posRect.bottom))
             	{
-            		Log.v(Main.APP_IDENTIFIER, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
+            		Log.v(TAG, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
             		position.setRectRight(posRect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X);
             		position.setRectBottom(posRect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y);
             	}
@@ -257,7 +255,7 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
         }
         catch (Exception e)
         {
-            Log.v(Main.APP_IDENTIFIER, "ERR>parseEndTag() name:" + name + " " + e.toString());
+            Log.v(TAG, "ERR>parseEndTag() name:" + name + " " + e.toString());
         }
     }
     
@@ -280,9 +278,13 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     		 File inputFile = new File(fileName);
     		 if (!inputFile.exists())
     		 {
-    			 // ファイルがなかったときには、「ファイルなし」と報告する。
-    			 resultMessage = "ERR>File not found.";
-    			 return (resultMessage);
+                 // ファイルが見つからないときは、存在しないファイルを生成する
+                 if (!inputFile.createNewFile())
+                 {
+                     // ファイルの新規作成が失敗したときには、「ファイルなし」と報告する。
+                     resultMessage = "ERR>File not found.";
+                     return (resultMessage);
+                 }
     		 }
     		 // ファイルの読み込み
     		 FileReader reader = new FileReader(inputFile);
@@ -324,9 +326,9 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	 }
     	 catch (Exception e)
     	 {
-         	 resultMessage = " ERR>" + e.toString();
-             Log.v(Main.APP_IDENTIFIER, resultMessage);
-         	 e.printStackTrace();
+             resultMessage = " ERR " + e.getMessage();
+             Log.v(TAG, resultMessage);
+             e.printStackTrace();
     	 }
     	return (resultMessage);
     }
@@ -334,13 +336,12 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     /**
      *  非同期処理
      *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     * 
      */
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
         // ファイル名の設定 ... (拡張子あり...保存時とは違う)
-    	String fileName = fileUtility.getGokigenDirectory() + "/" + datas[0].getDataTitle() + ".xml";
+    	String fileName = parent.getFilesDir() + "/" + datas[0].getDataTitle() + ".xml";
     	
     	// データを読みだす。
         String result = restoreToXmlFile(fileName, datas[0]);
@@ -350,9 +351,8 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
         {
         	receiver.onLoadingProcess();
         }
-
-		System.gc();
-		return (result);
+        System.gc();
+        return (result);
     }
     /**
      *  非同期処理の進捗状況の更新
@@ -385,12 +385,12 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
 
             if (receiver != null)
             {
-            	receiver.onLoadedResult(result);
+            	receiver.onLoadedResult(!(result.isEmpty()), result);
             }
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.getMessage());
     	}
     }     
 	
@@ -406,6 +406,6 @@ public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Inte
     	void onLoadingProcess();
     	
         /**  保存結果の報告 **/
-        void onLoadedResult(String detail);
+        void onLoadedResult(boolean isError, String detail);
     }
 }

@@ -50,19 +50,20 @@ public class SharedIntentInvoker
             }
             catch (Exception ee)
             {
-            	// 
-                Log.v(IDENTIFIER, "attach failure : " + contentUri + "  " + ee.toString() + " " + ee.getMessage());
+                Log.v(IDENTIFIER, "attach failure : " + contentUri + "  "  + ee.getMessage());
+                ee.printStackTrace();
             }
             parent.startActivityForResult(intent, id);          	
         }
         catch (android.content.ActivityNotFoundException ex)
         {
             Toast.makeText(parent, "" + ex.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.v(IDENTIFIER, "android.content.ActivityNotFoundException : " + ex.toString() + " " + ex.getMessage());
+            Log.v(IDENTIFIER, "android.content.ActivityNotFoundException : " + ex.getMessage());
+            ex.printStackTrace();
         }
-        catch (Exception e)
+        catch (Throwable e)
         {
-            Log.v(IDENTIFIER, "xxx : " + e.toString() + " " + e.getMessage());
+            Log.v(IDENTIFIER, "xxx : " + e.getMessage());
             e.printStackTrace();
         }
     }

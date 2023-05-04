@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
 
@@ -24,6 +23,7 @@ import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder;
  */
 public class SelectLineShapeDialog implements ImageButton.OnClickListener
 {
+    private final String TAG = toString();
 	private int lineThickness = LineStyleHolder.LINETHICKNESS_THIN;
 	private int lineStyle = LineStyleHolder.LINESTYLE_STRAIGHT_NO_ARROW;
 	private int lineShape = LineStyleHolder.LINESHAPE_NORMAL;
@@ -189,7 +189,7 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
         lineStyleHolder.setLineStyle(toSetLineStyle);
         lineStyleHolder.setLineThickness(toSetLineThickness);
         
-        Log.v(Main.APP_IDENTIFIER, ":::CHANGE LINE :::  shape:" + toSetLineShape + " style:" + toSetLineStyle + " thickness:" + toSetLineThickness);
+        Log.v(TAG, ":::CHANGE LINE :::  shape:" + toSetLineShape + " style:" + toSetLineStyle + " thickness:" + toSetLineThickness);
     }
 
     /**
@@ -218,7 +218,7 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
     	catch (Exception ex)
     	{
     		// 
-    		Log.v(Main.APP_IDENTIFIER, "setButtonBorder(): " + ex.toString());
+    		Log.v(TAG, "setButtonBorder(): " + ex.toString());
     	}
     	
     }
@@ -462,19 +462,19 @@ public class SelectLineShapeDialog implements ImageButton.OnClickListener
      */
     public void onClick(View v)
     {
-    	int id = v.getId();
-    	
-    	// 押されたボタンが接続線の太さだった場合...
+        int id = v.getId();
+
+        // 押されたボタンが接続線の太さだった場合...
         if ((id == R.id.btnLineThicknessThin)||(id == R.id.btnLineThicknessMiddle)||(id == R.id.btnLineThicknessHeavy))
         {
-        	updateButtonHighlightLineThickness(id);
-        	updateLineThickness(id);
-        	return;
+            updateButtonHighlightLineThickness(id);
+            updateLineThickness(id);
+            return;
         }
 
         // 線の形状を更新した場合...
         updateButtonHighlightLineShape(id);
-    	updateLineStyle(id);
+        updateLineStyle(id);
     }
 
     public interface IResultReceiver

@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
 
-import jp.sourceforge.gokigen.memoma.io.ExternalStorageFileUtility;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
 import jp.sourceforge.gokigen.memoma.R;
 
@@ -30,22 +29,22 @@ public class FileSelectionDialog
 	 *    コンストラクタ
 	 *
 	 */
-	public FileSelectionDialog(Context arg, String titleMessage, ExternalStorageFileUtility utility, String extension, IResultReceiver receiver)
-	{
-	    context = arg;	
-	    resultReceiver = receiver;
-		title = titleMessage;
+	public FileSelectionDialog(Context arg, String titleMessage, String extension, IResultReceiver receiver)
+    {
+        context = arg;
+        resultReceiver = receiver;
+        title = titleMessage;
         fileExtension = extension;
-        dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, utility, extension);
-	}
+        dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, extension);
+    }
 
 	/**
 	 *   ファイル一覧データをつくる！
 	 *
 	 */
-	public void prepare(String currentFileName, String extendDirectory)
+	public void prepare()
 	{
-		dataFileHolder.updateFileList(currentFileName, extendDirectory);
+		dataFileHolder.updateFileList("");
 	}
 
     /**
@@ -59,7 +58,7 @@ public class FileSelectionDialog
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         
-        final ListView  listView = (ListView)  layout.findViewById(R.id.ListDataFileName);
+        final ListView  listView = layout.findViewById(R.id.ListDataFileName);
         listView.setAdapter(dataFileHolder);
 
         // 表示するデータ（ダイアログタイトル）を準備する

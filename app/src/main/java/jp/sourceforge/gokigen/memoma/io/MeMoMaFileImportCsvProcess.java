@@ -10,27 +10,19 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *  
- *  AsyncTask
- *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
- *    Integer    : 途中経過を伝えるクラス(Progress)
- *    String     : 処理結果を伝えるクラス(Result)
- *    
- * @author MRSa
- *
  */
 public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String> implements MeMoMaFileSavingProcess.ISavingStatusHolder, MeMoMaFileSavingProcess.IResultReceiver
-{	
-	private Context parent = null;
+{
+    private final String TAG = toString();
+	private final Context context;
 	private IResultReceiver receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
+
 	private String targetFileName = null;
     private String fileSavedResult = "";
 	private ProgressDialog importingDialog = null;
@@ -41,11 +33,10 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileImportCsvProcess(Context context, ExternalStorageFileUtility utility,  IResultReceiver resultReceiver, String fileName)
+    public MeMoMaFileImportCsvProcess(Context context, IResultReceiver resultReceiver, String fileName)
     {
-    	parent = context;
+    	this.context = context;
     	receiver = resultReceiver;
-    	fileUtility = utility;
     	targetFileName = fileName;
 
         //  プログレスダイアログ（「データインポート中...」）を表示する。
@@ -57,14 +48,13 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     	importingDialog.show();
 
     	//  設定読み出し用...あらかじめ、UIスレッドで読みだしておく。   	
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
+    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     	backgroundUri = preferences.getString("backgroundUri","");
     	userCheckboxString = preferences.getString("userCheckboxString","");
     }
 	
     /**
      *  非同期処理実施前の前処理
-     * 
      */
     @Override
     protected void onPreExecute()
@@ -72,10 +62,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     }
 
     /**
-     *    １レコード分のデータを読み込む。 
-     * 
-     * @param buf
-     * @return
+     *    １レコード分のデータを読み込む。
      */
     private String readRecord(BufferedReader buf )
     {
@@ -98,7 +85,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     	catch (Exception ex)
     	{
             //
-    		Log.v(Main.APP_IDENTIFIER, "CSV:readRecord() ex : " + ex.toString());
+    		Log.v(TAG, "CSV:readRecord() ex : " + ex.toString());
     		oneRecord = null;
     	}
     	return (oneRecord);
@@ -106,9 +93,6 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
 
     /**
      *   1レコード分のデータを区切る
-     * 
-     * 
-     * @param dataLine
      */
     private void parseRecord(String dataLine,  MeMoMaObjectHolder objectHolder)
     {
@@ -124,7 +108,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             detailIndex = dataLine.indexOf("\",\"");
             if (detailIndex < 0)
             {
-                Log.v(Main.APP_IDENTIFIER, "parseRecord() : label wrong : " + dataLine);
+                Log.v(TAG, "parseRecord() : label wrong : " + dataLine);
             	return;
             }
             label = dataLine.substring(1, detailIndex);
@@ -146,7 +130,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             }
             else // if ((userCheckIndexTrue <= detailIndex)&&(userCheckIndexFalse <= detailIndex))
             {
-                Log.v(Main.APP_IDENTIFIER, "parseRecord() : detail wrong : " + dataLine);
+                Log.v(TAG, "parseRecord() : detail wrong : " + dataLine);
             	return;            	
             }
             
@@ -154,7 +138,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             String[] datas = (dataLine.substring(nextIndex)).split(",");
             if (datas.length < 6)
             {
-            	Log.v(Main.APP_IDENTIFIER, "parseRecord() : data size wrong : " + datas.length);
+            	Log.v(TAG, "parseRecord() : data size wrong : " + datas.length);
             	return;
             }
             int drawStyle = Integer.parseInt(datas[0]);
@@ -171,7 +155,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             PositionObject pos = objectHolder.createPosition(left, top, drawStyle);
             if (pos == null)
             {
-                Log.v(Main.APP_IDENTIFIER, "parseRecord() : object create failure.");
+                Log.v(TAG, "parseRecord() : object create failure.");
             	return;            	
             }
             pos.setRectRight(left + width);
@@ -180,11 +164,11 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             pos.setDetail(detail);
             pos.setPaintStyle(paintStyle);
             pos.setUserChecked(userChecked);
-            Log.v(Main.APP_IDENTIFIER, "OBJECT CREATED: " + label + "(" + left + "," + top + ") [" +drawStyle + "]");
+            Log.v(TAG, "OBJECT CREATED: " + label + "(" + left + "," + top + ") [" +drawStyle + "]");
         }
         catch (Exception ex)
         {
-        	Log.v(Main.APP_IDENTIFIER, "parseRecord() " + ex.toString());
+        	Log.v(TAG, "parseRecord() " + ex.toString());
         }
     	
     }
@@ -192,22 +176,18 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     
     /**
      *    (CSV形式の)データを読み込んで格納する。
-     * 
-     * @param fileName
-     * @param objectHolder
-     * @return
      */
     private String importFromCsvFile(String fileName, MeMoMaObjectHolder objectHolder)
     {
     	String resultMessage = "";
         try
         {
-            Log.v(Main.APP_IDENTIFIER, "CSV(import)>> " + fileName);        		
+            Log.v(TAG, "CSV(import)>> " + fileName);
         	BufferedReader buf = new BufferedReader(new FileReader(fileName));
             String dataLine = readRecord(buf);
             while (dataLine != null)
             {
-        		if (dataLine.startsWith(";") != true)
+        		if (!dataLine.startsWith(";"))
         		{
         			// データ行だった。ログに出力する！
                     parseRecord(dataLine, objectHolder);
@@ -218,8 +198,8 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         }
         catch (Exception e)
         {
-        	resultMessage = " ERR(import)>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
+        	resultMessage = " ERR(import) " + e.getMessage();
+            Log.v(TAG, resultMessage);
             e.printStackTrace();
         } 
         return (resultMessage);
@@ -232,25 +212,24 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
      */
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
-    {    	
+    {
         // ファイル名の設定 ... (拡張子なし)
-    	String fileName = fileUtility.getGokigenDirectory() + "/exported/" + targetFileName;
+        String fileName = context.getFilesDir() + "/exported/" + targetFileName;
 
-    	// データを読み込む
+        // データを読み込む
         String result = importFromCsvFile(fileName, datas[0]);
 
         // データを保存する
-    	MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(fileUtility, backgroundUri, userCheckboxString);
-    	String message = savingEngine.saveObjects(datas[0]);
+        MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(context, backgroundUri, userCheckboxString);
+        String message = savingEngine.saveObjects(datas[0]);
 
         System.gc();
 
-		return (result + " " + message);
+        return (result + " " + message);
     }
 
     /**
      *  非同期処理の進捗状況の更新
-     * 
      */
 	@Override
 	protected void onProgressUpdate(Integer... values)
@@ -275,7 +254,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.getMessage());
     	}
     	// プログレスダイアログを消す
     	importingDialog.dismiss();
@@ -283,7 +262,7 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
     	return;
     }
     
-    public void onSavedResult(String detail)
+    public void onSavedResult(boolean isError, String detail)
     {
         fileSavedResult = detail;
     }
@@ -300,13 +279,10 @@ public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
 
     /**
      *    結果報告用のインタフェース（積極的に使う予定はないけど...）
-     *    
-     * @author MRSa
-     *
      */
     public interface IResultReceiver
     {
         /**  保存結果の報告 **/
-        public abstract void onImportedResult(String detail);
+        void onImportedResult(String fileName);
     }
 }

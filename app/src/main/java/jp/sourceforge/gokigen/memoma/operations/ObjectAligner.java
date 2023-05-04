@@ -16,19 +16,16 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  オブジェクトの位置を整列するクラス (非同期処理を実行)
- *  
  *  AsyncTask
  *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
  *    Integer    : 途中経過を伝えるクラス(Progress)
  *    String     : 処理結果を伝えるクラス(Result)
- *    
- * @author MRSa
- *
  */
 public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String>
 {
-	private ProgressDialog executingDialog;
-	private IAlignCallback  receiver;
+    private final String TAG = toString();
+	private final ProgressDialog executingDialog;
+	private final IAlignCallback  receiver;
 	/**
 	 *   コンストラクタ
 	 */
@@ -37,7 +34,7 @@ public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String
         receiver = client;
     	
     	//  プログレスダイアログ（「保存中...」）を表示する。
-    	executingDialog = new ProgressDialog(context);
+        executingDialog = new ProgressDialog(context);
     	executingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
     	executingDialog.setMessage(context.getString(R.string.dataAligning));
     	executingDialog.setIndeterminate(true);
@@ -108,7 +105,7 @@ public class ObjectAligner extends AsyncTask<MeMoMaObjectHolder, Integer, String
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "ObjectAligner::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "ObjectAligner::onPostExecute() : " + ex.toString());
     	}
 
     	// プログレスダイアログを消す

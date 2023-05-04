@@ -6,98 +6,39 @@ import java.util.Enumeration;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
 import android.graphics.RectF;
 import android.util.Log;
 import android.util.Xml;
 
 import jp.sourceforge.gokigen.memoma.Main;
+import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
 import jp.sourceforge.gokigen.memoma.holders.PositionObject;
 
 /**
  *  データをファイルに保存するエンジン部分
- *  
- * @author MRSa
- *
  */
 public class MeMoMaFileSavingEngine
-{	
-	private ExternalStorageFileUtility fileUtility = null;
-	private String backgroundUri = null;
-	private String userCheckboxString = null;    
+{
+    private final String TAG = toString();
+    private final Context context;
+	private final String backgroundUri;
+	private final String userCheckboxString;
 	
 	/**
 	 *   コンストラクタ
 	 */
-	MeMoMaFileSavingEngine(ExternalStorageFileUtility utility, String bgUri, String checkBoxLabel)
+    public MeMoMaFileSavingEngine(Context context, String bgUri, String checkBoxLabel)
     {
-    	// ファイルユーティリティを記憶する
-    	fileUtility = utility;
-    	
-    	// ファイルをバックアップするディレクトリを作成する
-    	File dir = new File(fileUtility.getGokigenDirectory() + "/backup");
-    	dir.mkdir();
+        this.context = context;
 
-    	//  設定データ読み出し用...。
-    	backgroundUri = bgUri;
-    	userCheckboxString = checkBoxLabel;
+        //  設定データ読み出し用...。
+        backgroundUri = bgUri;
+        userCheckboxString = checkBoxLabel;
     }
 
-    /**
-     *   ファイルが存在したとき、リネームする
-     *
-     */
-    private boolean renameFile(String targetFileName, String newFileName)
-    {
-    	boolean ret = true;
-		File targetFile = new File(targetFileName);
-		if (targetFile.exists())
-		{
-			// ファイルが存在した、、、ファイル名を１世代古いものに変更する
-			ret = targetFile.renameTo(new File(newFileName));
-		}
-		return (ret);
-    }
-    
-    /**
-     *    保管データを複数世代保管する。
-     * 
-     *
-     */
-    private void backupFiles(String dirName, String backupFileName)
-    {
-    	//  データをバックアップする。（上書き予定のファイルがあれば、それをコピーする）
-        boolean result = true;
-        try
-        {
-        	String  fileName = dirName +  "backup/" + backupFileName;
-    		File backFile = new File(fileName + ".xml.bak5");
-    		if (backFile.exists())
-    		{
-    			// ファイルが存在した、、、削除する
-    			backFile.delete();
-    		}
-    		backFile = null;
-    		renameFile((fileName + ".xml.bak4"), (fileName + ".xml.bak5"));
-    		renameFile((fileName + ".xml.bak3"), (fileName + ".xml.bak4"));
-    		renameFile((fileName + ".xml.bak2"), (fileName + ".xml.bak3"));
-    		renameFile((fileName + ".xml.bak1"), (fileName + ".xml.bak2"));
-    		renameFile((fileName + ".xml.bak"), (fileName + ".xml.bak1"));
-    		renameFile((dirName + backupFileName + ".xml"), (fileName + ".xml.bak"));
-        }
-        catch (Exception ex)
-        {
-        	// 何か例外が発生した場合にはエラーと認識する。
-        	result = false;
-        }
-		if (!result)
-		{
-            // バックアップファイルのコピー失敗をログに記述する
-            Log.v(Main.APP_IDENTIFIER, "rename failure : " + dirName +  backupFileName + ".xml");
-		}
-    }
-    
     /**
      *    データを(XML形式で)保管する。
      *
@@ -107,7 +48,7 @@ public class MeMoMaFileSavingEngine
     	String resultMessage = "";
         try
         {
-            FileWriter writer = new FileWriter(new File(fileName + ".xml"));    	
+            FileWriter writer = new FileWriter(fileName + ".xml");
             XmlSerializer serializer = Xml.newSerializer();
 
             serializer.setOutput(writer);
@@ -279,35 +220,51 @@ public class MeMoMaFileSavingEngine
         }
         catch (Exception e)
         {
-        	resultMessage = " ERR>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
+            resultMessage = " " + e.getMessage();
+            Log.v(TAG, resultMessage);
             e.printStackTrace();
-        } 
+        }
         return (resultMessage);
     }
 
     /**
      *    オブジェクトを保存する
-     * 
-     *
      */
     public String saveObjects(MeMoMaObjectHolder objectHolder)
     {
 		// データタイトルがない場合...保存処理は行わない。
-    	if (objectHolder.getDataTitle().length() <= 0)
+    	if (objectHolder.getDataTitle().length() == 0)
         {
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
-
+    		Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
     		return ("");
         }
 
-    	// バックアップを保存する
-    	backupFiles(fileUtility.getGokigenDirectory() + "/" , objectHolder.getDataTitle());
-    	
-        // ファイル名の設定 ... (拡張子なし)
-    	String fileName = fileUtility.getGokigenDirectory() + "/" + objectHolder.getDataTitle();
+        if (objectHolder.isEmpty())
+        {
+            try
+            {
+                // ファイルの存在を確認
+                String fileName = context.getFilesDir() + "/" + objectHolder.getDataTitle() + ".xml";
+                File checkFile = new File(fileName);
+                if (!checkFile.exists())
+                {
+                    // ファイルが存在しない場合、新規ファイルを作成する
+                    if (checkFile.createNewFile())
+                    {
+                        Log.v(TAG, "create New File.");
+                        return (context.getString(R.string.createnew));
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+            // データがない場合は保存しない
+            return(context.getString(R.string.none_object));
+        }
 
-    	// データを保管する
-        return (storeToXmlFile(fileName, objectHolder));
+    	// データを保管する （ファイル名の設定は、拡張子なし
+        return (storeToXmlFile(context.getFilesDir() + "/" + objectHolder.getDataTitle(), objectHolder));
     }
 }

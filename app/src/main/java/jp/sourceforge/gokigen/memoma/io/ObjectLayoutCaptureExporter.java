@@ -1,5 +1,7 @@
 package jp.sourceforge.gokigen.memoma.io;
 
+import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -8,18 +10,26 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Locale;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
 
-import jp.sourceforge.gokigen.memoma.Main;
+import androidx.appcompat.app.AppCompatActivity;
+
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
@@ -29,17 +39,16 @@ import jp.sourceforge.gokigen.memoma.holders.PositionObject;
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
  *  Viewの情報を画像形式（png形式）で保存する。
  *  どのViewを保存するのかは、ICaptureExporter.getCaptureTargetView()クラスを使って教えてもらう。
- *  
  *  AsyncTask
  *    String       : 実行時に渡すクラス(Param)           : ファイル名をもらう
  *    Integer    : 途中経過を伝えるクラス(Progress)   : 今回は使っていない
  *    String      : 処理結果を伝えるクラス(Result)      : 結果を応答する。
- *    
- * @author MRSa
- *
  */
 public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, String>
 {
+    private final String TAG = toString();
+    private static final boolean dumpLog = false;
+
     private static final int OUTPUT_EXPORT_SHARE_ID = 1000;
 	private static final int OUTPUT_MARGIN = 8;
 	private static final int OUTPUT_MARGIN_TOP = 50;
@@ -47,26 +56,29 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
 	private static final int MINIMUM_WIDTH = 800;
 	private static final int MINIMUM_HEIGHT = 600;
 
-	private ICaptureLayoutExporter receiver;
-	private ExternalStorageFileUtility fileUtility;
-	private String exportedFileName = null;	
-	private MeMoMaObjectHolder objectHolder;
-	private MeMoMaCanvasDrawer canvasDrawer;
-	private ProgressDialog savingDialog;
+	private final ICaptureLayoutExporter receiver;
+
+	private final MeMoMaObjectHolder objectHolder;
+	private final MeMoMaCanvasDrawer canvasDrawer;
+	private final ProgressDialog savingDialog;
 	private float offsetX = 0.0f;
 	private float offsetY = 0.0f;
 	private int displayWidth;
 	private int displayHeight;
 
+    private final Context context;
+
+    private Uri exportedUri = null;
+
 	/**
 	 *   コンストラクタ
 	 */
-	ObjectLayoutCaptureExporter(Activity context, ExternalStorageFileUtility utility,  MeMoMaObjectHolder holder, MeMoMaCanvasDrawer drawer, ICaptureLayoutExporter resultReceiver)
+	ObjectLayoutCaptureExporter(AppCompatActivity context, MeMoMaObjectHolder holder, MeMoMaCanvasDrawer drawer, ICaptureLayoutExporter resultReceiver)
     {
-    	receiver = resultReceiver;
-    	fileUtility = utility;
-    	objectHolder = holder;
-    	canvasDrawer = drawer;
+        this.context = context;
+        receiver = resultReceiver;
+        objectHolder = holder;
+        canvasDrawer = drawer;
 
         // 現在の画面サイズを取得
         Display display = context.getWindowManager().getDefaultDisplay();
@@ -82,63 +94,127 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     	savingDialog.show();
 
     	// ファイルをバックアップするディレクトリを作成する
-    	File dir = new File(fileUtility.getGokigenDirectory() + "/exported");
+    	File dir = new File(context.getFilesDir() + "/exported");
     	if (!dir.mkdir())
         {
-            Log.v(Main.APP_IDENTIFIER, "mkdir is failed.");
+            Log.v(TAG, "mkdir is failed.");
         }
     }
 	
     /**
      *  非同期処理実施前の前処理
-     * 
      */
     @Override
     protected void onPreExecute()
     {
         // なにもしない。
     }
-    
+
     /**
      *    ビットマップデータを(PNG形式で)保管する。
-     *
-     *
      */
-    private String exportToFile(String fileName, Bitmap targetBitmap)
+    private String exportToFile(String baseName, Bitmap targetImage)
     {
-    	String resultMessage = "";
+        String resultMessage = "";
         try
         {
-        	if (targetBitmap == null)
-        	{
-        		// ビットマップが取れないため、ここで折り返す。
-        		return ("SCREEN DATA GET FAILURE...");
-        	}
-        	
-        	// エクスポートするファイル名を決定する
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US);
-            exportedFileName = fileName + "_" + outFormat.format(calendar.getTime()) + ".png";
+            String outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getPath() + "/" + APP_NAMESPACE + "/";
+            ContentResolver resolver = context.getContentResolver();
+            String fileName = baseName + ".png";
 
-            // PNG形式でファイル出力を行う。
-            OutputStream out = new FileOutputStream(exportedFileName);
-            targetBitmap.compress(CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();            
+            OutputStream outputStream = null;
+            Uri extStorageUri;
+            Uri imageUri = null;
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.TITLE, fileName);
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + APP_NAMESPACE);
+                values.put(MediaStore.Images.Media.IS_PENDING, true);
+                extStorageUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+                Log.v(TAG, "---------- " + baseName + ".png " + values);
+                imageUri = resolver.insert(extStorageUri, values);
+                if (imageUri != null)
+                {
+                    ////////////////////////////////////////////////////////////////
+                    if (dumpLog)
+                    {
+                        try
+                        {
+                            Cursor cursor = resolver.query(imageUri, null, null, null, null);
+                            DatabaseUtils.dumpCursor(cursor);
+                            cursor.close();
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            resultMessage = e.getMessage();
+                        }
+                    }
+                    ////////////////////////////////////////////////////////////////
+                    try
+                    {
+                        outputStream = resolver.openOutputStream(imageUri, "wa");
+                    }
+                    catch (Exception ee)
+                    {
+                        ee.printStackTrace();
+                    }
+                }
+                else
+                {
+                    Log.v(TAG, " cannot get imageUri...");
+                }
+            }
+            else
+            {
+                File path = new File(outputDir);
+                if (!path.mkdir())
+                {
+                    Log.v(TAG, " mkdir fail: " + outputDir);
+                }
+                values.put(MediaStore.Images.Media.DATA, path.getAbsolutePath() + File.separator + fileName);
+                File targetPath = new File(outputDir + File.separator + fileName);
+                try
+                {
+                    outputStream = new FileOutputStream(targetPath);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+            if (outputStream != null)
+            {
+                targetImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                values.put(MediaStore.Images.Media.IS_PENDING, false);
+                if (imageUri != null)
+                {
+                    resolver.update(imageUri, values, null, null);
+                    exportedUri = imageUri;
+                }
+            }
         }
-        catch (Exception e)
+        catch (Throwable t)
         {
-        	resultMessage = " ERR(png)>" + e.toString();
-            Log.v(Main.APP_IDENTIFIER, resultMessage);
-            e.printStackTrace();
-        } 
+            t.printStackTrace();
+            resultMessage = t.getMessage();
+            exportedUri = null;
+        }
         return (resultMessage);
     }
-    
+
     /**
      *    キャンバスの大きさがどれくらい必要か、チェックする。
-     * 
-     *
      */
     private Rect checkCanvasSize()
     {
@@ -177,9 +253,6 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         canvasSize.sort();
 
         // 現在の画面サイズを取得
-        //Display display = parent.getWindowManager().getDefaultDisplay();
-        //int width = display.getWidth();
-        //int height = display.getHeight();
         if (displayWidth < MINIMUM_WIDTH)
         {
             displayWidth = MINIMUM_WIDTH;
@@ -198,21 +271,19 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
         {
         	canvasSize.bottom = canvasSize.top + displayHeight;
         }
-        
-        
+
         // 画像位置（キャンバス位置）の調整。。。
         offsetX = 0.0f - canvasSize.left - (OUTPUT_MARGIN);
         offsetY = 0.0f - canvasSize.top - (OUTPUT_MARGIN);
 
         // 出力する画像データのサイズを表示する
-        Log.v(Main.APP_IDENTIFIER, "ObjectLayoutCaptureExporter::checkCanvasSize() w:" + canvasSize.width() + " , h:" + canvasSize.height() + "  offset :(" + offsetX + "," + offsetY + ")");
+        Log.v(TAG, "ObjectLayoutCaptureExporter::checkCanvasSize() w:" + canvasSize.width() + " , h:" + canvasSize.height() + "  offset :(" + offsetX + "," + offsetY + ")");
         return (canvasSize);
     }    
 
     /**
      *  非同期処理
      *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     * 
      */
     @Override
     protected String doInBackground(String... datas)
@@ -227,8 +298,7 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
             // オブジェクトをビットマップの中に書き込む
             canvasDrawer.drawOnBitmapCanvas(targetCanvas, offsetX, offsetY);
 
-            // ファイル名の設定 ... (拡張子なし)
-            String fileName = fileUtility.getGokigenDirectory() + "/exported/" + datas[0];
+            String fileName = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Calendar.getInstance().getTime()) + "_" + datas[0];
 
             // データを保管する
             result = exportToFile(fileName, targetBitmap);
@@ -262,12 +332,13 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
     	{
             if (receiver != null)
             {
-            	receiver.onCaptureLayoutExportedResult(exportedFileName, result, OUTPUT_EXPORT_SHARE_ID);
+            	receiver.onCaptureLayoutExportedResult(exportedUri, result, OUTPUT_EXPORT_SHARE_ID);
             }
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "ViewCaptureExporter::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "ViewCaptureExporter::onPostExecute() : " + ex.getMessage());
+            ex.printStackTrace();
     	}
     	// プログレスダイアログを消す
     	if (savingDialog != null)
@@ -278,13 +349,10 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
  
     /**
      *    結果報告用のインタフェース
-     *    
-     * @author MRSa
-     *
      */
     public interface ICaptureLayoutExporter
     {
         //  保存結果の報告
-        void onCaptureLayoutExportedResult(String exportedFileName, String detail, int id);
+        void onCaptureLayoutExportedResult(Uri exportedUri, String detail, int id);
     }
 }

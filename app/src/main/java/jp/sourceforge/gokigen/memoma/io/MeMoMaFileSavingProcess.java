@@ -7,13 +7,11 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import jp.sourceforge.gokigen.memoma.Main;
 import jp.sourceforge.gokigen.memoma.R;
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
 
 /**
  *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *  
  *  AsyncTask
  *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
  *    Integer    : 途中経過を伝えるクラス(Progress)
@@ -23,22 +21,24 @@ import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
  *
  */
 public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
-{	
-	private IResultReceiver receiver = null;
-	private ExternalStorageFileUtility fileUtility = null;
-	private ISavingStatusHolder statusHolder = null;
+{
+	private final String TAG = toString();
+
+	private final Context context;
+	private final IResultReceiver receiver;
+	private final ISavingStatusHolder statusHolder;
 	
-	private String backgroundUri = null;
-	private String userCheckboxString = null;
-	private ProgressDialog savingDialog = null;
+	private final String backgroundUri;
+	private final String userCheckboxString;
+	private final ProgressDialog savingDialog;
 	
 	/**
 	 *   コンストラクタ
 	 */
-    public MeMoMaFileSavingProcess(Context context, ISavingStatusHolder holder, ExternalStorageFileUtility utility,  IResultReceiver resultReceiver)
+    public MeMoMaFileSavingProcess(Context context, ISavingStatusHolder holder,  IResultReceiver resultReceiver)
     {
+		this.context = context;
     	receiver = resultReceiver;
-    	fileUtility = utility;
     	statusHolder = holder;
 
         //  プログレスダイアログ（「保存中...」）を表示する。
@@ -72,22 +72,21 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     /**
      *  非同期処理
      *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     * 
      */
     @Override
     protected String doInBackground(MeMoMaObjectHolder... datas)
     {
-    	// 保管中状態を設定する
-    	statusHolder.setSavingStatus(true);
+		// 保管中状態を設定する
+		statusHolder.setSavingStatus(true);
 
-    	// データの保管メイン
-    	MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(fileUtility, backgroundUri, userCheckboxString);
-    	String result = savingEngine.saveObjects(datas[0]);
+		// データの保管メイン
+		MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(context, backgroundUri, userCheckboxString);
+		String result = savingEngine.saveObjects(datas[0]);
 
-        System.gc();
-		
-    	// 未保管状態にリセットする
-    	statusHolder.setSavingStatus(false);
+		System.gc();
+
+		// 未保管状態にリセットする
+		statusHolder.setSavingStatus(false);
 
 		return (result);
     }
@@ -113,12 +112,12 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     	{
             if (receiver != null)
             {
-            	receiver.onSavedResult(result);
+            	receiver.onSavedResult(!(result.isEmpty()), result);
             }
     	}
     	catch (Exception ex)
     	{
-    		Log.v(Main.APP_IDENTIFIER, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.toString());
+    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.getMessage());
     	}
     	// プログレスダイアログを消す
     	savingDialog.dismiss();
@@ -130,29 +129,23 @@ public class MeMoMaFileSavingProcess extends AsyncTask<MeMoMaObjectHolder, Integ
     
     /**
      *    結果報告用のインタフェース（積極的に使う予定はないけど...）
-     *    
-     * @author MRSa
-     *
      */
     public interface IResultReceiver
     {
-        /**  保存結果の報告 **/
-        public abstract void onSavedResult(String detail);
+        // 保存結果の報告
+		void onSavedResult(boolean isError, String detail);
     }
 
     /**
      *     ファイル保存実施状態を記憶するインタフェースクラス
-     *     
-     * @author MRSa
-     *
      */
     public interface ISavingStatusHolder
     {
-    	/**  保存中状態を設定する **/
-        public abstract void setSavingStatus(boolean isSaving);
+    	// 保存中状態を設定する
+		void setSavingStatus(boolean isSaving);
         
-        /** 保存中状態を取得する **/
-        public abstract boolean getSavingStatus();
+        // 保存中状態を取得する
+		boolean getSavingStatus();
     }
 
 }
