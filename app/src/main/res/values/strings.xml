@@ -81,4 +81,5 @@
     <string name="import_xml_information">Please select again the data imported from the XML file on the main screen.</string>
     <string name="exported_picture_not_shared">The picture is exported, but it cannot share it.</string>
     <string name="exported_data_not_shared">The file is exported, but it cannot share it.</string>
+    <string name="intent_call_error">The file picker call failed.</string>
 </resources>

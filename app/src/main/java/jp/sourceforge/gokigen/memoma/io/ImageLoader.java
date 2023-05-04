@@ -49,7 +49,7 @@ public class ImageLoader
         InputStream input = null; 
         try
         {
-            if (Build.VERSION.SDK_INT >= 19)
+            if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
             {
                 context.getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }

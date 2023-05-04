@@ -209,7 +209,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                 {
                     try
                     {
-                        if (Build.VERSION.SDK_INT >= 19)
+                        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
                         {
                             parent.contentResolver.takePersistableUriPermission(
                                 backgroundUri,
@@ -529,7 +529,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private fun insertPicture()
     {
         val intent: Intent
-        if (Build.VERSION.SDK_INT >= 19)
+        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
         {
             intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)

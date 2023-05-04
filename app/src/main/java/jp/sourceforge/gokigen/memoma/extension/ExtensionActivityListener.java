@@ -398,13 +398,13 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
                 result = true;
             }
             case MENU_ID_IMPORT -> {
-                // データのインポート
-                importObjectFromCsv();
+                // データのインポート(CSV形式)
+                callPickImportObject(PICK_CSV_FILE);
                 result = true;
             }
             case MENU_ID_IMPORT_XML -> {
                 // データのインポート(XML形式)
-                importObjectFromXml();
+                callPickImportObject(PICK_XML_FILE);
                 result = true;
             }
             case MENU_ID_DELETE -> {
@@ -415,40 +415,6 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
             default -> result = false;
         }
         return (result);
-    }
-
-    /**
-     *   XML形式でデータをインポートする
-     */
-    private void importObjectFromXml()
-    {
-        try
-        {
-            // ファイル選択のダイアログを取得する
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
-            {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("text/*");
-                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                {
-                    String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
-                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, path);
-                }
-                parent.startActivityForResult(intent, PICK_XML_FILE);
-            }
-            else
-            {
-                // 旧バージョンの Android での処理... （File Picker ってあったっけ？）
-
-
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -493,31 +459,38 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
         }
     }
 
-
     /**
-     *   CSV形式でデータをインポートする
+     *   データをインポートする(Intentを呼び出す)
      */
-    private void importObjectFromCsv()
+    private void callPickImportObject(int code)
     {
-        // ファイル選択のダイアログを取得する
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        try
         {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            Intent intent;
+            // ファイル選択のダイアログを取得する
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            {
+                intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            else
+            {
+                intent = new Intent(Intent.ACTION_GET_CONTENT);
+            }
             intent.setType("text/*");
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
                 String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
                 intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, path);
             }
-            parent.startActivityForResult(intent, PICK_CSV_FILE);
+            parent.startActivityForResult(intent, code);
         }
-        else
+        catch (Exception e)
         {
-            // 旧バージョンの Android での処理... （File Picker ってあったっけ？）
-
-
+            String message = " " + parent.getString(R.string.intent_call_error) + " " + e.getMessage() + " ID:" + code;
+            Toast.makeText(parent, message,Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 
