@@ -11,6 +11,7 @@ import android.util.Xml
 import jp.sourceforge.gokigen.memoma.Main
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
 import java.io.File
+import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -31,31 +32,38 @@ class ExtensionXmlExport(private val context: Context, private val objectHolder:
             val outFormat = SimpleDateFormat("yyyyMMdd_HHmmss_", Locale.US)
             val exportedFileName = outFormat.format(calendar.time) + objectHolder.dataTitle + ".xml"
             val extStorageUri: Uri
+            val documentUri: Uri?
+            val writer: OutputStreamWriter
             val values = ContentValues()
             values.put(MediaStore.Downloads.TITLE, exportedFileName)
             values.put(MediaStore.Downloads.DISPLAY_NAME, exportedFileName)
             values.put(MediaStore.Downloads.MIME_TYPE, "text/xml") // text/plain or text/xml
-            extStorageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             {
                 values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + Main.APP_NAMESPACE)
                 values.put(MediaStore.Downloads.IS_PENDING, true)
-                MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                extStorageUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                Log.v(TAG, "---------- $exportedFileName $values")
+                documentUri = resolver.insert(extStorageUri, values)
+                if (documentUri == null)
+                {
+                    resultMessage = "documentUri is NULL."
+                    return resultMessage
+                }
+                val outputStream = resolver.openOutputStream(documentUri, "wa")
+                writer = OutputStreamWriter(outputStream)
             }
             else
             {
+                documentUri = null
                 val path = File(outputDir)
+                path.mkdir()
                 values.put(MediaStore.Downloads.DATA, path.absolutePath + File.separator + exportedFileName)
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                val targetFile = File(outputDir + File.separator + exportedFileName)
+                val outputStream = FileOutputStream(targetFile)
+                writer = OutputStreamWriter(outputStream)
             }
-            Log.v(TAG, "---------- $exportedFileName $values")
-            val documentUri = resolver.insert(extStorageUri, values)
-            if (documentUri == null)
-            {
-                resultMessage = "documentUri is NULL."
-                return resultMessage
-            }
-            val outputStream = resolver.openOutputStream(documentUri, "wa")
-            val writer = OutputStreamWriter(outputStream)
+
             val serializer = Xml.newSerializer()
             serializer.setOutput(writer)
             serializer.startDocument("UTF-8", true)
@@ -178,7 +186,10 @@ class ExtensionXmlExport(private val context: Context, private val objectHolder:
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             {
                 values.put(MediaStore.Downloads.IS_PENDING, false)
-                resolver.update(documentUri, values, null, null)
+                if (documentUri != null)
+                {
+                    resolver.update(documentUri, values, null, null)
+                }
             }
         }
         catch (e: Exception)

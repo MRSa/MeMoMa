@@ -641,6 +641,12 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
 
         // エクスポートしたことを伝達する
         String outputMessage = parent.getString(R.string.export_csv) + " " + objectHolder.getDataTitle() + " " + detail;
+        if ((documentUri == null)&&(isShareExportedData))
+        {
+            // エクスポートはできない
+            isShareExportedData = false;
+            outputMessage = parent.getString(R.string.exported_data_not_shared) + " : " + objectHolder.getDataTitle() + " " + detail;
+        }
         Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
 
         if (isShareExportedData)

@@ -79,5 +79,6 @@
     <string name="delete_content">Delete Content&#8230;</string>
     <string name="none_object">Object is empty, not saved.</string>
     <string name="import_xml_information">Please select again the data imported from the XML file on the main screen.</string>
-
+    <string name="exported_picture_not_shared">The picture is exported, but it cannot share it.</string>
+    <string name="exported_data_not_shared">The file is exported, but it cannot share it.</string>
 </resources>

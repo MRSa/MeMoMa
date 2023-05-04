@@ -275,14 +275,18 @@ public class MeMoMaDataInOutManager implements MeMoMaFileSavingProcess.ISavingSt
      */
 	public void onCaptureLayoutExportedResult(Uri exportedUri, String detail, int id)
 	{
-		Log.v(TAG, "MeMoMaDataInOutManager::onCaptureExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail + " " + exportedUri.toString());
-
-		// エクスポートしたことを伝達する
-		String outputMessage = parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail;
-		Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-
+		Log.v(TAG, "MeMoMaDataInOutManager::onCaptureExportedResult() '"  + objectHolder.getDataTitle() +"' : " + detail);
 		try
 		{
+			// エクスポートしたことを伝達する
+			String outputMessage = parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail;
+			if ((exportedUri == null)&&(isShareExportedData))
+			{
+				// エクスポートはできない
+				isShareExportedData = false;
+				outputMessage = parent.getString(R.string.exported_picture_not_shared) + " : " + objectHolder.getDataTitle() + " " + detail;
+			}
+			Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
 			if (isShareExportedData)
 			{
 				// ギャラリーに受信したファイルを登録し、エクスポートしたファイルを共有する

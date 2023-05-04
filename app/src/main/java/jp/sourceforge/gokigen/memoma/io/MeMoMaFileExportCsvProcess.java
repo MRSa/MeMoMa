@@ -3,6 +3,8 @@ package jp.sourceforge.gokigen.memoma.io;
 import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -85,6 +87,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
             String exportedFileName =  outFormat.format(calendar.getTime()) + baseName + ".csv";
 
             Uri extStorageUri;
+            OutputStreamWriter writer;
             ContentValues values = new ContentValues();
             values.put(MediaStore.Downloads.TITLE, exportedFileName);
             values.put(MediaStore.Downloads.DISPLAY_NAME, exportedFileName);
@@ -94,25 +97,28 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
                 values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + APP_NAMESPACE);
                 values.put(MediaStore.Downloads.IS_PENDING, true);
                 extStorageUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+
+                Log.v(TAG, "---------- " + exportedFileName + " " + values);
+
+                documentUri = resolver.insert(extStorageUri, values);
+
+                if (documentUri == null)
+                {
+                    resultMessage = "documentUri is NULL.";
+                    return (resultMessage);
+                }
+                OutputStream outputStream = resolver.openOutputStream(documentUri, "wa");
+                writer = new OutputStreamWriter(outputStream);
             }
             else
             {
                 File path = new File(outputDir);
+                path.mkdir();
                 values.put(MediaStore.Downloads.DATA, path.getAbsolutePath() + File.separator + exportedFileName);
-                extStorageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                File targetFile = new File(outputDir + File.separator + exportedFileName);
+                FileOutputStream outputStream = new FileOutputStream(targetFile);
+                writer = new OutputStreamWriter(outputStream);
             }
-            Log.v(TAG, "---------- " + exportedFileName + " " + values);
-
-            documentUri = resolver.insert(extStorageUri, values);
-
-            if (documentUri == null)
-            {
-                resultMessage = "documentUri is NULL.";
-                return (resultMessage);
-            }
-
-            OutputStream outputStream = resolver.openOutputStream(documentUri, "wa");
-            OutputStreamWriter writer = new OutputStreamWriter(outputStream);
 
             //  データのタイトルを出力
             String str = "; label,detail,userChecked,shape,style,centerX,centerY,width,height,;!<_$ (';!<_$' is a record Separator)\r\n";
@@ -159,7 +165,7 @@ public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, In
         }
         catch (Exception e)
         {
-            resultMessage = " ERR " + e.getMessage();
+            resultMessage = " ERR " + e.getMessage() + " " + documentUri;
             Log.v(TAG, resultMessage);
             e.printStackTrace();
         }

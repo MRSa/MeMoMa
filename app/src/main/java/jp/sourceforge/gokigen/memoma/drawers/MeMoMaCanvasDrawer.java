@@ -43,6 +43,8 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	public static final float OBJECTLABEL_MARGIN = 8.0f;
 	public static final float OBJECTLABEL_MARGIN_WIDTH = 24.0f;
 
+	public static final int DATALABEL_TEXT_SIZE = 30;
+
 	public static final int BACKGROUND_COLOR_DEFAULT = 0xff004000;
 	private int backgroundColor = BACKGROUND_COLOR_DEFAULT;
 	
@@ -105,8 +107,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  /**
 	   *   オブジェクトの形状を変更する
 	   *   (ここで指定された形状のチェックを行っておく。)
-	   * 
-	   *
 	   */
 	  public void setObjectStyle(int style)
 	  {
@@ -165,7 +165,7 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  }
 		  catch (Exception ex)
 		  {
-			  Log.v(TAG, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : " + uri + " , "+ ex.toString());
+			  Log.v(TAG, "MeMoMaCanvasDrawer::updateBackgroundBitmap() : " + uri + " , "+ ex.getMessage());
 			  ex.printStackTrace();
 			  backgroundBitmap = null;
 			  backgroundBitmapUri = "";
@@ -175,8 +175,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  
 	  /**
 	   *   背景画像を設定する
-	   *   
-	   *
 	   */
 	  public void setBackgroundUri(String uri)
 	  {
@@ -185,8 +183,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	  
 	  /**
 	   *   背景色を(文字列で)設定する
-	   * 
-	   *
 	   */
 	  public void setBackgroundColor(String colorString)
 	  {
@@ -287,48 +283,47 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 	   */
 	  public void drawOnBitmapCanvas(Canvas canvas, float offsetX, float offsetY)
 	  {
-	    	try
-	    	{
-	    		Paint paint = new Paint();
+		  try
+		  {
+			  Paint paint = new Paint();
 
-	    		// 画面全体をクリアする
-	    		canvas.drawColor(backgroundColor);	    			
-	    		
-	    		// 背景画像が設定されていた場合は、背景画像を描画する
-	    		if (backgroundBitmap != null)
-	    		{
-	    		    canvas.drawBitmap(backgroundBitmap, offsetX, offsetY, paint);
-	    		}
+			  // 画面全体をクリアする
+			  canvas.drawColor(backgroundColor);
 
-	    		// オブジェクト間の接続線をすべて表示する
-	    		drawConnectionLines(canvas, offsetX, offsetY);
-	    		
-                // オブジェクトをすべて表示
-	    		drawObjects(canvas, offsetX, offsetY);
-	    		
-	    		// タイトルとめもまのアイコンを表示する : 文字の色は黒でいいのかな...
-	    		Bitmap bitmap = BitmapFactory.decodeResource(parent.getResources(), R.drawable.icon1);
-	    		canvas.drawBitmap(bitmap, 2.0f, 2.0f, paint);
+			  // 背景画像が設定されていた場合は、背景画像を描画する
+			  if (backgroundBitmap != null)
+			  {
+				  canvas.drawBitmap(backgroundBitmap, offsetX, offsetY, paint);
+			  }
 
-                // 文字をライトグレー、ちょっと影付きにする
-                paint.setColor(Color.LTGRAY);
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+			  // オブジェクト間の接続線をすべて表示する
+			  drawConnectionLines(canvas, offsetX, offsetY);
 
-	    		canvas.drawText(objectHolder.getDataTitle(), (bitmap.getWidth() + 10.0f), 32.0f, paint);
+			  // オブジェクトをすべて表示
+			  drawObjects(canvas, offsetX, offsetY);
 
-	    	}
-	    	catch (Exception ex)
-	    	{
-	    		// 例外発生...でもそのときには何もしない
-	    		Log.v(TAG, "drawOnBitmapCanvas() ex: " + ex.toString() + " " + ex.getMessage());
-	    	}
+			  // タイトルとめもまのアイコンを表示する : 文字の色は黒でいいのかな...
+			  Bitmap bitmap = BitmapFactory.decodeResource(parent.getResources(), R.drawable.icon1);
+			  canvas.drawBitmap(bitmap, 2.0f, 2.0f, paint);
+
+			  // 文字をライトグレー、ちょっと影付きにする
+			  paint.setColor(Color.LTGRAY);
+			  paint.setStyle(Paint.Style.FILL_AND_STROKE);
+			  paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY);
+			  paint.setTextSize(DATALABEL_TEXT_SIZE);
+
+			  canvas.drawText(objectHolder.getDataTitle(), (bitmap.getWidth() + 10.0f), 32.0f, paint);
+
+		  }
+		  catch (Exception ex)
+		  {
+			  // 例外発生...でもそのときには何もしない
+			  Log.v(TAG, "drawOnBitmapCanvas() ex: " + " " + ex.getMessage());
+		  }
 	  }
 
 	  /**
 	   *    オブジェクト間の接続線を表示する
-	   * 
-	   *
 	   */
 	  private void drawConnectionLines(Canvas canvas, float offsetX, float offsetY)
 	  {
@@ -521,14 +516,12 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 		  catch (Exception ex)
 		  {
 			  // なにもしない
-			  Log.v(TAG, "EXCEPTION :" + ex.toString());
+			  Log.v(TAG, "EXCEPTION :" + ex.getMessage());
 		  }
 	  }	  
 	  
     /**
      *   オブジェクトを動かしている最中かどうかの判定を行う。
-     * 
-     *
      * @return  trueなら、動かしている最中
      */
     private boolean isFlicking(Canvas canvas)
@@ -538,8 +531,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
     /**
      *   フリック時の軌跡と現在地点を表示する
-     * 
-     *
      */
     private void drawTrackAndPositions(Canvas canvas)
     {
@@ -718,8 +709,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
     /**
      *   オブジェクトをすべて表示する
-     *
-     *
      */
     private void drawObjects(Canvas canvas , float offsetX, float offsetY)
     {
@@ -1229,8 +1218,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
       /**
        *   （ScaleGestureDetector.OnScaleGestureListener の実装）
-       * 
-       *
        */
       public boolean onScale(ScaleGestureDetector detector)
       {
@@ -1253,8 +1240,6 @@ public class MeMoMaCanvasDrawer implements ICanvasDrawer,  GestureDetector.OnGes
 
       /**
        *   （ScaleGestureDetector.OnScaleGestureListener の実装）
-       *   
-       * 
        */
       public  boolean	 onScaleBegin(ScaleGestureDetector detector)
       {

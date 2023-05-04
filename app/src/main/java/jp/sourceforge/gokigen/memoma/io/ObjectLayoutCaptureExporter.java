@@ -3,6 +3,7 @@ package jp.sourceforge.gokigen.memoma.io;
 import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -121,7 +122,9 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
             ContentResolver resolver = context.getContentResolver();
             String fileName = baseName + ".png";
 
+            OutputStream outputStream = null;
             Uri extStorageUri;
+            Uri imageUri = null;
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.Media.TITLE, fileName);
             values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
@@ -131,52 +134,75 @@ public class ObjectLayoutCaptureExporter extends AsyncTask<String, Integer, Stri
                 values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/" + APP_NAMESPACE);
                 values.put(MediaStore.Images.Media.IS_PENDING, true);
                 extStorageUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+                Log.v(TAG, "---------- " + baseName + ".png " + values);
+                imageUri = resolver.insert(extStorageUri, values);
+                if (imageUri != null)
+                {
+                    ////////////////////////////////////////////////////////////////
+                    if (dumpLog)
+                    {
+                        try
+                        {
+                            Cursor cursor = resolver.query(imageUri, null, null, null, null);
+                            DatabaseUtils.dumpCursor(cursor);
+                            cursor.close();
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            resultMessage = e.getMessage();
+                        }
+                    }
+                    ////////////////////////////////////////////////////////////////
+                    try
+                    {
+                        outputStream = resolver.openOutputStream(imageUri, "wa");
+                    }
+                    catch (Exception ee)
+                    {
+                        ee.printStackTrace();
+                    }
+                }
+                else
+                {
+                    Log.v(TAG, " cannot get imageUri...");
+                }
             }
             else
             {
                 File path = new File(outputDir);
+                if (!path.mkdir())
+                {
+                    Log.v(TAG, " mkdir fail: " + outputDir);
+                }
                 values.put(MediaStore.Images.Media.DATA, path.getAbsolutePath() + File.separator + fileName);
-                extStorageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            }
-            Log.v(TAG, "---------- " + baseName + ".png " + values);
-            Uri imageUri = resolver.insert(extStorageUri, values);
-            if (imageUri != null)
-            {
-                ////////////////////////////////////////////////////////////////
-                if (dumpLog)
+                File targetPath = new File(outputDir + File.separator + fileName);
+                try
                 {
-                    try
-                    {
-                        Cursor cursor = resolver.query(imageUri, null, null, null, null);
-                        DatabaseUtils.dumpCursor(cursor);
-                        cursor.close();
-                    }
-                    catch (Exception e)
-                    {
-                        e.printStackTrace();
-                        resultMessage = e.getMessage();
-                    }
+                    outputStream = new FileOutputStream(targetPath);
                 }
-                ////////////////////////////////////////////////////////////////
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
 
-                OutputStream outputStream = resolver.openOutputStream(imageUri, "wa");
-                if (outputStream != null)
-                {
-                    targetImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
-                    outputStream.flush();
-                    outputStream.close();
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                {
-                    values.put(MediaStore.Images.Media.IS_PENDING, false);
-                    resolver.update(imageUri, values, null, null);
-                }
-            }
-            else
+            if (outputStream != null)
             {
-                Log.v(TAG, " cannot get imageUri...");
+                targetImage.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
             }
-            exportedUri = imageUri;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                values.put(MediaStore.Images.Media.IS_PENDING, false);
+                if (imageUri != null)
+                {
+                    resolver.update(imageUri, values, null, null);
+                    exportedUri = imageUri;
+                }
+            }
         }
         catch (Throwable t)
         {

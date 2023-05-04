@@ -79,4 +79,6 @@
     <string name="delete_content">データの削除&#8230;</string>
     <string name="none_object">図形がないため、保存しません</string>
     <string name="import_xml_information">XMLファイルから取り込みしたデータは、メイン画面で改めて選択をお願いします。</string>
+    <string name="exported_picture_not_shared">画像を出力しましたが、共有はできません。</string>
+    <string name="exported_data_not_shared">CSVファイルを出力しましたが、共有はできません。</string>
 </resources>
