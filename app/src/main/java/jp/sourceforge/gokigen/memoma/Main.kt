@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -112,9 +113,40 @@ class Main : AppCompatActivity()
         }
         return false
     }
+
+    private fun allPermissionsGranted() : Boolean
+    {
+        var result = true
+        for (param in REQUIRED_PERMISSIONS) {
+            if (ContextCompat.checkSelfPermission(
+                    baseContext,
+                    param
+                ) != PackageManager.PERMISSION_GRANTED
+            )
+            {
+                // Permission Denied
+                if ((param == Manifest.permission.READ_EXTERNAL_STORAGE)&&(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN))
+                {
+                    // この場合は権限付与がされているかどうかの判断を除外 (デバイスが JELLY_BEAN よりも古く、READ_EXTERNAL_STORAGE がない場合）
+                }
+                //else if ((param == Manifest.permission.ACCESS_MEDIA_LOCATION)&&(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q))
+                //{
+                //    //　この場合は権限付与がされているかどうかの判断を除外 (デバイスが (10) よりも古く、ACCESS_MEDIA_LOCATION がない場合）
+                //}
+                else
+                {
+                    result = false
+                }
+            }
+        }
+        return (result)
+    }
+
+/*
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
+*/
     /**
      * 画面が裏に回ったときの処理
      */

@@ -862,6 +862,18 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     }
 
     /**
+     * オブジェクトを共有する
+     *
+     *
+     */
+    private fun shareObject(key: Int)
+    {
+        // 選択中オブジェクトを共有する
+        objectHolder.shareObject(key)
+    }
+
+
+    /**
      * オブジェクトを拡大する
      *
      *
@@ -1114,6 +1126,9 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_SIZESMALLER) {
             // オブジェクトの縮小
             shrinkObject(selectedContextKey)
+        } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_SHARE) {
+            // オブジェクトの共有
+            shareObject(selectedContextKey)
         }
     }
 

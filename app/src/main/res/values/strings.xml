@@ -61,6 +61,7 @@
     <string name="object_duplicate">Duplicate</string>
     <string name="object_bigger">Expand</string>
     <string name="object_smaller">Shrink</string>
+    <string name="object_share">Share</string>
     <string name="object_bringtop">Bring to top</string>
     <string name="object_small_limit">Cannot shrink</string>
     <string name="object_bigger_limit">Cannot expand</string>

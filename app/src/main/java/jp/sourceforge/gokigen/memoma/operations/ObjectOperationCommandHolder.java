@@ -17,9 +17,11 @@ public class ObjectOperationCommandHolder implements ItemSelectionDialog.ISelect
     public static final int OBJECTOPERATION_DUPLICATE =1;
     public static final int OBJECTOPERATION_SIZEBIGGER = 2;
     public static final int OBJECTOPERATION_SIZESMALLER = 3;
-//    public static final int OBJECTOPERATION_BRINGTOP = 4;
-	
-	private Context parent = null;
+    public static final int OBJECTOPERATION_SHARE = 4;
+
+    //    public static final int OBJECTOPERATION_BRINGTOP = 5;
+
+	private final Context parent;
 	
 	/**
 	 *    コンストラクタ
@@ -46,11 +48,12 @@ public class ObjectOperationCommandHolder implements ItemSelectionDialog.ISelect
      */
 	public String[] getItems()
 	{
-        String[] ret = new String[4];
+        String[] ret = new String[5];
         ret[0] = parent.getString(R.string.object_delete);
         ret[1] = parent.getString(R.string.object_duplicate);
         ret[2] = parent.getString(R.string.object_bigger);
         ret[3] = parent.getString(R.string.object_smaller);
+        ret[4] = parent.getString(R.string.object_share);
         //ret[4] = parent.getString(R.string.object_bringtop);
 
         return (ret);
@@ -65,25 +68,28 @@ public class ObjectOperationCommandHolder implements ItemSelectionDialog.ISelect
     	String message = "";
     	switch (index)
     	{
-          case OBJECTOPERATION_DELETE:
-    		message = parent.getString(R.string.object_delete);
-    		break;
-          case OBJECTOPERATION_DUPLICATE:
-      		message = parent.getString(R.string.object_duplicate);
-      		break;
-          case OBJECTOPERATION_SIZEBIGGER:
-        	message = parent.getString(R.string.object_bigger);
-        	break;
-          case OBJECTOPERATION_SIZESMALLER:
-        	message = parent.getString(R.string.object_smaller);
-         	break;
+            case OBJECTOPERATION_DELETE:
+                message = parent.getString(R.string.object_delete);
+                break;
+            case OBJECTOPERATION_DUPLICATE:
+                message = parent.getString(R.string.object_duplicate);
+                break;
+            case OBJECTOPERATION_SIZEBIGGER:
+                message = parent.getString(R.string.object_bigger);
+                break;
+            case OBJECTOPERATION_SIZESMALLER:
+                message = parent.getString(R.string.object_smaller);
+                break;
+            case OBJECTOPERATION_SHARE:
+                message = parent.getString(R.string.object_share);
+                break;
 /*
           case OBJECTOPERATION_BRINGTOP:
         	message = parent.getString(R.string.object_bringtop);
          	break;
 */
-          default:
-         	break;
+            default:
+                break;
     	}
     	return (message);
     }
