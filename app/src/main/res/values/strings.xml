@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="blank"> </string>
-    <string name="app_credit">An idea planner\n web site: "http://bit.ly/A8c8yv"</string>
+    <string name="app_credit">An idea planner.\n</string>
     <string name="app_name">MeMoMa</string>
     <string name="extent_name">Etc</string>
     <string name="createnew">New</string>
@@ -67,6 +67,7 @@
     <string name="object_bigger_limit">Cannot expand</string>
     <string name="confirmYes">OK</string>
     <string name="confirmNo">Cancel</string>
+    <string name="confirmGo">Go</string>
     <string name="dummyData"> </string>
     <string name="no_name">(no name)</string>
     <string name="labelLineThickness">Line Thickness</string>
@@ -83,4 +84,9 @@
     <string name="exported_picture_not_shared">The picture is exported, but it cannot share it.</string>
     <string name="exported_data_not_shared">The file is exported, but it cannot share it.</string>
     <string name="intent_call_error">The file picker call failed.</string>
+    <string name="create_object">Create Object</string>
+    <string name="delete_object">Delete Object</string>
+    <string name="save">Save objects</string>
+    <string name="set_line_style">Set line style</string>
+    <string name="show_another_view">Show another view</string>
 </resources>

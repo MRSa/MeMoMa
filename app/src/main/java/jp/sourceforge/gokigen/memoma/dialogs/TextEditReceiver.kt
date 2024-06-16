@@ -1,65 +1,56 @@
-package jp.sourceforge.gokigen.memoma.dialogs;
+package jp.sourceforge.gokigen.memoma.dialogs
 
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
+import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog.ITextEditResultReceiver
 
 /**
- *   テキストデータの反映
+ * テキストデータの反映
  */
-public class TextEditReceiver implements TextEditDialog.ITextEditResultReceiver
+class TextEditReceiver(private val parent: AppCompatActivity, private val textId: String, private val textResId: Int) : ITextEditResultReceiver
 {
-	private final AppCompatActivity parent;
-	private final String  textId;
-	private final int     textResId;
-	
     /**
-     *    コンストラクタ
+     * データの更新
      */
-	public TextEditReceiver(AppCompatActivity argument, String prefId, int resId)
+    override fun finishTextEditDialog(message: String)
     {
-        textId = prefId;
-        parent = argument;
-        textResId = resId;
-    }
-	
-	/**
-	 *   データの更新
-	 */
-    public void finishTextEditDialog(String message)
-    {
-    	if ((message == null)||(message.length() == 0))
-    	{
+        if (message.isEmpty())
+        {
             // データが入力されていなかったので、何もしない。
-    		return;
-    	}
-    	
-    	// 文字列を記録
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(textId, message);
-        editor.apply();
+            return
+        }
+
+        // 文字列を記録
+        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+        val editor = preferences.edit()
+        editor.putString(textId, message)
+        editor.apply()
 
         if (textResId != 0)
         {
             // 画面表示の更新
-        	final TextView infoText = parent.findViewById(textResId);
-        	infoText.setText(message);
+            val infoText = parent.findViewById<TextView>(textResId)
+            infoText.text = message
         }
         else
         {
-        	// リソースIDが指定されていない場合は、タイトルを更新する
-        	parent.setTitle(message);
+            // リソースIDが指定されていない場合は、タイトルを更新する
+            parent.title = message
         }
-
     }
 
     /**
-     *   データを更新しないとき...
+     * データを更新しないとき...なにもしない
      */
-    public void cancelTextEditDialog()
+    override fun cancelTextEditDialog()
     {
+        Log.v(TAG,"cancelTextEditDialog()")
+    }
+
+    companion object
+    {
+        private val TAG = TextEditReceiver::class.java.simpleName
     }
 }

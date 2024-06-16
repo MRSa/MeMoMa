@@ -1,101 +1,67 @@
-package jp.sourceforge.gokigen.memoma.dialogs;
+package jp.sourceforge.gokigen.memoma.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
+import android.content.Context
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import jp.sourceforge.gokigen.memoma.R
 
-import jp.sourceforge.gokigen.memoma.R;
-
-/**
- *   はい か いいえ を入力するダイアログを準備する
- * 
- * @author MRSa
- *
- */
-public class ConfirmationDialog
+class ConfirmationDialog(private val myContext: Context) : DialogFragment()
 {
-	private final Context context;
-	private IResultReceiver resultReceiver = null;
-    private String  message = "";
-	private String  title = "";
-	private int    icon = 0;
-
-	public ConfirmationDialog(Context arg)
-	{
-		context = arg;
-	}
-
-	/**
-	 *  クラスの準備
-     *
-	 */
-	public void prepare(IResultReceiver receiver, int titleIcon, String titleMessage, String confirmMessage)
-	{
-		if (receiver != null)
-		{
-			resultReceiver = receiver;
-		}
-		icon = titleIcon;
-		title = titleMessage;
-        message = confirmMessage;		
-	}
-
     /**
-     *   確認ダイアログを応答する
-     *
+     *    ダイアログを表示する (タイトルやメッセージはリソースからとってくる）
      */
-    public Dialog getDialog()
+    fun show(titleResId: Int, messageResId: Int, callback: ConfirmationCallback)
     {
-    	LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    	if (inflater == null)
-        {
-            return (null);
-        }
-        final View layout = inflater.inflate(R.layout.confirmationdialog, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        final TextView  textView = layout.findViewById(R.id.confirm_message);
-
-        // 表示するデータ（アイコン、ダイアログタイトル、メッセージ）を準備する
-        if (icon != 0)
-        {
-            builder.setIcon(icon);
-        }
-        if (title != null)
-        {
-            builder.setTitle(title);
-        }
-        if (message != null)
-        {
-        	textView.setText(message);
-        }
-        builder.setView(layout);
-        builder.setCancelable(false);
-        builder.setPositiveButton(context.getString(R.string.confirmYes), (dialog, id) -> {
-            if (resultReceiver != null)
-            {
-                resultReceiver.acceptConfirmation();
-            }
-            dialog.cancel();
-            System.gc();
-        });
-        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
-            if (resultReceiver != null)
-            {
-                resultReceiver.rejectConfirmation();
-            }
-            dialog.cancel();
-            System.gc();
-        });
-        return (builder.create());    	
+        val title = myContext.getString(titleResId)
+        val message = myContext.getString(messageResId)
+        show(title, message, callback)
     }
 
-    public interface IResultReceiver
+    fun show(title: String?, message: String?, callback: ConfirmationCallback)
     {
-        void acceptConfirmation();
-        void rejectConfirmation();
+        val alertDialog = AlertDialog.Builder(myContext)
+        alertDialog.setTitle(title)
+        alertDialog.setIcon(android.R.drawable.ic_dialog_alert)
+        alertDialog.setMessage(message)
+        alertDialog.setCancelable(true)
+        alertDialog.setPositiveButton(myContext.getString(R.string.confirmYes)) { dialog, _ ->
+            callback.acceptConfirmation()
+            dialog.dismiss() }
+
+        alertDialog.setNegativeButton(myContext.getString(R.string.confirmNo)) { dialog, _ ->
+            callback.cancelConfirmation()
+            dialog.cancel() }
+        alertDialog.show()
+    }
+
+    fun show(iconResId: Int, title: String?, message: String?)
+    {
+        // 表示イアログの生成
+        val alertDialog = AlertDialog.Builder(myContext)
+        alertDialog.setTitle(title)
+        alertDialog.setIcon(iconResId)
+        alertDialog.setMessage(message)
+        alertDialog.setCancelable(true)
+
+        // ボタンを設定する（実行ボタン）
+        alertDialog.setPositiveButton(myContext.getString(R.string.confirmGo)) { dialog, _ -> dialog.dismiss() }
+
+        // 確認ダイアログを表示する
+        alertDialog.show()
+    }
+
+    // コールバックインタフェース
+    interface ConfirmationCallback
+    {
+        fun acceptConfirmation()
+        fun cancelConfirmation()
+    }
+
+    companion object
+    {
+        fun newInstance(context: Context): ConfirmationDialog
+        {
+            return (ConfirmationDialog(context))
+        }
     }
 }

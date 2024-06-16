@@ -18,7 +18,7 @@
     <string name="export_csv">CSV形式で保存&#8230;</string>
     <string name="import_csv">CSVファイルから追加&#8230;</string>
     <string name="background_data">背景画像&#8230;</string>
-   <string name="dialogtitle_selectcsv">追加するCSVファイルを選択</string>
+    <string name="dialogtitle_selectcsv">追加するCSVファイルを選択</string>
     <string name="about_gokigen">情報</string>
     <string name="shareContent">共有</string>
     <string name="dataTitle">タイトル</string>
@@ -67,6 +67,7 @@
     <string name="object_bigger_limit">これ以上拡大できません</string>
     <string name="confirmYes">OK</string>
     <string name="confirmNo">Cancel</string>
+    <string name="confirmGo">Go</string>
     <string name="dummyData"> </string>
     <string name="no_name">(無題)</string>
     <string name="labelLineThickness">太さ</string>
@@ -83,4 +84,9 @@
     <string name="exported_picture_not_shared">画像を出力しましたが、共有はできません。</string>
     <string name="exported_data_not_shared">CSVファイルを出力しましたが、共有はできません。</string>
     <string name="intent_call_error">ファイル選択の呼び出しに失敗しました。</string>
+    <string name="create_object">図形の追加</string>
+    <string name="delete_object">図形の削除</string>
+    <string name="save">図形の保存</string>
+    <string name="set_line_style">線の形状の設定</string>
+    <string name="show_another_view">別の画面へ</string>
 </resources>

@@ -1,54 +1,39 @@
 package jp.sourceforge.gokigen.memoma
 
-import android.Manifest
-import android.app.Dialog
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.view.Window
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager
 
 /**
  * メイン画面の処理
  */
 class Main : AppCompatActivity()
 {
-    private lateinit var listener: MeMoMaListener // イベント処理クラス
+    private val sceneChanger = ChangeScene(this)
 
     public override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
 
-        // リスナクラスを生成する
-        listener = MeMoMaListener(this, MeMoMaDataInOutManager(this))
-
-        // タイトルにプログレスバーを出せるようにする
-        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS)
-
         // タイトルバーにアクションバーを出す
         supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
 
-        // レイアウトを設定する **/
-        setContentView(R.layout.main)
+        // レイアウトを設定する
+        setContentView(R.layout.activity_main)
 
         try
         {
-            // リスナクラスの準備
-            listener.prepareListener()
+            // ----- 最初の画面を開く
+            sceneChanger.prepare()
+            sceneChanger.changeSceneToMain()
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
 
+/*     //  たぶん今は使っていない、、と、思う
         try
         {
             if (!allPermissionsGranted())
@@ -60,13 +45,14 @@ class Main : AppCompatActivity()
         {
             e.printStackTrace()
         }
-
-        Log.v(TAG, " START MEMOMA...");
+*/
+        Log.v(TAG, " START MeMoMa...")
     }
 
     /**
      * メニューの生成
      */
+/*
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         try
@@ -80,10 +66,11 @@ class Main : AppCompatActivity()
         }
         return false
     }
-
+*/
     /**
      * メニューアイテムの選択
      */
+/*
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
         try
@@ -96,10 +83,11 @@ class Main : AppCompatActivity()
         }
         return false
     }
-
+*/
     /**
      * メニュー表示前の処理
      */
+/*
     override fun onPrepareOptionsMenu(menu: Menu): Boolean
     {
         try
@@ -113,7 +101,8 @@ class Main : AppCompatActivity()
         }
         return false
     }
-
+*/
+/*
     private fun allPermissionsGranted() : Boolean
     {
         var result = true
@@ -141,7 +130,7 @@ class Main : AppCompatActivity()
         }
         return (result)
     }
-
+*/
 /*
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
@@ -150,6 +139,7 @@ class Main : AppCompatActivity()
     /**
      * 画面が裏に回ったときの処理
      */
+/*
     public override fun onPause()
     {
         super.onPause()
@@ -163,10 +153,11 @@ class Main : AppCompatActivity()
             ex.printStackTrace()
         }
     }
-
+*/
     /**
      * 画面が表に出てきたときの処理
      */
+/*
     public override fun onResume()
     {
         super.onResume()
@@ -181,10 +172,11 @@ class Main : AppCompatActivity()
             ex.printStackTrace()
         }
     }
-
+*/
     /**
      * 終了時の処理
      */
+/*
     override fun onDestroy()
     {
         try
@@ -197,10 +189,11 @@ class Main : AppCompatActivity()
             e.printStackTrace()
         }
     }
-
+*/
     /**
      *
      */
+/*
     override fun onSaveInstanceState(outState: Bundle)
     {
         try
@@ -217,10 +210,11 @@ class Main : AppCompatActivity()
             e.printStackTrace()
         }
     }
-
+*/
     /**
      *
      */
+/*
     override fun onRestoreInstanceState(savedInstanceState: Bundle)
     {
         super.onRestoreInstanceState(savedInstanceState)
@@ -237,49 +231,50 @@ class Main : AppCompatActivity()
             e.printStackTrace()
         }
     }
+*/
+    /**
+     * ダイアログ表示の準備
+     *
+     */
+    //override fun onCreateDialog(id: Int): Dialog?
+    //{
+    //    return listener.onCreateDialog(id)
+    //}
 
     /**
      * ダイアログ表示の準備
      *
      */
-    override fun onCreateDialog(id: Int): Dialog?
-    {
-        return listener.onCreateDialog(id)
-    }
-
-    /**
-     * ダイアログ表示の準備
-     *
-     */
-    override fun onPrepareDialog(id: Int, dialog: Dialog)
-    {
-        try
-        {
-            listener.onPrepareDialog(id, dialog)
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
+    //override fun onPrepareDialog(id: Int, dialog: Dialog)
+    // {
+    //    try
+    //    {
+    //        listener.onPrepareDialog(id, dialog)
+    //    }
+    //    catch (e: Exception)
+    //    {
+    //        e.printStackTrace()
+    //    }
+    //}
 
     /**
      * 子画面から応答をもらったときの処理
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-    {
-        super.onActivityResult(requestCode, resultCode, data)
-        try
-        {
-            // 子画面からもらった情報の応答処理をイベント処理クラスに依頼する
-            listener.onActivityResult(requestCode, resultCode, data)
-        }
-        catch (ex: Exception)
-        {
-            ex.printStackTrace()
-        }
-    }
+    //override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    //{
+    //    super.onActivityResult(requestCode, resultCode, data)
+    //    try
+    //    {
+    //        // 子画面からもらった情報の応答処理をイベント処理クラスに依頼する
+    //        listener.onActivityResult(requestCode, resultCode, data)
+    //    }
+    //    catch (ex: Exception)
+    //    {
+    //        ex.printStackTrace()
+    //    }
+    //}
 
+/*
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
     {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -291,14 +286,14 @@ class Main : AppCompatActivity()
             }
         }
     }
-
+*/
     companion object {
         const val APP_NAMESPACE = "gokigen"
         private val TAG = Main::class.java.simpleName
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        )
+        //private const val REQUEST_CODE_PERMISSIONS = 10
+        //private val REQUIRED_PERMISSIONS = arrayOf(
+        //    Manifest.permission.READ_EXTERNAL_STORAGE,
+        //    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        //)
     }
 }

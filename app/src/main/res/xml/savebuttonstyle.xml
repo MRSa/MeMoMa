@@ -2,13 +2,13 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:state_pressed="true"
-        android:drawable="@drawable/btn_save_pressed"
+        android:drawable="@drawable/baseline_save_black_48"
     />
     <item
         android:state_focused="true"
-        android:drawable="@drawable/btn_save_selected"
+        android:drawable="@drawable/baseline_save_black_48"
     />
     <item
-        android:drawable="@drawable/btn_save_normal"
+        android:drawable="@drawable/baseline_save_grey_48"
     />
 </selector>

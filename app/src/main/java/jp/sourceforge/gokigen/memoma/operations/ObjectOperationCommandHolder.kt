@@ -1,114 +1,57 @@
-package jp.sourceforge.gokigen.memoma.operations;
+package jp.sourceforge.gokigen.memoma.operations
 
-import android.content.Context;
+import android.content.Context
+import jp.sourceforge.gokigen.memoma.R
+import jp.sourceforge.gokigen.memoma.dialogs.ItemSelectionDialog.ISelectionItemHolder
 
-import jp.sourceforge.gokigen.memoma.R;
-import jp.sourceforge.gokigen.memoma.dialogs.ItemSelectionDialog;
-
-/**
- * 
- * 
- * @author MRSa
- *
- */
-public class ObjectOperationCommandHolder implements ItemSelectionDialog.ISelectionItemHolder
+class ObjectOperationCommandHolder(private val parent: Context) : ISelectionItemHolder
 {
-    public static final int OBJECTOPERATION_DELETE = 0;
-    public static final int OBJECTOPERATION_DUPLICATE =1;
-    public static final int OBJECTOPERATION_SIZEBIGGER = 2;
-    public static final int OBJECTOPERATION_SIZESMALLER = 3;
-    public static final int OBJECTOPERATION_SHARE = 4;
-
-    //    public static final int OBJECTOPERATION_BRINGTOP = 5;
-
-	private final Context parent;
-	
-	/**
-	 *    コンストラクタ
-	 * 
-	 */
-    public ObjectOperationCommandHolder(Context context)
+    override fun isMultipleSelection(): Boolean
     {
-    	parent = context;
-    }	
-
-    /**
-     * 
-     * 
-     */
-    public boolean isMultipleSelection()
-	{
-		return (false);
-		
-	}
-
-    /**
-     * 
-     * 
-     */
-	public String[] getItems()
-	{
-        String[] ret = new String[5];
-        ret[0] = parent.getString(R.string.object_delete);
-        ret[1] = parent.getString(R.string.object_duplicate);
-        ret[2] = parent.getString(R.string.object_bigger);
-        ret[3] = parent.getString(R.string.object_smaller);
-        ret[4] = parent.getString(R.string.object_share);
-        //ret[4] = parent.getString(R.string.object_bringtop);
-
-        return (ret);
-	}
-	
-	/**
-	 * 
-	 * 
-	 */
-    public String  getItem(int index)
-    {
-    	String message = "";
-    	switch (index)
-    	{
-            case OBJECTOPERATION_DELETE:
-                message = parent.getString(R.string.object_delete);
-                break;
-            case OBJECTOPERATION_DUPLICATE:
-                message = parent.getString(R.string.object_duplicate);
-                break;
-            case OBJECTOPERATION_SIZEBIGGER:
-                message = parent.getString(R.string.object_bigger);
-                break;
-            case OBJECTOPERATION_SIZESMALLER:
-                message = parent.getString(R.string.object_smaller);
-                break;
-            case OBJECTOPERATION_SHARE:
-                message = parent.getString(R.string.object_share);
-                break;
-/*
-          case OBJECTOPERATION_BRINGTOP:
-        	message = parent.getString(R.string.object_bringtop);
-         	break;
-*/
-            default:
-                break;
-    	}
-    	return (message);
+        return (false)
     }
 
-    /** 複数選択時に使用する **/
-    
-    /**
-     * 
-     */
-    public boolean[] getSelectionStatus()
+    override fun getItems(): Array<String?>
     {
-    	return (null);
+        val ret = arrayOfNulls<String>(5)
+        ret[0] = parent.getString(R.string.object_delete)
+        ret[1] = parent.getString(R.string.object_duplicate)
+        ret[2] = parent.getString(R.string.object_bigger)
+        ret[3] = parent.getString(R.string.object_smaller)
+        ret[4] = parent.getString(R.string.object_share)
+        return (ret)
     }
-    
-    /**
-     * 
-     */
-    public void setSelectionStatus(int index, boolean isSelected)
+
+    override fun getItem(index: Int): String
     {
-    	  // なにもしない
+        var message = ""
+        when (index) {
+            OBJECTOPERATION_DELETE -> message = parent.getString(R.string.object_delete)
+            OBJECTOPERATION_DUPLICATE -> message = parent.getString(R.string.object_duplicate)
+            OBJECTOPERATION_SIZEBIGGER -> message = parent.getString(R.string.object_bigger)
+            OBJECTOPERATION_SIZESMALLER -> message = parent.getString(R.string.object_smaller)
+            OBJECTOPERATION_SHARE -> message = parent.getString(R.string.object_share)
+            else -> {}
+        }
+        return (message)
+    }
+
+    override fun getSelectionStatus(): BooleanArray
+    {
+        return (booleanArrayOf())
+    }
+
+    override fun setSelectionStatus(index: Int, isSelected: Boolean)
+    {
+        // なにもしない
+    }
+
+    companion object
+    {
+        const val OBJECTOPERATION_DELETE: Int = 0
+        const val OBJECTOPERATION_DUPLICATE: Int = 1
+        const val OBJECTOPERATION_SIZEBIGGER: Int = 2
+        const val OBJECTOPERATION_SIZESMALLER: Int = 3
+        const val OBJECTOPERATION_SHARE: Int = 4
     }
 }

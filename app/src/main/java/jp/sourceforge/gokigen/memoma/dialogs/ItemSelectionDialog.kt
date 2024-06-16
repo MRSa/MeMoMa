@@ -1,116 +1,93 @@
-package jp.sourceforge.gokigen.memoma.dialogs;
+package jp.sourceforge.gokigen.memoma.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
+import android.content.Context
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import jp.sourceforge.gokigen.memoma.R
 
-import jp.sourceforge.gokigen.memoma.R;
-
-
-/**
- *   アイテムを選択するダイアログを準備する
- * 
- * @author MRSa
- *
- */
-public class ItemSelectionDialog
+class ItemSelectionDialog(private val parent: Context) : DialogFragment()
 {
-	private final Context context;
-	private ISelectionItemReceiver resultReceiver = null;
-	private ISelectionItemHolder dataHolder = null;
-	private String  title = "";
+    private lateinit var resultReceiver: ISelectionItemReceiver
+    private lateinit var dataHolder: ISelectionItemHolder
+    private lateinit var title : String
 
-	public ItemSelectionDialog(Context arg)
-	{
-		context = arg;
-	}
+    fun prepare(
+        receiver: ISelectionItemReceiver,
+        holder: ISelectionItemHolder,
+        titleMessage: String
+    ) {
+        title = titleMessage
+        resultReceiver = receiver
+        dataHolder = holder
+    }
 
-	/**
-	 *  クラスの準備
-     *
-	 */
-	public void prepare(ISelectionItemReceiver receiver, ISelectionItemHolder holder,  String titleMessage)
-	{
-		title = titleMessage;
-		resultReceiver = receiver;
-		dataHolder = holder;
-	}
-	
-	/**
-     *   確認ダイアログを応答する
-     */
-    public Dialog getDialog()
+    override fun getDialog(): AlertDialog
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        
+        val builder = AlertDialog.Builder(parent)
+
         // 表示するデータ（ダイアログタイトル、メッセージ）を準備する
-        if (title != null)
-        {
-            builder.setTitle(title);
-        }
-        builder.setCancelable(false);
-        if (dataHolder != null)
-        {
-        	if (!dataHolder.isMultipleSelection())
-        	{
-                builder.setItems(dataHolder.getItems(), (dialog, id) -> {
-                   if (resultReceiver != null)
-                   {
-                       resultReceiver.itemSelected(id, dataHolder.getItem(id));
-                   }
-                   dialog.cancel();
-                   System.gc();
-                });
-        	}
-            else
-            {
-            	//  複数選択の選択肢を準備する
-                builder.setMultiChoiceItems(dataHolder.getItems(), dataHolder.getSelectionStatus(), (dialog, which, isChecked) -> {
-                      if (resultReceiver != null)
-                    {
-                        resultReceiver.itemSelected(which, dataHolder.getItem(which));
-                    }
-                });
+        builder.setTitle(title)
+        builder.setCancelable(false)
+        if (!dataHolder.isMultipleSelection()) {
+            builder.setItems(dataHolder.getItems()) { dialog, id ->
+                resultReceiver.itemSelected(id, dataHolder.getItem(id))
+                dialog.cancel()
+                System.gc()
+            }
+        } else {
+            //  複数選択の選択肢を準備する
+            builder.setMultiChoiceItems(
+                dataHolder.getItems(), dataHolder.getSelectionStatus()
+            ) { _, which, _ ->
+                resultReceiver.itemSelected(which, dataHolder.getItem(which))
+            }
 
-                //  複数選択時には、OKボタンを押したときに選択を確定させる。
-                builder.setPositiveButton(context.getString(R.string.confirmYes), (dialog, id) -> {
-                    if (resultReceiver != null)
-                    {
-                        resultReceiver.itemSelectedMulti(dataHolder.getItems(), dataHolder.getSelectionStatus());
-                    }
-                    dialog.cancel();
-                    System.gc();
-                });
+            //  複数選択時には、OKボタンを押したときに選択を確定させる。  感謝
+            builder.setPositiveButton(
+                parent.getString(R.string.confirmYes)
+            ) { dialog, _ ->
+                resultReceiver.itemSelectedMulti(
+                    dataHolder.getItems(),
+                    dataHolder.getSelectionStatus()
+                )
+                dialog.cancel()
+                System.gc()
             }
         }
 
-        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
-            if (resultReceiver != null)
-            {
-                resultReceiver.canceledSelection();
-            }
-            dialog.cancel();
-            System.gc();
-        });
-        return (builder.create());    	
+        builder.setNegativeButton(parent.getString(R.string.confirmNo)) { dialog, _ ->
+            resultReceiver.canceledSelection()
+            dialog.cancel()
+            System.gc()
+        }
+        Log.v(TAG, "Create Multi-selection Dialog")
+        return (builder.create())
     }
 
-    public interface ISelectionItemHolder
+
+    interface ISelectionItemHolder
     {
-    	boolean isMultipleSelection();
-
-    	String[] getItems();
-        String  getItem(int index);
-
-        /** 複数選択時に使用する **/
-        boolean[] getSelectionStatus();
-        void setSelectionStatus(int index, boolean isSelected);
+        fun isMultipleSelection(): Boolean
+        fun getItems() : Array<String?>
+        fun getItem(index: Int): String
+        fun getSelectionStatus(): BooleanArray
+        fun setSelectionStatus(index: Int, isSelected: Boolean)
     }
-    
-    public interface ISelectionItemReceiver
+
+    interface ISelectionItemReceiver
     {
-        void itemSelected(int index, String itemValue);
-        void itemSelectedMulti(String[] items, boolean[] status);
-        void canceledSelection();
+        fun itemSelected(index: Int, itemValue: String)
+        fun itemSelectedMulti(items: Array<String?>, status: BooleanArray)
+        fun canceledSelection()
+    }
+
+    companion object
+    {
+        private val TAG = ItemSelectionDialog::class.java.simpleName
+        fun newInstance(context: Context): ItemSelectionDialog
+        {
+            return (ItemSelectionDialog(context))
+        }
     }
 }

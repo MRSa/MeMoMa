@@ -1,111 +1,88 @@
-package jp.sourceforge.gokigen.memoma.dialogs;
+package jp.sourceforge.gokigen.memoma.dialogs
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ListView;
-
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder;
-import jp.sourceforge.gokigen.memoma.R;
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemClickListener
+import android.widget.ListView
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import jp.sourceforge.gokigen.memoma.R
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaDataFileHolder
 
 /**
- *    ファイル選択ダイアログ
- * 
- * @author MRSa
- *
+ * ファイル選択ダイアログ
  */
-public class FileSelectionDialog
+class FileSelectionDialog(private val parent: Context, private val titleMessage: String, private val extension: String, private val receiver: IResultReceiver): DialogFragment()
 {
-	private final Context context;
-	private final IResultReceiver resultReceiver;
-    private final MeMoMaDataFileHolder dataFileHolder;
-    private final String title;
-    private final String fileExtension;
-    private Dialog dialogRef;
-    
-	/**
-	 *    コンストラクタ
-	 *
-	 */
-	public FileSelectionDialog(Context arg, String titleMessage, String extension, IResultReceiver receiver)
+    private val dataFileHolder = MeMoMaDataFileHolder(parent, android.R.layout.simple_list_item_1, extension)
+    private lateinit var dialogRef: AlertDialog
+
+    fun prepare()
     {
-        context = arg;
-        resultReceiver = receiver;
-        title = titleMessage;
-        fileExtension = extension;
-        dataFileHolder = new MeMoMaDataFileHolder(context, android.R.layout.simple_list_item_1, extension);
+        dataFileHolder.updateFileList("")
     }
 
-	/**
-	 *   ファイル一覧データをつくる！
-	 *
-	 */
-	public void prepare()
-	{
-		dataFileHolder.updateFileList("");
-	}
-
-    /**
-     *   ファイル選択ダイアログを応答する
-     *
-     */
-    public Dialog getDialog()
+    override fun getDialog(): AlertDialog?
     {
-    	LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View layout = inflater.inflate(R.layout.listdialog, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        
-        final ListView  listView = layout.findViewById(R.id.ListDataFileName);
-        listView.setAdapter(dataFileHolder);
-
-        // 表示するデータ（ダイアログタイトル）を準備する
-        if (title != null)
+        try
         {
-            builder.setTitle(title);
-        }
-        builder.setView(layout);
+            val inflater =
+                parent.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val layout: View = inflater.inflate(R.layout.listdialog, null)
+            val builder = AlertDialog.Builder(parent)
+            val listView = layout.findViewById<ListView>(R.id.ListDataFileName)
+            listView.adapter = dataFileHolder
 
-        // アイテムを選択したときの処理
-        listView.setOnItemClickListener((parentView, view, position, id) -> {
-            ListView listView1 = (ListView) parentView;
-            String fileName = (String) listView1.getItemAtPosition(position);
+            // 表示するデータ（ダイアログタイトル）を準備する
+            builder.setTitle(titleMessage)
+            builder.setView(layout)
 
-            /// リストが選択されたときの処理...データを開く
-            if (resultReceiver != null)
-           {
-               resultReceiver.selectedFileName(fileName + fileExtension);
-           }
-            if (dialogRef != null)
-            {
-                dialogRef.dismiss();
-               dialogRef = null;
+            // アイテムを選択したときの処理
+            listView.onItemClickListener =
+                OnItemClickListener { parentView: AdapterView<*>, _: View?, position: Int, _: Long ->
+                    val listView1 = parentView as ListView
+                    val fileName = listView1.getItemAtPosition(position) as String
+
+                    /// リストが選択されたときの処理...データを開く
+                    receiver.selectedFileName(fileName + extension)
+
+                    if (::dialogRef.isInitialized)
+                    {
+                        dialogRef.dismiss()
+                    }
+                    System.gc()
+                }
+            builder.setCancelable(true)
+            builder.setNegativeButton(
+                parent.getString(R.string.confirmNo)
+            ) { dialog, _ ->
+                dialog.cancel()
+                System.gc()
             }
-           System.gc();
-        });
-        builder.setCancelable(true);
-        builder.setNegativeButton(context.getString(R.string.confirmNo), (dialog, id) -> {
-            dialog.cancel();
-            System.gc();
-        });
-        dialogRef = builder.create();
-        return (dialogRef);    	
+            dialogRef = builder.create()
+            return (dialogRef)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return (null)
     }
 
     /**
-     *   ファイルダイアログのインタフェース
-     *   
-     * @author MRSa
-     *
+     * ファイルダイアログのインタフェース
      */
-    public interface IResultReceiver
+    interface IResultReceiver
     {
-    	/**
-    	 *    ファイルが選択された！
-    	 *    
-    	 */
-        void selectedFileName(String fileName);
-    }	
+        fun selectedFileName(fileName: String?)
+    }
+    companion object
+    {
+        fun newInstance(context: Context, titleMessage: String, extension: String, receiver: IResultReceiver): FileSelectionDialog
+        {
+            return (FileSelectionDialog(context, titleMessage, extension, receiver))
+        }
+    }
 }

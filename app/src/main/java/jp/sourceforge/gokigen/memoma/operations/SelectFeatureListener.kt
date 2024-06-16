@@ -1,34 +1,12 @@
-package jp.sourceforge.gokigen.memoma.operations;
+package jp.sourceforge.gokigen.memoma.operations
 
-import android.app.Activity;
-import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 
-/**
- *   「フィーチャ選択ボタン」を押されたときの処理
- *
- * @author MRSa
- *
- */
-public class SelectFeatureListener implements OnClickListener
+class SelectFeatureListener(argument: AppCompatActivity) : View.OnClickListener
 {
-    //private Activity parent = null;  // 親分
-
-    /**
-     *  コンストラクタ
-     * @param argument
-     */
-    public SelectFeatureListener(Activity argument)
-    {
-        //parent = argument;
-    }
-
-    /**
-     *   クリックされたときの処理
-     */
-    public void onClick(View v)
+    override fun onClick(v: View)
     {
         // int id = v.getId();
-
     }
 }

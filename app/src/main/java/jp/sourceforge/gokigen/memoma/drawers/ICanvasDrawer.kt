@@ -1,12 +1,12 @@
-package jp.sourceforge.gokigen.memoma.drawers;
+package jp.sourceforge.gokigen.memoma.drawers
 
-import android.graphics.Canvas;
-import android.view.MotionEvent;
+import android.graphics.Canvas
+import android.view.MotionEvent
 
-public interface ICanvasDrawer
-{	
-    void prepareToStart(int width, int height);
-    void changedScreenProperty(int format, int width, int height);
-    void drawOnCanvas(Canvas canvas);
-    boolean onTouchEvent(MotionEvent event);
+interface ICanvasDrawer
+{
+    fun prepareToStart(width: Int, height: Int)
+    fun changedScreenProperty(format: Int, width: Int, height: Int)
+    fun drawOnCanvas(canvas: Canvas)
+    fun onTouchEvent(event: MotionEvent): Boolean
 }

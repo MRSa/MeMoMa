@@ -1,366 +1,419 @@
-package jp.sourceforge.gokigen.memoma.drawers;
+package jp.sourceforge.gokigen.memoma.drawers
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
-import jp.sourceforge.gokigen.memoma.holders.PositionObject;
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RectF
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
+import jp.sourceforge.gokigen.memoma.holders.PositionObject
+import kotlin.math.atan2
 
 /**
- *   めもまのオブジェクト・ライン・ラベルを描画するメソッド群
- *   (現在のところ、MeMoMaCanvasDrawerクラスから追い出してきただけ...)
- * 
- * @author MRSa
+ * めもまのオブジェクト・ライン・ラベルを描画するメソッド群
+ * (現在のところ、MeMoMaCanvasDrawerクラスから追い出してきただけ...)
  *
+ * @author MRSa
  */
-public class ObjectShapeDrawer
-{
-
-    static public float drawObjectOval(Canvas canvas, RectF objectShape, Paint paint)
-    {
+object ObjectShapeDrawer {
+    fun drawObjectOval(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
         // 楕円形の描画
-        canvas.drawOval(objectShape, paint);
-
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2);
+        canvas.drawOval(objectShape, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2)
     }
 
-    static public float drawObjectRect(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 四角形を描画する
-        canvas.drawRect(objectShape, paint);
-        return (0.0f);
+    fun drawObjectRect(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 四角形を描画する
+        canvas.drawRect(objectShape, paint)
+        return (0.0f)
     }
 
-    static public float drawObjectRoundRect(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 丸角四角形の描画
-        canvas.drawRoundRect(objectShape, MeMoMaObjectHolder.ROUNDRECT_CORNER_RX, MeMoMaObjectHolder.ROUNDRECT_CORNER_RY, paint);
-
-        return (0.0f);
+    fun drawObjectRoundRect(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 丸角四角形の描画
+        canvas.drawRoundRect(
+            objectShape,
+            MeMoMaObjectHolder.ROUNDRECT_CORNER_RX,
+            MeMoMaObjectHolder.ROUNDRECT_CORNER_RY,
+            paint
+        )
+        return (0.0f)
     }
 
-    static public float drawObjectDiamond(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 菱形の描画
-        Path path = new Path();
-        path.moveTo(objectShape.centerX(), objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY());
-        path.lineTo(objectShape.centerX(), objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY());
-        path.lineTo(objectShape.centerX(), objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2);
+    fun drawObjectDiamond(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 菱形の描画
+        val path = Path()
+        path.moveTo(objectShape.centerX(), objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY())
+        path.lineTo(objectShape.centerX(), objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY())
+        path.lineTo(objectShape.centerX(), objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2)
     }
 
-    static public float drawObjectKeyboard(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 台形(キーボード型)の描画
-        Path path = new Path();
-        path.moveTo(objectShape.left, objectShape.centerY() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN);
-        path.lineTo(objectShape.left, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN);
+    fun drawObjectKeyboard(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 台形(キーボード型)の描画
+        val path = Path()
+        path.moveTo(objectShape.left, objectShape.centerY() - MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN)
+        path.lineTo(objectShape.left, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY() - MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN)
     }
 
-    static public float drawObjectParallelogram(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 平行四辺形の描画
-        Path path = new Path();
-        path.moveTo(objectShape.left + MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.bottom);
-        path.lineTo(objectShape.right - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left + MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectParallelogram(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 平行四辺形の描画
+        val path = Path()
+        path.moveTo(objectShape.left + MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.bottom)
+        path.lineTo(objectShape.right - MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left + MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectHexagonal(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 六角形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2;
-        path.moveTo(objectShape.left + margin, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY());
-        path.lineTo(objectShape.left + margin, objectShape.bottom);
-        path.lineTo(objectShape.right - margin, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY());
-        path.lineTo(objectShape.right - margin, objectShape.top);
-        path.lineTo(objectShape.left + margin, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectHexagonal(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 六角形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2
+        path.moveTo(objectShape.left + margin, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY())
+        path.lineTo(objectShape.left + margin, objectShape.bottom)
+        path.lineTo(objectShape.right - margin, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY())
+        path.lineTo(objectShape.right - margin, objectShape.top)
+        path.lineTo(objectShape.left + margin, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectPaper(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 書類の形の描画
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 3.0f;
-        Path path = new Path();
-        path.moveTo(objectShape.left, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.bottom - margin);
-        path.cubicTo((objectShape.left + objectShape.centerX()) / 2.0f , objectShape.bottom, (objectShape.right + objectShape.centerX()) / 2.0f, objectShape.bottom - margin, objectShape.right, objectShape.bottom - margin);
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.top);
-        canvas.drawPath(path, paint);
-        return ( - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN);
+    fun drawObjectPaper(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 書類の形の描画
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 3.0f
+        val path = Path()
+        path.moveTo(objectShape.left, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.bottom - margin)
+        path.cubicTo(
+            (objectShape.left + objectShape.centerX()) / 2.0f,
+            objectShape.bottom,
+            (objectShape.right + objectShape.centerX()) / 2.0f,
+            objectShape.bottom - margin,
+            objectShape.right,
+            objectShape.bottom - margin
+        )
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (-MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN)
     }
 
-    static public float drawObjectDrum(Canvas canvas, RectF objectShape, Paint paint, Paint.Style paintStyle)
-    {
-		float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN;
-		// 円柱の描画
-        Path path = new Path();
-        path.moveTo(objectShape.left, objectShape.top);
-        path.arcTo(new RectF(objectShape.left, objectShape.top,objectShape.right, objectShape.top + margin), 180.0f, 359.999f, true);
-        path.lineTo(objectShape.left, objectShape.bottom - (margin / 2.0f));
-        path.arcTo(new RectF(objectShape.left, objectShape.bottom - margin, objectShape.right, objectShape.bottom), 180.0f, -180.0f, true);
-        path.lineTo(objectShape.right, objectShape.top + (margin / 2.0f));
-        if (paintStyle != Paint.Style.STROKE)
-        {
-        	// 塗りつぶし用に線の領域を追加する
-            path.arcTo(new RectF(objectShape.left, objectShape.top, objectShape.right, objectShape.top + margin), 180.0f, 180.0f, true);
-            path.lineTo(objectShape.left, objectShape.bottom - (margin / 2.0f));
-            path.arcTo(new RectF(objectShape.left, objectShape.bottom - margin, objectShape.right, objectShape.bottom), 180.0f, -180.0f, true);
+    fun drawObjectDrum(
+        canvas: Canvas,
+        objectShape: RectF,
+        paint: Paint,
+        paintStyle: Paint.Style
+    ): Float {
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN
+        // 円柱の描画
+        val path = Path()
+        path.moveTo(objectShape.left, objectShape.top)
+        path.arcTo(
+            RectF(
+                objectShape.left,
+                objectShape.top,
+                objectShape.right,
+                objectShape.top + margin
+            ), 180.0f, 359.999f, true
+        )
+        path.lineTo(objectShape.left, objectShape.bottom - (margin / 2.0f))
+        path.arcTo(
+            RectF(
+                objectShape.left,
+                objectShape.bottom - margin,
+                objectShape.right,
+                objectShape.bottom
+            ), 180.0f, -180.0f, true
+        )
+        path.lineTo(objectShape.right, objectShape.top + (margin / 2.0f))
+        if (paintStyle != Paint.Style.STROKE) {
+            // 塗りつぶし用に線の領域を追加する
+            path.arcTo(
+                RectF(
+                    objectShape.left,
+                    objectShape.top,
+                    objectShape.right,
+                    objectShape.top + margin
+                ), 180.0f, 180.0f, true
+            )
+            path.lineTo(objectShape.left, objectShape.bottom - (margin / 2.0f))
+            path.arcTo(
+                RectF(
+                    objectShape.left,
+                    objectShape.bottom - margin,
+                    objectShape.right,
+                    objectShape.bottom
+                ), 180.0f, -180.0f, true
+            )
         }
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectCircle(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 円を描画する
-        canvas.drawCircle(objectShape.centerX(), objectShape.centerY(), ((objectShape.right - objectShape.left)/ 2.0f), paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectCircle(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 円を描画する
+        canvas.drawCircle(
+            objectShape.centerX(),
+            objectShape.centerY(),
+            ((objectShape.right - objectShape.left) / 2.0f),
+            paint
+        )
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public void drawObjectNoRegion(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 何も表示しないとわからないので、ラベルが無いときには枠を表示する
-        paint.setColor(Color.DKGRAY);
-        canvas.drawRect(objectShape, paint);
-        paint.setColor(Color.WHITE);
+    fun drawObjectNoRegion(canvas: Canvas, objectShape: RectF, paint: Paint) {
+        // 何も表示しないとわからないので、ラベルが無いときには枠を表示する
+        paint.color = Color.DKGRAY
+        canvas.drawRect(objectShape, paint)
+        paint.color = Color.WHITE
     }
 
-    static public float drawObjectLoopStart(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// ループ開始図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2;
-        path.moveTo(objectShape.left + margin, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY());
-        path.lineTo(objectShape.left, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY());
-        path.lineTo(objectShape.right - margin, objectShape.top);
-        path.lineTo(objectShape.left + margin, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectLoopStart(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // ループ開始図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2
+        path.moveTo(objectShape.left + margin, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY())
+        path.lineTo(objectShape.left, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY())
+        path.lineTo(objectShape.right - margin, objectShape.top)
+        path.lineTo(objectShape.left + margin, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectLoopEnd(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// ループ終了図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2;
-        path.moveTo(objectShape.left, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY());
-        path.lineTo(objectShape.left + margin, objectShape.bottom);
-        path.lineTo(objectShape.right - margin, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY());
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectLoopEnd(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // ループ終了図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2
+        path.moveTo(objectShape.left, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY())
+        path.lineTo(objectShape.left + margin, objectShape.bottom)
+        path.lineTo(objectShape.right - margin, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY())
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectLeftArrow(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 左側矢印図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 4.0f;
-        path.moveTo(objectShape.left + margin, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY());
-        path.lineTo(objectShape.left + margin, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left + margin, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectLeftArrow(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 左側矢印図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 4.0f
+        path.moveTo(objectShape.left + margin, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY())
+        path.lineTo(objectShape.left + margin, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left + margin, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectDownArrow(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 下側矢印図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2;
-        path.moveTo(objectShape.left, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY() + margin);
-        path.lineTo(objectShape.centerX(), objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY() + margin);
-        path.lineTo(objectShape.right, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (- MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN);
+    fun drawObjectDownArrow(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 下側矢印図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2
+        path.moveTo(objectShape.left, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY() + margin)
+        path.lineTo(objectShape.centerX(), objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY() + margin)
+        path.lineTo(objectShape.right, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (-MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN)
     }
 
-    static public float drawObjectUpArrow(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 上側矢印図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2.0f;
-        path.moveTo(objectShape.centerX(), objectShape.top);
-        path.lineTo(objectShape.left, objectShape.centerY() - margin);
-        path.lineTo(objectShape.left, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY() - margin);
-        path.lineTo(objectShape.centerX(), objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectUpArrow(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 上側矢印図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2.0f
+        path.moveTo(objectShape.centerX(), objectShape.top)
+        path.lineTo(objectShape.left, objectShape.centerY() - margin)
+        path.lineTo(objectShape.left, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY() - margin)
+        path.lineTo(objectShape.centerX(), objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-    static public float drawObjectRightArrow(Canvas canvas, RectF objectShape, Paint paint)
-    {
-		// 右側矢印図形の描画
-        Path path = new Path();
-        float margin = MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 4.0f;
-        path.moveTo(objectShape.left, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.bottom);
-        path.lineTo(objectShape.right - margin, objectShape.bottom);
-        path.lineTo(objectShape.right, objectShape.centerY());
-        path.lineTo(objectShape.right - margin, objectShape.top);
-        path.lineTo(objectShape.left, objectShape.top);
-        canvas.drawPath(path, paint);
-        return (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN / 2.0f);
+    fun drawObjectRightArrow(canvas: Canvas, objectShape: RectF, paint: Paint): Float {
+        // 右側矢印図形の描画
+        val path = Path()
+        val margin = MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 4.0f
+        path.moveTo(objectShape.left, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.bottom)
+        path.lineTo(objectShape.right - margin, objectShape.bottom)
+        path.lineTo(objectShape.right, objectShape.centerY())
+        path.lineTo(objectShape.right - margin, objectShape.top)
+        path.lineTo(objectShape.left, objectShape.top)
+        canvas.drawPath(path, paint)
+        return (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN / 2.0f)
     }
 
-	  /**
-	   *    矢印を描画する処理 (ツリー表示時)
-	   *
-	   */
-	static public void drawArrowTree(Canvas canvas, Paint paint, float x1, float y1, float checkValue, boolean isXaxis)
-    {
-		float margin = 8.0f;
-	  	float direction;
-	  	if (isXaxis)
-        {
-	  	    direction = (checkValue < x1) ? -1.0f : 1.0f;
-            canvas.drawLine(x1, y1, (x1 + direction * margin), (y1 - margin), paint);
-	        canvas.drawLine(x1, y1, (x1 + direction * margin), (y1 + margin), paint);
-	  	}
-	  	else
-	  	{
-	  	    direction = (checkValue < y1) ? -1.0f : 1.0f;
-	        canvas.drawLine(x1, y1, (x1 - margin), (y1 + direction * margin), paint);
-	        canvas.drawLine(x1, y1, (x1 + margin), (y1 + direction * margin), paint);    		  
-	  	}
-    }
-	  /**
-	   *    矢印を描画する処理
-	   *
-	   */
-	  static public void drawArrow(Canvas canvas, Paint paint, float x1, float y1, float x2, float y2)
-	  {
-          // 矢印線の長さ
-		  float moveX = 14.0f;
-		  
-		  // 接続線の傾きが、どれくらいの角度で入っているか？
-		  float centerDegree = (float) (Math.atan2((y2 - y1) , (x2 - x1))  * 180.0d / Math.PI);
-
-		  // x1, y1 に x2, y2 方向から来た線に合わせた矢印を描画する
-		  // (2本、１本づつ引いて、それを回転行列で回転させている)
-
-		  // 回転行列の準備
-		  Matrix matrix1 = new Matrix();
-		  matrix1.setRotate((centerDegree + 30), x1, y1);
-	      Matrix matrix2 = new Matrix();
-		  matrix2.setRotate((centerDegree - 30), x1, y1);
-
-		  // 線分を引いた後、回転行列で回転させる
-		  Path pathLine1 = new Path();
-	      pathLine1.moveTo(x1, y1);
-	      pathLine1.lineTo(x1 + moveX, y1);
-	      pathLine1.transform(matrix1);
-	      canvas.drawPath(pathLine1, paint);
-
-		  Path pathLine2 = new Path();
-	      pathLine2.moveTo(x1, y1);
-	      pathLine2.lineTo(x1 + moveX, y1);
-	      pathLine2.transform(matrix2);
-	      canvas.drawPath(pathLine2, paint);
+    /**
+     * 矢印を描画する処理 (ツリー表示時)
+     *
+     */
+    fun drawArrowTree(
+        canvas: Canvas,
+        paint: Paint,
+        x1: Float,
+        y1: Float,
+        checkValue: Float,
+        isXaxis: Boolean
+    ) {
+        val margin = 8.0f
+        val direction: Float
+        if (isXaxis) {
+            direction = if ((checkValue < x1)) -1.0f else 1.0f
+            canvas.drawLine(
+                x1, y1, (x1 + direction * margin), (y1 - margin),
+                paint
+            )
+            canvas.drawLine(
+                x1, y1, (x1 + direction * margin), (y1 + margin),
+                paint
+            )
+        } else {
+            direction = if ((checkValue < y1)) -1.0f else 1.0f
+            canvas.drawLine(
+                x1, y1, (x1 - margin), (y1 + direction * margin),
+                paint
+            )
+            canvas.drawLine(
+                x1, y1, (x1 + margin), (y1 + direction * margin),
+                paint
+            )
+        }
     }
 
-	  /**
-	     *    オブジェクトのラベルを表示する
-	     *
-	     */
-      public static void drawTextLabel(Canvas canvas, Paint paint, PositionObject pos, RectF region, int displayObjectInformation, float offsetX, float offsetY)
-      {
-          // タイトルの先頭部分を表示する場合...
-          String labelToShow = pos.getLabel();
-          if (displayObjectInformation == 0)
-          {
-              float width = region.width() - MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN_WIDTH;
-              int textLen = paint.breakText(pos.getLabel(), true, width, null);  // 省略文字を追加するから、そのぶん減らす
-              labelToShow = labelToShow.substring(0, textLen);
-              if (!labelToShow.equals(pos.getLabel()))
-              {
-                  // truncate した場合には、省略文字を出す。
-                  labelToShow = labelToShow + "...";
-              }
-          }
+    /**
+     * 矢印を描画する処理
+     *
+     */
+    fun drawArrow(canvas: Canvas, paint: Paint, x1: Float, y1: Float, x2: Float, y2: Float) {
+        // 矢印線の長さ
+        val moveX = 14.0f
 
-          if (Paint.Style.valueOf(pos.getPaintStyle()) != Paint.Style.STROKE)
-          {
-              // オブジェクトを塗りつぶすのときは、文字の色を設定する
-              paint.setColor(pos.getLabelColor());
-          }
+        // 接続線の傾きが、どれくらいの角度で入っているか？
+        val centerDegree =
+            (atan2((y2 - y1).toDouble(), (x2 - x1).toDouble()) * 180.0 / Math.PI).toFloat()
 
-          // 文字をちょっと影付きにする
-          paint.setStyle(Paint.Style.FILL_AND_STROKE);
-          paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY);
+        // x1, y1 に x2, y2 方向から来た線に合わせた矢印を描画する
+        // (2本、１本づつ引いて、それを回転行列で回転させている)
 
-          // ユーザチェックの描画
-          if (pos.getUserChecked())
-          {
-              canvas.drawText("*", region.centerX(), region.top + (MeMoMaCanvasDrawer.OBJECTLABEL_MARGIN * 2.0f), paint);
-          }
+        // 回転行列の準備
+        val matrix1 = Matrix()
+        matrix1.setRotate((centerDegree + 30), x1, y1)
+        val matrix2 = Matrix()
+        matrix2.setRotate((centerDegree - 30), x1, y1)
 
-          // 強調表示
-          if (pos.getstrokeWidth() != 0.0f)
-          {
-              // そのまま表示すると、読めないので、太さを調整し、アンダーラインを引くことにする
-              paint.setStrokeWidth(0.0f);
-              paint.setSubpixelText(true);
-              paint.setUnderlineText (true);
-          }
+        // 線分を引いた後、回転行列で回転させる
+        val pathLine1 = Path()
+        pathLine1.moveTo(x1, y1)
+        pathLine1.lineTo(x1 + moveX, y1)
+        pathLine1.transform(matrix1)
+        canvas.drawPath(pathLine1, paint)
 
-          if (displayObjectInformation == 0)
-          {
-              // １行分しか表示しない場合...そのまま表示して終了する
-              canvas.drawText(labelToShow, (region.left + offsetX),   (region.centerY() + offsetY), paint);
-              return;
-          }
+        val pathLine2 = Path()
+        pathLine2.moveTo(x1, y1)
+        pathLine2.lineTo(x1 + moveX, y1)
+        pathLine2.transform(matrix2)
+        canvas.drawPath(pathLine2, paint)
+    }
 
-          float tall = paint.getFontMetrics().top + 1.0f;
-          float posX = (region.left + offsetX);
-          float posY =  (region.centerY() + offsetY);
-          float width = region.right - region.left - 12.0f;  // 幅
+    /**
+     * オブジェクトのラベルを表示する
+     *
+     */
+    fun drawTextLabel(
+        canvas: Canvas,
+        paint: Paint,
+        pos: PositionObject,
+        region: RectF,
+        displayObjectInformation: Int,
+        offsetX: Float,
+        offsetY: Float
+    ) {
+        // タイトルの先頭部分を表示する場合...
+        var labelToShow = pos.label
+        if (displayObjectInformation == 0) {
+            val width = region.width() - MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN_WIDTH
+            val textLen = paint.breakText(pos.label, true, width, null) // 省略文字を追加するから、そのぶん減らす
+            labelToShow = labelToShow.substring(0, textLen)
+            if (labelToShow != pos.label) {
+                // truncate した場合には、省略文字を出す。
+                labelToShow = "$labelToShow..."
+            }
+        }
 
-          int startChar  = 0;
-          int endChar = pos.getLabel().length();
-          do
-          {
-              int textLen = paint.breakText(pos.getLabel(), startChar, endChar, true, width, null);
-              canvas.drawText(labelToShow, startChar, (startChar +textLen), posX, posY, paint);
+        if (Paint.Style.valueOf(pos.paintStyle) != Paint.Style.STROKE) {
+            // オブジェクトを塗りつぶすのときは、文字の色を設定する
+            paint.color = pos.labelColor
+        }
 
-              posY = posY - tall;
-              startChar = startChar + textLen;
-          } while (startChar < endChar);
-      }
+        // 文字をちょっと影付きにする
+        paint.style = Paint.Style.FILL_AND_STROKE
+        paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY)
+
+        // ユーザチェックの描画
+        if (pos.userChecked) {
+            canvas.drawText(
+                "*",
+                region.centerX(),
+                region.top + (MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN * 2.0f),
+                paint
+            )
+        }
+
+        // 強調表示
+        if (pos.getstrokeWidth() != 0.0f) {
+            // そのまま表示すると、読めないので、太さを調整し、アンダーラインを引くことにする
+            paint.strokeWidth = 0.0f
+            paint.isSubpixelText = true
+            paint.isUnderlineText = true
+        }
+
+        if (displayObjectInformation == 0) {
+            // １行分しか表示しない場合...そのまま表示して終了する
+            canvas.drawText(
+                labelToShow,
+                (region.left + offsetX),
+                (region.centerY() + offsetY), paint
+            )
+            return
+        }
+
+        val tall = paint.fontMetrics.top + 1.0f
+        val posX = (region.left + offsetX)
+        var posY: Float = (region.centerY() + offsetY)
+        val width = region.right - region.left - 12.0f // 幅
+
+        var startChar = 0
+        val endChar = pos.label.length
+        do {
+            val textLen = paint.breakText(pos.label, startChar, endChar, true, width, null)
+            canvas.drawText(labelToShow, startChar, (startChar + textLen), posX, posY, paint)
+
+            posY -= tall
+            startChar += textLen
+        } while (startChar < endChar)
+    }
 }

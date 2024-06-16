@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto" >
+
+    <!-- 新規作成 -->
+    <item
+        android:id="@+id/action_add"
+        compat:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="@string/createnew"
+        android:visible="true" />
+
+    <!-- 画像の共有 -->
+    <item
+        android:id="@+id/action_share"
+        compat:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/shareContent"
+        android:visible="true" />
+
+    <!-- 画像のキャプチャ -->
+    <item
+        android:id="@+id/action_capture"
+        compat:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_crop"
+        android:title="@string/capture_data"
+        android:visible="true" />
+
+    <!-- 処理のUNDO -->
+    <item
+        android:id="@+id/action_undo"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_revert"
+        android:title="@string/undo_operation"
+        android:visible="true" />
+
+    <!-- オブジェクトの整列 -->
+    <item
+        android:id="@+id/action_align"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="@string/align_data"
+        android:visible="true" />
+
+    <!-- タイトルの変更 -->
+    <item
+        android:id="@+id/action_rename"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:title="@string/rename_title"
+        android:visible="true" />
+
+    <!-- 壁紙の選択 -->
+    <item
+        android:id="@+id/action_select_wallpaper"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="@string/background_data"
+        android:visible="true" />
+
+    <!-- 拡張メニュー -->
+    <item
+        android:id="@+id/action_extension"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_more"
+        android:title="@string/extend_menu"
+        android:visible="true" />
+
+    <!-- 設定 -->
+    <item
+        android:id="@+id/action_preference"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/preference_name"
+        android:visible="true" />
+
+    <!-- クレジット情報の表示 -->
+    <item
+        android:id="@+id/action_about_gokigen"
+        compat:showAsAction="never|withText"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@string/about_gokigen"
+        android:visible="true" />
+</menu>

@@ -1,79 +1,50 @@
-package jp.sourceforge.gokigen.memoma.listitem;
+package jp.sourceforge.gokigen.memoma.listitem
 
-import java.util.List;
+import android.content.Context
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import android.widget.TextView
 
-import android.content.Context;
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-public class SymbolListArrayAdapter extends ArrayAdapter<SymbolListArrayItem>
+class SymbolListArrayAdapter(
+    context: Context,
+    private val textViewResourceId: Int,
+    private val listItems: List<SymbolListArrayItem>
+) : ArrayAdapter<SymbolListArrayItem?>(context, textViewResourceId, listItems)
 {
-    private final LayoutInflater inflater;
-    private final int textViewResourceId;
-    private final List<SymbolListArrayItem> listItems;
-    
-    /**
-     * コンストラクタ
-     */
-    public SymbolListArrayAdapter(Context context, int textId, List<SymbolListArrayItem> items)
+    private val inflater =
+        context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View
     {
-        super(context, textId, items);
-
-        // リソースIDと表示アイテム
-        textViewResourceId = textId;
-        listItems = items;
-
-        // ContextからLayoutInflaterを取得
-        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public @NonNull View getView(int position, View convertView, @NonNull ViewGroup parent)
-    {
-        View view;
-        if(convertView != null)
+        val view = convertView ?: inflater.inflate(textViewResourceId, null)
+        try
         {
-            view = convertView;
+            val item = listItems[position]
+            val imageView = view.findViewWithTag<ImageView>("icon")
+            imageView.setImageResource(item.getIconResource())
+            val subIcon = item.getSubIconResource()
+            run {
+                val subImage =
+                    view.findViewWithTag<ImageView>("subIcon")
+                subImage.setImageResource(subIcon)
+            }
+
+            val titleView = view.findViewWithTag<TextView>("title")
+            titleView.setTextColor(Color.LTGRAY)
+            titleView.text = item.getTextResource1st()
+
+            val detailView = view.findViewWithTag<TextView>("detail")
+            detailView.setTextColor(Color.LTGRAY)
+            detailView.text = item.getTextResource2nd()
         }
-        else
+        catch (e: Exception)
         {
-            view = inflater.inflate(textViewResourceId, null);
+            e.printStackTrace()
         }
-
-        SymbolListArrayItem item = listItems.get(position);
-        
-        ImageView imageView = view.findViewWithTag("icon");
-        imageView.setImageResource(item.getIconResource());
-
-        int subIcon = item.getSubIconResource();
-        //if (subIcon != 0)
-        {
-            ImageView subImage = view.findViewWithTag("subIcon");
-            subImage.setImageResource(subIcon);
-        }            
-
-        TextView titleView = view.findViewWithTag("title");
-        titleView.setTextColor(Color.LTGRAY);
-        titleView.setText(item.getTextResource1st());
-
-        TextView detailView = view.findViewWithTag("detail");
-        detailView.setTextColor(Color.LTGRAY);
-        detailView.setText(item.getTextResource2nd());
-
-        /*
-        TextView optionView = view.findViewWithTag("option");
-        optionView.setText(item.getTextResource3rd());
-        */
-        return (view);
+        return (view)
     }
 }

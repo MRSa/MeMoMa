@@ -1,58 +1,32 @@
-package jp.sourceforge.gokigen.memoma.dialogs;
+package jp.sourceforge.gokigen.memoma.dialogs
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
+import android.content.Context
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import jp.sourceforge.gokigen.memoma.R
 
-import jp.sourceforge.gokigen.memoma.R;
-
-/**
- *  クレジットを表示する
- * 
- * @author MRSa
- *
- */
-public class CreditDialog
+class CreditDialog(private val myContext: Context) : DialogFragment()
 {
-	private final Activity context;
-
-	/**
-	 *   コンストラクタ
-	 *
-	 */
-	public CreditDialog(Activity arg)
-	{
-		context = arg;
-	}
-
-    /**
-     *   ダイアログを応答する
-     *
-     */
-    public Dialog getDialog()
+    fun show()
     {
-    	LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    	if (inflater == null)
-		{
-			return (null);
-		}
-    	View layout = inflater.inflate(R.layout.creditdialog, null);  //  ?? http://www.mail-archive.com/android-developers@googlegroups.com/msg162003.html より
-    	//View layout = inflater.inflate(R.layout.creditdialog,  context.findViewById(R.id.layout_root));
+        val alertDialog = AlertDialog.Builder(myContext)
+        alertDialog.setIcon(R.drawable.icon)
+        alertDialog.setTitle(myContext.getString(R.string.app_name))
+        alertDialog.setMessage(myContext.getString(R.string.app_credit))
+        alertDialog.setCancelable(true)
+        val alert = alertDialog.create()
+        alert.show()
+        (alert.findViewById<TextView>(android.R.id.message))?.movementMethod =
+            LinkMovementMethod.getInstance()
+    }
 
-    	TextView text = layout.findViewById(R.id.creditmessage);
-    	text.setText(context.getString(R.string.app_credit));
- //   	ImageView image = (ImageView) layout.findViewById(R.id.crediticon);
- //   	image.setImageResource(R.drawable.icon);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getString(R.string.app_name));
-        builder.setIcon(R.drawable.icon);
-        builder.setView(layout);
-        builder.setCancelable(true);
-        return (builder.create());
+    companion object
+    {
+        fun newInstance(context: Context): CreditDialog
+        {
+            return (CreditDialog(context))
+        }
     }
 }

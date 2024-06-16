@@ -8,7 +8,7 @@
     android:background="#000040"
     android:orientation="vertical">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:id="@+id/gokigenMeMoMaView"
         android:layout_width="fill_parent"
         android:layout_height="0dip"
@@ -50,7 +50,7 @@
             android:contentDescription="@string/blank"
             android:text="@string/blank"
             android:textSize="9pt"
-            android:visibility="visible"></ImageButton>
+            android:visibility="visible" />
         <!--
 <ImageView
     android:id="@+id/spacerMain1"
@@ -68,9 +68,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/HomeButton"
+            android:layout_toEndOf="@id/HomeButton"
             android:layout_toRightOf="@id/HomeButton"
             android:background="@drawable/btn_create"
-            android:visibility="visible"></ImageButton>
+            android:contentDescription="@string/create_object"
+            android:visibility="visible" />
         <!--
 <ImageView
     android:id="@+id/spacerMain2"
@@ -88,9 +90,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/HomeButton"
+            android:layout_toEndOf="@id/CreateObjectButton"
             android:layout_toRightOf="@id/CreateObjectButton"
             android:background="@drawable/btn_delete"
-            android:visibility="visible"></ImageButton>
+            android:contentDescription="@string/delete_object"
+            android:visibility="visible" />
         <!--
 <Button
     android:id="@+id/ModeButton"
@@ -133,29 +137,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/HomeButton"
+            android:layout_toEndOf="@id/DeleteObjectButton"
             android:layout_toRightOf="@id/DeleteObjectButton"
             android:background="@drawable/btn_straight"
-            android:visibility="visible"></ImageButton>
+            android:contentDescription="@string/set_line_style"
+            android:visibility="visible" />
 
         <ImageButton
             android:id="@+id/ExpandButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/HomeButton"
+            android:layout_toEndOf="@id/LineStyleButton"
             android:layout_toRightOf="@id/LineStyleButton"
             android:background="@drawable/btn_sheet"
-            android:visibility="visible"></ImageButton>
+            android:contentDescription="@string/show_another_view"
+            android:visibility="visible" />
 
         <ImageButton
             android:id="@+id/SaveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:background="@xml/savebuttonstyle"
+            android:contentDescription="@string/save"
             android:text="@string/blank"
             android:textSize="9pt"
-            android:visibility="visible"></ImageButton>
+            android:visibility="visible" />
 
         <TextView
             android:id="@+id/ZoomRate"
@@ -163,6 +173,7 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/SaveButton"
             android:layout_toLeftOf="@id/SaveButton"
+            android:layout_toStartOf="@id/SaveButton"
             android:text="@string/defaultZoom"
             android:textSize="9pt"
             android:visibility="visible" />

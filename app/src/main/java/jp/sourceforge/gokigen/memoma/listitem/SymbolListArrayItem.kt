@@ -1,73 +1,50 @@
-package jp.sourceforge.gokigen.memoma.listitem;
+package jp.sourceforge.gokigen.memoma.listitem
 
-public class SymbolListArrayItem
+class SymbolListArrayItem(
+    private var iconResource: Int,
+    private var textResource1st: String,
+    private var textResource2nd: String,
+    private var textResource3rd: String,
+    private var subIconResource: Int
+)
 {
-    private int iconResource;
-    private int subIconResource;
-    private String textResource1st;
-    private String textResource2nd;
-    private String textResource3rd;
-
-    /**
-     *  コンストラクタ
-     *
-     */
-    public SymbolListArrayItem(int iconId1, String textData1, String textData2, String textData3, int iconId2)
-    {
-        iconResource = iconId1;
-        textResource1st = textData1;
-        textResource2nd = textData2;
-        textResource3rd = textData3;
-        subIconResource = iconId2;
-    }
-    
-    public int getIconResource()
-    {
-        return (iconResource);
+    fun getIconResource(): Int {
+        return (iconResource)
     }
 
-    public void setIconResource(int iconId)
-    {
-        iconResource = iconId;
+    fun setIconResource(iconId: Int) {
+        iconResource = iconId
     }
 
-    public String getTextResource1st()
-    {
-        return (textResource1st);
+    fun getTextResource1st(): String {
+        return (textResource1st)
     }
 
-    public void setTextResource1st(String textData)
-    {
-        textResource1st = textData;
-    }    
-
-    public String getTextResource2nd()
-    {
-        return (textResource2nd);
+    fun setTextResource1st(textData: String) {
+        textResource1st = textData
     }
 
-    public void setTextResource2nd(String textData)
-    {
-        textResource2nd = textData;
+    fun getTextResource2nd(): String {
+        return (textResource2nd)
     }
-    
-    public String getTextResource3rd()
-    {
-        return (textResource3rd);
+
+    fun setTextResource2nd(textData: String) {
+        textResource2nd = textData
     }
-    
-    public void setTextResource3rd(String textData)
-    {
-        textResource3rd = textData;
+
+    fun getTextResource3rd(): String {
+        return (textResource3rd)
     }
-    
-    public int getSubIconResource()
-    {
-        return (subIconResource);
+
+    fun setTextResource3rd(textData: String) {
+        textResource3rd = textData
     }
-    
-    public void setSubIconResource(int iconId)
-    {
-        subIconResource = iconId;
-    }    
+
+    fun getSubIconResource(): Int {
+        return (subIconResource)
+    }
+
+    fun setSubIconResource(iconId: Int) {
+        subIconResource = iconId
+    }
 }

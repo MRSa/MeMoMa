@@ -1,17 +1,13 @@
-package jp.sourceforge.gokigen.memoma.operations;
-
+package jp.sourceforge.gokigen.memoma.operations
 
 /**
- *   オブジェクトが選択されたことを通知する
- * 
- * @author MRSa
- *
+ * オブジェクトが選択されたことを通知するインタフェース
  */
-public interface IObjectSelectionReceiver
+interface IObjectSelectionReceiver
 {
-	int touchedVacantArea();
-	int touchUppedVacantArea();
-	void objectCreated();
-    boolean objectSelected(Integer key);
-    void objectSelectedContext(Integer key);
+    fun touchedVacantArea(): Int
+    fun touchUppedVacantArea(): Int
+    fun objectCreated()
+    fun objectSelected(key: Int?): Boolean
+    fun objectSelectedContext(key: Int?)
 }
