@@ -1,113 +1,142 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import android.util.Log;
-
-import jp.sourceforge.gokigen.memoma.Main;
-
+import android.util.Log
+import java.util.Enumeration
+import java.util.Hashtable
 
 /**
- *   表示オブジェクト間の接続情報を保持するクラス
- * 
- * @author MRSa
- *
+ * 表示オブジェクト間の接続情報を保持するクラス
  */
-public class MeMoMaConnectLineHolder
+class MeMoMaConnectLineHolder(private val historyHolder: IOperationHistoryHolder)
 {
-    private final String TAG = toString();
+    private val connectLines = Hashtable<Int, ObjectConnector>()
+    private var serialNumber = 1
 
-	private final IOperationHistoryHolder historyHolder;
-    public static final int ID_NOTSPECIFY = -1;
-    private Hashtable<Integer, ObjectConnector>  connectLines;
-    private Integer serialNumber = 1;
-
-    public MeMoMaConnectLineHolder(IOperationHistoryHolder historyHolder)
+    init
     {
-        this.historyHolder = historyHolder;
-        connectLines = new Hashtable<>();
-        connectLines.clear();
+        connectLines.clear()
     }
 
-    public Enumeration<Integer> getLineKeys()
+    val lineKeys: Enumeration<Int>
+        get() = (connectLines.keys())
+
+    fun getLine(key: Int): ObjectConnector?
     {
-        return (connectLines.keys());
+        return (connectLines[key])
     }
 
-    public ObjectConnector getLine(Integer key)
+    fun disconnectLines(key: Int): Boolean
     {
-        return (connectLines.get(key));
-    }
-
-    public boolean disconnectLines(Integer key)
-    {
-        ObjectConnector removeTarget = connectLines.remove(key);
-        if (removeTarget != null)
+        try
         {
-            historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_CONNECT_LINE, removeTarget);
-        }
-        Log.v(TAG, "DISCONNECT LINES : " + key);
-        return (true);
-    }
-
-    public void setSerialNumber(int id)
-    {
-        serialNumber = (id == ID_NOTSPECIFY) ? ++serialNumber : id;
-    }
-
-    public int getSerialNumber()
-    {
-        return (serialNumber);
-    }
-
-    public void removeAllLines()
-    {
-        connectLines.clear();
-        serialNumber = 1;
-    }
-
-    public void dumpConnectLine(ObjectConnector conn)
-    {
-        if (conn == null)
-        {
-            return;
-        }
-        Log.v(TAG, "LINE " + conn.getKey() + " [" + conn.getFromObjectKey() + " -> " + conn.getToObjectKey() + "] ");
-    }
-
-    /**
-     *    keyToRemove で指定されたobjectの接続をすべて削除する
-     *
-     * @param keyToRemove\
-     */
-    public void removeAllConnection(Integer keyToRemove)
-    {
-        Enumeration<Integer> keys = connectLines.keys();
-        while (keys.hasMoreElements())
-        {
-            Integer key = keys.nextElement();
-            ObjectConnector connector = connectLines.get(key);
-            if ((connector.getFromObjectKey() == keyToRemove)||(connector.getToObjectKey() == keyToRemove))
+            val removeTarget = connectLines.remove(key)
+            if (removeTarget != null)
             {
-                // 削除するキーが見つかった！
-                connectLines.remove(key);
+                historyHolder.addHistory(
+                    key,
+                    IOperationHistoryHolder.ChangeKind.DELETE_CONNECT_LINE,
+                    removeTarget
+                )
+            }
+            Log.v(TAG, "DISCONNECT LINES : $key")
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return (true)
+    }
+
+    fun setSerialNumber(id: Int)
+    {
+        serialNumber = if ((id == ID_NOTSPECIFY)) ++serialNumber else id
+    }
+
+    fun getSerialNumber(): Int
+    {
+        return (serialNumber)
+    }
+
+    fun removeAllLines()
+    {
+        connectLines.clear()
+        serialNumber = 1
+    }
+
+    fun dumpConnectLine(conn: ObjectConnector?)
+    {
+        if (conn == null) {
+            return
+        }
+        Log.v(
+            TAG,
+            "LINE " + conn.getKey() + " [" + conn.getFromObjectKey() + " -> " + conn.getToObjectKey() + "] "
+        )
+    }
+
+    fun removeAllConnection(keyToRemove: Int)
+    {
+        try
+        {
+            val keys = connectLines.keys()
+            while (keys.hasMoreElements())
+            {
+                val key = keys.nextElement()
+                val connector = connectLines[key]
+                if ((connector != null)&&((connector.getFromObjectKey() == keyToRemove) || (connector.getToObjectKey() == keyToRemove)))
+                {
+                    // 削除するキーが見つかった！
+                    connectLines.remove(key)
+                }
             }
         }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    public ObjectConnector createLine(int id)
+    fun createLine(id: Int): ObjectConnector
     {
-        ObjectConnector connector = new ObjectConnector(id, 1, 1, LineStyleHolder.LINESTYLE_STRAIGHT_NO_ARROW, LineStyleHolder.LINESHAPE_NORMAL, LineStyleHolder.LINETHICKNESS_THIN, historyHolder);
-        connectLines.put(id, connector);
-        return (connector);
+        val connector = ObjectConnector(
+            id,
+            1,
+            1,
+            LineStyleHolder.LINESTYLE_STRAIGHT_NO_ARROW,
+            LineStyleHolder.LINESHAPE_NORMAL,
+            LineStyleHolder.LINETHICKNESS_THIN,
+            historyHolder
+        )
+        connectLines[id] = connector
+        return (connector)
     }
 
-    public ObjectConnector setLines(Integer fromKey, Integer toKey, LineStyleHolder lineHolder)
+    fun setLines(fromKey: Int, toKey: Int, lineHolder: LineStyleHolder): ObjectConnector
     {
-        ObjectConnector connector = new ObjectConnector(serialNumber, fromKey, toKey, lineHolder.getLineStyle(), lineHolder.getLineShape(), lineHolder.getLineThickness(), historyHolder);
+        val connector = ObjectConnector(
+            this.serialNumber,
+            fromKey,
+            toKey,
+            lineHolder.getLineStyle(),
+            lineHolder.getLineShape(),
+            lineHolder.getLineThickness(),
+            this.historyHolder
+        )
+        try
+        {
+            this.connectLines[this.serialNumber] = connector
+            this.serialNumber++
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return (connector)
+    }
 
-        connectLines.put(serialNumber, connector);
-        serialNumber++;
-        return (connector);
+    companion object
+    {
+        const val ID_NOTSPECIFY: Int = -1
+        private val TAG = MeMoMaConnectLineHolder::class.java.simpleName
     }
 }

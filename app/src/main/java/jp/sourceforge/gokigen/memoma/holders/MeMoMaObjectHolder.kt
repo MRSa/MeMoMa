@@ -1,421 +1,390 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.util.Log;
-import android.widget.Toast;
-
-import jp.sourceforge.gokigen.memoma.R;
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.util.Log
+import android.widget.Toast
+import jp.sourceforge.gokigen.memoma.R
+import java.util.Enumeration
+import java.util.Hashtable
 
 /**
- *   表示オブジェクトの情報を保持するクラス
- * 
- * @author MRSa
- *
+ * 表示オブジェクトの情報を保持するクラス
  */
-public class MeMoMaObjectHolder
+class MeMoMaObjectHolder(private val parent: Context)
 {
-	private final String TAG = toString();
-	public static final int ID_NOTSPECIFY = -1;
-	
-    public static final int DRAWSTYLE_RECTANGLE = 0;
-    public static final int DRAWSTYLE_ROUNDRECT = 1;
-    public static final int DRAWSTYLE_OVAL = 2;
-    public static final int DRAWSTYLE_DIAMOND = 3;
-    public static final int DRAWSTYLE_HEXAGONAL = 4;
-    public static final int DRAWSTYLE_PARALLELOGRAM = 5;
-    public static final int DRAWSTYLE_KEYBOARD = 6;
-    public static final int DRAWSTYLE_PAPER = 7;
-    public static final int DRAWSTYLE_DRUM = 8;
-    public static final int DRAWSTYLE_CIRCLE = 9;
-    public static final int DRAWSTYLE_NO_REGION = 10;
-    
-    public static final int DRAWSTYLE_LOOP_START = 11;
-    public static final int DRAWSTYLE_LOOP_END = 12;
-    public static final int DRAWSTYLE_LEFT_ARROW = 13;
-    public static final int DRAWSTYLE_DOWN_ARROW = 14;
-    public static final int DRAWSTYLE_UP_ARROW = 15;
-    public static final int DRAWSTYLE_RIGHT_ARROW = 16;
-
-    public static final float ROUNDRECT_CORNER_RX = 8;
-    public static final float ROUNDRECT_CORNER_RY = 8;
-    
-    public static final float STOROKE_BOLD_WIDTH = 3.5f;
-    public static final float STOROKE_NORMAL_WIDTH = 0.0f;
-    
-    public static final float DUPLICATEPOSITION_MARGIN = 15.0f;
-
-    public static final float OBJECTSIZE_DEFAULT_X = 198.0f;
-	public static final float OBJECTSIZE_DEFAULT_Y = (OBJECTSIZE_DEFAULT_X / 16.0f * 10.0f);
-
-	public static final float OBJECTSIZE_MINIMUM_X = 90.0f;
-	public static final float OBJECTSIZE_MINIMUM_Y = (OBJECTSIZE_MINIMUM_X / 16.0f * 10.0f);
-	
-	public static final float OBJECTSIZE_MAXIMUM_X = 25600.0f;
-	public static final float OBJECTSIZE_MAXIMUM_Y =  (OBJECTSIZE_MAXIMUM_X / 16.0f * 10.0f);
-
-	public static final float OBJECTSIZE_STEP_X = OBJECTSIZE_MINIMUM_X;
-	public static final float OBJECTSIZE_STEP_Y = OBJECTSIZE_MINIMUM_Y;
-	
-	public static final float FONTSIZE_DEFAULT = 20.0f;
-	
-    private final MeMoMaConnectLineHolder connectLineHolder;
-    
-	private final Hashtable<Integer, PositionObject> objectPoints;
-	private Integer serialNumber = 1;
-	private String  dataTitle = "";
-	private String  background = "";
-	private final Context parent;
-	private final IOperationHistoryHolder historyHolder;
-
-    public MeMoMaObjectHolder(Context context)
+    private val connectLineHolder: MeMoMaConnectLineHolder
+    private val objectPoints: Hashtable<Int, PositionObject>?
+    private var serialNumber = 1
+    private var dataTitle: String = ""
+    fun getDataTitle() : String
     {
-		historyHolder = new OperationHistoryHolder(this);
-		connectLineHolder = new MeMoMaConnectLineHolder(historyHolder);
-		objectPoints = new Hashtable<>();
-		parent = context;
+        return (dataTitle)
+    }
+    fun setDataTitle(value: String)
+    {
+        dataTitle = value
+    }
+
+    private var background: String = ""
+    fun getBackground(): String
+    {
+        return (background)
+    }
+    fun setBackground(value: String)
+    {
+        background = value
+    }
+
+    private val historyHolder: IOperationHistoryHolder = OperationHistoryHolder(this)
+
+    init
+    {
+        connectLineHolder = MeMoMaConnectLineHolder(historyHolder)
+        objectPoints = Hashtable()
+    }
+
+    fun isEmpty(): Boolean
+    {
+        return (((objectPoints == null)) || (objectPoints.isEmpty))
+    }
+
+    fun isHistoryExist(): Boolean
+    {
+        return (historyHolder.isHistoryExist())
     }
 
     /**
-     *    データの有無を見る (true の場合、データはない。)
+     * 「ひとつ戻す」処理
      */
-    public boolean isEmpty()
+    fun undo(): Boolean
     {
-		return ((objectPoints == null))||(objectPoints.isEmpty());
+        return (historyHolder.undo())
     }
 
-    /**
-     *   履歴の有無があるか (trueの場合、履歴あり）
-     *
-     */
-    public boolean isHistoryExist()
+    fun getConnectLineHolder(): MeMoMaConnectLineHolder
     {
-        return (historyHolder.isHistoryExist());
+        return (connectLineHolder)
     }
 
-    /**
-     *   「ひとつ戻す」処理
-     *
-     */
-    public boolean undo()
+    fun getCount(): Int
     {
-        return (historyHolder.undo());
+        return (objectPoints?.size?:0)
     }
 
-    public MeMoMaConnectLineHolder getConnectLineHolder()
+    fun getObjectKeys(): Enumeration<Int>?
     {
-    	return (connectLineHolder);
-    }
-    
-    public void setDataTitle(String title)
-    {
-    	dataTitle = title;
-    }
-    
-    public String getDataTitle()
-    {
-    	return (dataTitle);
+        if (objectPoints == null)
+        {
+            return (null)
+        }
+        return (objectPoints.keys())
     }
 
-    public void setBackground(String data)
+    fun getPosition(key: Int): PositionObject?
     {
-    	background = data;
-    }
-    
-    public String getBackground()
-    {
-    	return (background);
-    }
-
-    public int getCount()
-    {
-    	return (objectPoints.size());
+        if (objectPoints == null)
+        {
+            return (null)
+        }
+        return (objectPoints[key])
     }
 
-    public Enumeration<Integer> getObjectKeys()
+    fun removePosition(key: Int): Boolean
     {
-    	return (objectPoints.keys());
-    }
-
-    public PositionObject getPosition(Integer key)
-    {
-        return  (objectPoints.get(key));
-    }
-
-    public boolean removePosition(Integer key)
-    {
-        PositionObject removeTarget = objectPoints.remove(key);
+        val removeTarget = objectPoints?.remove(key)
         if (removeTarget != null)
         {
-            historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DELETE_OBJECT, removeTarget);
+            historyHolder.addHistory(
+                key,
+                IOperationHistoryHolder.ChangeKind.DELETE_OBJECT,
+                removeTarget
+            )
         }
-    	Log.v(TAG, "REMOVE : " + key);
-    	return (true);
+        Log.v(TAG, "REMOVE : $key")
+        return (true)
     }
-    
-    public void removeAllPositions()
+
+    fun removeAllPositions()
     {
-        objectPoints.clear();
-        serialNumber = 1;
+        objectPoints?.clear()
+        serialNumber = 1
 
         // 操作履歴をクリアする
-        historyHolder.reset();
+        historyHolder.reset()
     }
 
-    public void setSerialNumber(int id)
+    fun setSerialNumber(id: Int)
     {
-    	serialNumber = (id == ID_NOTSPECIFY) ? ++serialNumber : id;
+        serialNumber = if ((id == ID_NOTSPECIFY)) ++serialNumber else id
     }
-    
-    public int getSerialNumber()
+
+    fun getSerialNumber(): Int
     {
-    	return (serialNumber);
+        return (serialNumber)
     }
-
-/*
-    public void dumpPositionObject(PositionObject position)
-    {
-    	if (position == null)
-    	{
-    		return;
-    	}
-    	RectF posRect = position.getRect();
-        Log.v(TAG, "[" + posRect.left + "," + posRect.top + "][" + posRect.right + "," + posRect.bottom + "] " + "label : " + position.getLabel() + " detail : " + position.getDetail());
-    }
-*/
-
-	/**
-	 *   オブジェクトを共有する
-	 */
-	public void shareObject(int key)
-	{
-		Log.v(TAG, " shareObject " + key);
-		PositionObject targetPosition = objectPoints.get(key);
-		if (targetPosition == null)
-		{
-			// 元のオブジェクトが見つからなかったので、何もせずに戻る
-			return;
-		}
-		String title = targetPosition.getLabel();
-		String detail = targetPosition.getDetail();
-
-		try
-		{
-			Intent intent = new Intent();
-			intent.setAction(Intent.ACTION_SEND);
-			intent.setType("text/plain");
-			intent.putExtra(Intent.EXTRA_TITLE, title);
-			intent.putExtra(Intent.EXTRA_SUBJECT, title);
-			intent.putExtra(Intent.EXTRA_TEXT, detail);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			parent.startActivity(intent);
-			Log.v(TAG, "<<< SEND INTENT >>> : " + title);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 
     /**
-     *   オブジェクトを複製する。
+     * オブジェクトを共有する
      */
-    public PositionObject duplicatePosition(int key)
-    {
-    	PositionObject orgPosition = objectPoints.get(key);
-    	if (orgPosition == null)
-    	{
-    		// 元のオブジェクトが見つからなかったので、何もせずに戻る
-    		return (null);
-    	}
-    	RectF orgRect = orgPosition.getRect();
-    	PositionObject position = new PositionObject(serialNumber,
-                new RectF(orgRect.left + DUPLICATEPOSITION_MARGIN, orgRect.top + DUPLICATEPOSITION_MARGIN, orgRect.right + DUPLICATEPOSITION_MARGIN, orgRect.bottom + DUPLICATEPOSITION_MARGIN),
-                orgPosition.getDrawStyle(),
-                orgPosition.getIcon(),
-                orgPosition.getLabel(),
-                orgPosition.getDetail(),
-                orgPosition.getUserChecked(),
-                orgPosition.getLabelColor(),
-                orgPosition.getObjectColor(),
-                orgPosition.getPaintStyle(),
-                orgPosition.getstrokeWidth(),
-                orgPosition.getFontSize(),
-                historyHolder);
-		objectPoints.put(serialNumber, position);
-		serialNumber++;
-		return (position);
-    }
+    fun shareObject(key: Int) {
+        Log.v(TAG, " shareObject $key")
+        if (objectPoints == null)
+        {
+            return
+        }
+        val targetPosition = objectPoints[key]
+        val title = targetPosition?.getLabel()
+        val detail = targetPosition?.getDetail()
 
-    public PositionObject createPosition(int id)
-    {
-    	PositionObject position = new PositionObject(id,
-                new RectF(0, 0, OBJECTSIZE_DEFAULT_X, OBJECTSIZE_DEFAULT_Y),
-                MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE,
-                0,
-                "",
-                "",
-                false,
-                Color.WHITE,
-                Color.WHITE,
-                Paint.Style.STROKE.toString(),
-                STOROKE_NORMAL_WIDTH,
-                FONTSIZE_DEFAULT,
-                historyHolder);
-		objectPoints.put(id, position);
-		return (position);    	
+        try
+        {
+            val intent = Intent()
+            intent.setAction(Intent.ACTION_SEND)
+            intent.setType("text/plain")
+            intent.putExtra(Intent.EXTRA_TITLE, title)
+            intent.putExtra(Intent.EXTRA_SUBJECT, title)
+            intent.putExtra(Intent.EXTRA_TEXT, detail)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            parent.startActivity(intent)
+            Log.v(TAG, "<<< SEND INTENT >>> : $title")
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
-
-	public PositionObject createPosition(float x, float y, int drawStyle)
-	{
-		PositionObject position = createPosition(serialNumber);
-		RectF posRect = position.getRect();
-		position.setRectLeft(posRect.left + x);
-		position.setRectRight(posRect.right + x);
-		position.setRectTop(posRect.top + y);
-		position.setRectBottom(posRect.bottom + y);
-		position.setDrawStyle(drawStyle);
-		serialNumber++;
-		return (position);
-	}
 
     /**
-     *   オブジェクトのサイズを拡大する
+     * オブジェクトを複製する。
+     */
+    fun duplicatePosition(key: Int): PositionObject?
+    {
+        if (objectPoints == null)
+        {
+            // 元のオブジェクトが見つからなかったので、何もせずに戻る
+            return (null)
+        }
+        val orgPosition = objectPoints[key] ?: return (null)
+        val orgRect = orgPosition.getRect()
+        val position = PositionObject(
+            serialNumber,
+            RectF(
+                orgRect.left + DUPLICATEPOSITION_MARGIN,
+                orgRect.top + DUPLICATEPOSITION_MARGIN,
+                orgRect.right + DUPLICATEPOSITION_MARGIN,
+                orgRect.bottom + DUPLICATEPOSITION_MARGIN
+            ),
+            orgPosition.getDrawStyle(),
+            orgPosition.getIcon(),
+            orgPosition.getLabel(),
+            orgPosition.getDetail(),
+            orgPosition.getUserChecked(),
+            orgPosition.getLabelColor(),
+            orgPosition.getObjectColor(),
+            orgPosition.getPaintStyle(),
+            orgPosition.getstrokeWidth(),
+            orgPosition.getFontSize(),
+            historyHolder
+        )
+        objectPoints[serialNumber] = position
+        serialNumber++
+        return (position)
+    }
+
+    fun createPosition(id: Int): PositionObject
+    {
+        val position = PositionObject(
+            id,
+            RectF(0f, 0f, OBJECTSIZE_DEFAULT_X, OBJECTSIZE_DEFAULT_Y),
+            DRAWSTYLE_RECTANGLE,
+            0,
+            "",
+            "",
+            false,
+            Color.WHITE,
+            Color.WHITE,
+            Paint.Style.STROKE.toString(),
+            STROKE_NORMAL_WIDTH,
+            FONTSIZE_DEFAULT,
+            historyHolder
+        )
+        objectPoints!![id] = position
+        return (position)
+    }
+
+    fun createPosition(x: Float, y: Float, drawStyle: Int): PositionObject
+    {
+        val position = createPosition(serialNumber)
+        val posRect = position.getRect()
+        position.setRectLeft(posRect.left + x)
+        position.setRectRight(posRect.right + x)
+        position.setRectTop(posRect.top + y)
+        position.setRectBottom(posRect.bottom + y)
+        position.setDrawStyle(drawStyle)
+        serialNumber++
+        return (position)
+    }
+
+    /**
+     * オブジェクトのサイズを拡大する
      *
      */
-    public void expandObjectSize(Integer key)
+    fun expandObjectSize(key: Int)
     {
-    	PositionObject position = objectPoints.get(key);
-    	if (position == null)
-    	{
-    		// 元のオブジェクトが見つからなかったので、何もせずに戻る
-    		return;
-    	}
-    	RectF posRect = position.getRect();
-        float width = posRect.right - posRect.left;
-        float height = posRect.bottom - posRect.top;
-        if (((width + (OBJECTSIZE_STEP_X * 2.0f)) > OBJECTSIZE_MAXIMUM_X)||((height + (OBJECTSIZE_STEP_Y * 2.0f)) > OBJECTSIZE_MAXIMUM_Y))
+        if (objectPoints == null)
         {
-            // 拡大リミットだった。。。拡大しない
-    		String outputMessage = parent.getString(R.string.object_bigger_limit) + " ";
-            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-            return;
+            // 元のオブジェクトが見つからなかったので、何もせずに戻る
+            return
         }
-        position.setRectLeft(posRect.left - OBJECTSIZE_STEP_X);
-        position.setRectRight(posRect.right + OBJECTSIZE_STEP_X);
-        position.setRectTop(posRect.top - OBJECTSIZE_STEP_Y);
-        position.setRectBottom(posRect.bottom + OBJECTSIZE_STEP_Y);
+        val position = objectPoints[key] ?: return
+        val posRect = position.getRect()
+        val width = posRect.right - posRect.left
+        val height = posRect.bottom - posRect.top
+        if (((width + (OBJECTSIZE_STEP_X * 2.0f)) > OBJECTSIZE_MAXIMUM_X) || ((height + (OBJECTSIZE_STEP_Y * 2.0f)) > OBJECTSIZE_MAXIMUM_Y)) {
+            // 拡大リミットだった。。。拡大しない
+            val outputMessage = parent.getString(R.string.object_bigger_limit) + " "
+            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+            return
+        }
+        position.setRectLeft(posRect.left - OBJECTSIZE_STEP_X)
+        position.setRectRight(posRect.right + OBJECTSIZE_STEP_X)
+        position.setRectTop(posRect.top - OBJECTSIZE_STEP_Y)
+        position.setRectBottom(posRect.bottom + OBJECTSIZE_STEP_Y)
     }
 
     /**
-     *   オブジェクトのサイズを縮小する
+     * オブジェクトのサイズを縮小する
      */
-    public void shrinkObjectSize(Integer key)
+    fun shrinkObjectSize(key: Int)
     {
-    	PositionObject position = objectPoints.get(key);
-    	if (position == null)
-    	{
-    		// 元のオブジェクトが見つからなかったので、何もせずに戻る
-    		return;
-    	}
-    	RectF posRect = position.getRect();
-        float width = posRect.right - posRect.left;
-        float height = posRect.bottom - posRect.top;
-        if (((width - (OBJECTSIZE_STEP_X * 2.0f)) < OBJECTSIZE_MINIMUM_X)||((height - (OBJECTSIZE_STEP_Y * 2.0f)) < OBJECTSIZE_MINIMUM_Y))
+        if (objectPoints == null)
+        {
+            // 元のオブジェクトが見つからなかったので、何もせずに戻る
+            return
+        }
+        val position = objectPoints[key] ?: return
+        val posRect = position.getRect()
+        val width = posRect.right - posRect.left
+        val height = posRect.bottom - posRect.top
+        if (((width - (OBJECTSIZE_STEP_X * 2.0f)) < OBJECTSIZE_MINIMUM_X) || ((height - (OBJECTSIZE_STEP_Y * 2.0f)) < OBJECTSIZE_MINIMUM_Y))
         {
             // 縮小リミットだった。。。縮小しない
-    		String outputMessage = parent.getString(R.string.object_small_limit) + " ";
-            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-            return;
+            val outputMessage = parent.getString(R.string.object_small_limit) + " "
+            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+            return
         }
-        position.setRectLeft(posRect.left + OBJECTSIZE_STEP_X);
-        position.setRectRight(posRect.right - OBJECTSIZE_STEP_X);
-        position.setRectTop(posRect.top + OBJECTSIZE_STEP_Y);
-        position.setRectBottom(posRect.bottom - OBJECTSIZE_STEP_Y);
+        position.setRectLeft(posRect.left + OBJECTSIZE_STEP_X)
+        position.setRectRight(posRect.right - OBJECTSIZE_STEP_X)
+        position.setRectTop(posRect.top + OBJECTSIZE_STEP_Y)
+        position.setRectBottom(posRect.bottom - OBJECTSIZE_STEP_Y)
     }
 
-/*
-    public MeMoMaConnectLineHolder getLineHolder()
-	{
-		return (connectLineHolder);
-	}
-*/
-	static public int getObjectDrawStyleIcon(int drawStyle)
-	{
-		int icon = 0;
-    	if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_RECTANGLE)
-    	{
-    		icon  = R.drawable.btn_rectangle;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_ROUNDRECT)
-    	{
-    		icon = R.drawable.btn_roundrect;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_OVAL)
-    	{
-    		icon = R.drawable.btn_oval;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DIAMOND)
-    	{
-    		icon = R.drawable.btn_diamond;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_HEXAGONAL)
-    	{
-    		icon = R.drawable.btn_hexagonal;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PARALLELOGRAM)
-    	{
-    		icon = R.drawable.btn_parallelogram;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_KEYBOARD)
-    	{
-    		icon = R.drawable.btn_keyboard;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_PAPER)
-    	{
-    		icon = R.drawable.btn_paper;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DRUM)
-    	{
-    		icon = R.drawable.btn_drum;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE)
-    	{
-    		icon = R.drawable.btn_circle;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_NO_REGION)
-    	{
-    		icon = R.drawable.btn_noregion;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_START)
-    	{
-    		icon = R.drawable.btn_trapezoidy_up;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LOOP_END)
-    	{
-    		icon = R.drawable.btn_trapezoidy_down;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LEFT_ARROW)
-    	{
-    		icon = R.drawable.btn_arrow_left;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_DOWN_ARROW)
-    	{
-    		icon = R.drawable.btn_arrow_down;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_UP_ARROW)
-    	{
-    		icon = R.drawable.btn_arrow_up;
-    	}
-    	else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_RIGHT_ARROW)
-    	{
-    		icon = R.drawable.btn_arrow_right;
-    	}
-    	return (icon);
-	}
+    companion object
+    {
+        private val TAG = MeMoMaObjectHolder::class.java.simpleName
+
+        const val ID_NOTSPECIFY: Int = -1
+        const val DRAWSTYLE_RECTANGLE: Int = 0
+        const val DRAWSTYLE_ROUNDRECT: Int = 1
+        const val DRAWSTYLE_OVAL: Int = 2
+        const val DRAWSTYLE_DIAMOND: Int = 3
+        const val DRAWSTYLE_HEXAGONAL: Int = 4
+        const val DRAWSTYLE_PARALLELOGRAM: Int = 5
+        const val DRAWSTYLE_KEYBOARD: Int = 6
+        const val DRAWSTYLE_PAPER: Int = 7
+        const val DRAWSTYLE_DRUM: Int = 8
+        const val DRAWSTYLE_CIRCLE: Int = 9
+        const val DRAWSTYLE_NO_REGION: Int = 10
+
+        const val DRAWSTYLE_LOOP_START: Int = 11
+        const val DRAWSTYLE_LOOP_END: Int = 12
+        const val DRAWSTYLE_LEFT_ARROW: Int = 13
+        const val DRAWSTYLE_DOWN_ARROW: Int = 14
+        const val DRAWSTYLE_UP_ARROW: Int = 15
+        const val DRAWSTYLE_RIGHT_ARROW: Int = 16
+
+        const val ROUNDRECT_CORNER_RX: Float = 8f
+        const val ROUNDRECT_CORNER_RY: Float = 8f
+
+        const val STROKE_BOLD_WIDTH: Float = 3.5f
+        const val STROKE_NORMAL_WIDTH: Float = 0.0f
+
+        const val DUPLICATEPOSITION_MARGIN: Float = 15.0f
+
+        const val OBJECTSIZE_DEFAULT_X: Float = 198.0f
+        const val OBJECTSIZE_DEFAULT_Y: Float = (OBJECTSIZE_DEFAULT_X / 16.0f * 10.0f)
+
+        const val OBJECTSIZE_MINIMUM_X: Float = 90.0f
+        const val OBJECTSIZE_MINIMUM_Y: Float = (OBJECTSIZE_MINIMUM_X / 16.0f * 10.0f)
+
+        const val OBJECTSIZE_MAXIMUM_X: Float = 25600.0f
+        const val OBJECTSIZE_MAXIMUM_Y: Float = (OBJECTSIZE_MAXIMUM_X / 16.0f * 10.0f)
+
+        const val OBJECTSIZE_STEP_X: Float = OBJECTSIZE_MINIMUM_X
+        const val OBJECTSIZE_STEP_Y: Float = OBJECTSIZE_MINIMUM_Y
+
+        const val FONTSIZE_DEFAULT: Float = 20.0f
+
+        fun getObjectDrawStyleIcon(drawStyle: Int): Int {
+            var icon = 0
+            when (drawStyle) {
+                DRAWSTYLE_RECTANGLE -> {
+                    icon = R.drawable.btn_rectangle
+                }
+                DRAWSTYLE_ROUNDRECT -> {
+                    icon = R.drawable.btn_roundrect
+                }
+                DRAWSTYLE_OVAL -> {
+                    icon = R.drawable.btn_oval
+                }
+                DRAWSTYLE_DIAMOND -> {
+                    icon = R.drawable.btn_diamond
+                }
+                DRAWSTYLE_HEXAGONAL -> {
+                    icon = R.drawable.btn_hexagonal
+                }
+                DRAWSTYLE_PARALLELOGRAM -> {
+                    icon = R.drawable.btn_parallelogram
+                }
+                DRAWSTYLE_KEYBOARD -> {
+                    icon = R.drawable.btn_keyboard
+                }
+                DRAWSTYLE_PAPER -> {
+                    icon = R.drawable.btn_paper
+                }
+                DRAWSTYLE_DRUM -> {
+                    icon = R.drawable.btn_drum
+                }
+                DRAWSTYLE_CIRCLE -> {
+                    icon = R.drawable.btn_circle
+                }
+                DRAWSTYLE_NO_REGION -> {
+                    icon = R.drawable.btn_noregion
+                }
+                DRAWSTYLE_LOOP_START -> {
+                    icon = R.drawable.btn_trapezoidy_up
+                }
+                DRAWSTYLE_LOOP_END -> {
+                    icon = R.drawable.btn_trapezoidy_down
+                }
+                DRAWSTYLE_LEFT_ARROW -> {
+                    icon = R.drawable.btn_arrow_left
+                }
+                DRAWSTYLE_DOWN_ARROW -> {
+                    icon = R.drawable.btn_arrow_down
+                }
+                DRAWSTYLE_UP_ARROW -> {
+                    icon = R.drawable.btn_arrow_up
+                }
+                DRAWSTYLE_RIGHT_ARROW -> {
+                    icon = R.drawable.btn_arrow_right
+                }
+            }
+            return (icon)
+        }
+    }
 }

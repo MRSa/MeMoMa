@@ -1,206 +1,136 @@
-package jp.sourceforge.gokigen.memoma.extension;
+package jp.sourceforge.gokigen.memoma.extension
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import jp.sourceforge.gokigen.memoma.R
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
-import jp.sourceforge.gokigen.memoma.R;
-
-/**
- *
- */
-public class ExtensionActivity extends AppCompatActivity
+class ExtensionActivity : AppCompatActivity()
 {
-    private final String TAG = toString();
-	// 起動コード
-    public static final String MEMOMA_EXTENSION_LAUNCH_ACTIVITY = "jp.sfjp.gokigen.memoma.extension.activity";
+    private val listener: ExtensionActivityListener = ExtensionActivityListener(this)
 
-    // データ識別子(表示中データの保存ファイルへのフルパス)
-    public static final String MEMOMA_EXTENSION_DATA_FULLPATH = "jp.sfjp.gokigen.memoma.extension.data.fullpath";
-    public static final String MEMOMA_EXTENSION_DATA_TITLE = "jp.sfjp.gokigen.memoma.extension.data.title";
-
-    private ExtensionActivityListener listener = null;
-    
-	/** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) 
+    public override fun onCreate(savedInstanceState: Bundle?)
     {
-          super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
+        try
+        {
+            Log.v(TAG, "ExtensionActivity::onCreate()")
 
-          Log.v(TAG, "ExtensionActivity::onCreate()");
-          try
-          {
-              // リスナクラスを生成する
-              listener = new ExtensionActivityListener(this);
+            // レイアウトを設定する
+            setContentView(R.layout.extensionview)
 
-              // レイアウトを設定する
-              setContentView(R.layout.extensionview);
-
-              // リスナクラスの準備
-              listener.prepareExtraDatas(getIntent());
-              listener.prepareListener();
-          }
-          catch (Exception e)
-          {
-              e.printStackTrace();
-          }
+            // リスナクラスの準備
+            listener.prepareExtraDatas(intent)
+            listener.prepareListener()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
-     *  メニューの生成
+     * メニューの生成
      */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
+    override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         try
         {
-            menu = listener.onCreateOptionsMenu(menu);
+            listener.onCreateOptionsMenu(menu)
         }
-        catch (Exception e)
+        catch (e: Exception)
         {
-            e.printStackTrace();
+            e.printStackTrace()
         }
-        return (super.onCreateOptionsMenu(menu));
+        return (super.onCreateOptionsMenu(menu))
     }
 
     /**
-     *  メニューアイテムの選択
+     * メニューアイテムの選択
      */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
-        return (listener.onOptionsItemSelected(item));
-    }
-    
-    /**
-     *  メニュー表示前の処理
-     */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-        try
-        {
-            listener.onPrepareOptionsMenu(menu);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return (super.onPrepareOptionsMenu(menu));
+        return (listener.onOptionsItemSelected(item))
     }
 
     /**
-     *  画面が裏に回ったときの処理
+     * メニュー表示前の処理
      */
-    @Override
-    public void onPause()
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean
     {
-        super.onPause();
         try
         {
+            listener.onPrepareOptionsMenu(menu)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return (super.onPrepareOptionsMenu(menu))
+    }
+
+    /**
+     * 画面が裏に回ったときの処理
+     */
+    public override fun onPause()
+    {
+        try
+        {
+            super.onPause()
+
             // 動作を止めるようイベント処理クラスに指示する
-        	listener.shutdown();        	
+            listener.shutdown()
         }
-        catch (Exception ex)
+        catch (ex: Exception)
         {
-        	// 何もしない
-        }
-    }
-    
-    /**
-     *  画面が表に出てきたときの処理
-     */
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        try
-        {
-        	// 動作準備するようイベント処理クラスに指示する
-        	listener.prepareToStart();
-        }
-        catch (Exception ex)
-        {
-            // なにもしない
-            ex.printStackTrace();
+            ex.printStackTrace()
         }
     }
 
     /**
-     *   終了時の処理
-     * 
+     * 画面が表に出てきたときの処理
      */
-    @Override
-    protected void onDestroy()
+    public override fun onResume()
     {
         try
         {
-            listener.finishListener();
-            super.onDestroy();
+            super.onResume()
+            listener.prepareToStart()
         }
-        catch (Exception e)
+        catch (ex: Exception)
         {
-            e.printStackTrace();
+            ex.printStackTrace()
         }
     }
 
     /**
-     * 
+     * 終了時の処理
+     *
      */
-    @Override
-    protected void onStart()
+    override fun onDestroy()
     {
-        super.onStart();
-    }
-
-    /**
-     * 
-     */
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-    }
-
-    /**
-     * 
-     */
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState)
-    {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
-    /**
-     *  子画面から応答をもらったときの処理
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
         try
         {
-            // 子画面からもらった情報の応答処理をイベント処理クラスに依頼する
-            listener.onActivityResult(requestCode, resultCode, data);
+            listener.finishListener()
+            super.onDestroy()
         }
-        catch (Exception ex)
+        catch (e: Exception)
         {
-            // 例外が発生したときには、何もしない。
-            ex.printStackTrace();
+            e.printStackTrace()
         }
-    }    
+    }
+
+    companion object {
+        private val TAG = ExtensionActivity::class.java.simpleName
+
+        // 起動コード
+        const val MEMOMA_EXTENSION_LAUNCH_ACTIVITY: String = "jp.sfjp.gokigen.memoma.extension.activity"
+
+        // データ識別子(表示中データの保存ファイルへのフルパス)
+        const val MEMOMA_EXTENSION_DATA_FULLPATH: String = "jp.sfjp.gokigen.memoma.extension.data.fullpath"
+        const val MEMOMA_EXTENSION_DATA_TITLE: String = "jp.sfjp.gokigen.memoma.extension.data.title"
+    }
 }

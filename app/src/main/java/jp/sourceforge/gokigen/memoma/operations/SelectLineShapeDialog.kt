@@ -39,9 +39,9 @@ class SelectLineShapeDialog(private val parent: Context, private val lineStyleHo
             val builder = AlertDialog.Builder(parent)
 
             //  ダイアログで表示するデータを設定する場所
-            lineShape = lineStyleHolder.lineShape
-            lineStyle = lineStyleHolder.lineStyle
-            lineThickness = lineStyleHolder.lineThickness
+            lineShape = lineStyleHolder.getLineShape()
+            lineStyle = lineStyleHolder.getLineStyle()
+            lineThickness = lineStyleHolder.getLineThickness()
 
             // 線の太さ
             val thin = layout.findViewById<View>(R.id.btnLineThicknessThin) as ImageButton
@@ -134,9 +134,9 @@ class SelectLineShapeDialog(private val parent: Context, private val lineStyleHo
         try
         {
             // 現在の線の形状と種類を取得する
-            lineShape = lineStyleHolder.lineShape
-            lineStyle = lineStyleHolder.lineStyle
-            lineThickness = lineStyleHolder.lineThickness
+            lineShape = lineStyleHolder.getLineShape()
+            lineStyle = lineStyleHolder.getLineStyle()
+            lineThickness = lineStyleHolder.getLineThickness()
 
             // 画面（ダイアログ）で、現在選択中のものをハイライトにする。
             updateButtonHighlightLineThickness(getLineThicknessButtonId(lineThickness))
@@ -152,10 +152,9 @@ class SelectLineShapeDialog(private val parent: Context, private val lineStyleHo
      * 線の形状を設定する
      */
     private fun setLineShape(toSetLineStyle: Int, toSetLineShape: Int, toSetLineThickness: Int) {
-        lineStyleHolder.lineShape = toSetLineShape
-        lineStyleHolder.lineStyle = toSetLineStyle
-        lineStyleHolder.lineThickness = toSetLineThickness
-
+        lineStyleHolder.setLineShape(toSetLineShape)
+        lineStyleHolder.setLineStyle(toSetLineStyle)
+        lineStyleHolder.setLineThickness(toSetLineThickness)
         Log.v(
             TAG,
             ":::CHANGE LINE :::  shape:$toSetLineShape style:$toSetLineStyle thickness:$toSetLineThickness"

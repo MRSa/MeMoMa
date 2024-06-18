@@ -2,7 +2,6 @@ package jp.sourceforge.gokigen.memoma
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -17,6 +16,8 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.ImageButton
 import android.widget.SeekBar
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
@@ -182,14 +183,13 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     {
         try
         {
-            dataInOutManager.updateFileList(objectHolder.dataTitle, parent.supportActionBar)
+            dataInOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
     }
-
 
     /**
      * 終了準備
@@ -200,76 +200,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         saveData(true)
     }
 
-    /**
-     * 他画面から戻ってきたとき...
-     *
-     */
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-    {
-        if ((requestCode == MENU_ID_INSERT_PICTURE) && (resultCode == Activity.RESULT_OK))
-        {
-            try
-            {
-                // 取得したuri を preferenceに記録する
-                val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-                val backgroundUri = data?.data
-                if (backgroundUri != null)
-                {
-                    try
-                    {
-                        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
-                        {
-                            parent.contentResolver.takePersistableUriPermission(
-                                backgroundUri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                            )
-                        }
-                        val editor = preferences.edit()
-                        editor.putString("backgroundUri", backgroundUri.toString())
-                        editor.apply()
-                    }
-                    catch (e: Exception)
-                    {
-                        e.printStackTrace()
-                    }
-                    // 背景画像イメージの更新処理
-                    updateBackgroundImage(backgroundUri.toString())
-                }
-                System.gc()
-            }
-            catch (ex: Exception)
-            {
-                Log.v(TAG, "Ex:" + ex.message)
-                ex.printStackTrace()
-            }
-            return
-        }
-        else if (requestCode == MENU_ID_PREFERENCES)
-        {
-            // 背景色、背景画像の設定を行う。
-            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-            val colorString = preferences.getString("backgroundColor", "#ff004000") ?: "#ff004000"
-            objectDrawer.setBackgroundColor(colorString)
 
-            // 背景画像イメージの更新処理
-            val backgroundString = preferences.getString("backgroundUri", "") ?: ""
-            updateBackgroundImage(backgroundString)
-            Log.v(TAG, "RETURNED PREFERENCES $backgroundString")
-        }
-        else if (requestCode == MENU_ID_EXTEND)
-        {
-            // その他...今開いているファイルを読みなおす
-            dataInOutManager.loadFile(parent.title as String)
-        }
-        else
-        {
-            // 画面表示の準備を実行...
-            //prepareToStart();
-            return
-        }
-        // 画面の再描画を指示する
-        redrawSurfaceView()
-    }
 
     /**
      * 背景画像イメージの更新処理
@@ -277,14 +208,21 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun updateBackgroundImage(uri: String)
     {
-        // 背景画像イメージの更新処理
-        val graphView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
+        try
+        {
+            // 背景画像イメージの更新処理
+            val graphView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
 
-        // ビットマップを設定する
-        objectDrawer.updateBackgroundBitmap(uri, graphView.width, graphView.height)
+            // ビットマップを設定する
+            objectDrawer.updateBackgroundBitmap(uri, graphView.width, graphView.height)
 
-        // 画面の再描画指示
-        graphView.doDraw()
+            // 画面の再描画指示
+            graphView.doDraw()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -296,13 +234,16 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         when (val id = v.id)
         {
             R.id.MeMoMaInfo -> {
-                showInfoMessageEditDialog()  // テキスト編集ダイアログを表示する
+                // テキスト編集ダイアログを表示する
+                showInfoMessageEditDialog()
             }
             R.id.LineStyleButton -> {
-                selectLineShapeDialog() // ライン形状を変えるダイアログ
+                // ライン形状を変えるダイアログ
+                selectLineShapeDialog()
             }
             R.id.ExpandButton -> {
-                callExtendMenu()      // 拡張メニューを呼び出す
+                // 拡張メニューを呼び出す
+                callExtendMenu()
             }
             R.id.DeleteObjectButton, R.id.CreateObjectButton -> {
                 // 削除ボタン or 作成ボタンが押された時の処理
@@ -329,13 +270,18 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouch(v: View, event: MotionEvent): Boolean
     {
-        //Log.v(TAG, "onTouch()")
-        val id = v.id
-        if (id == R.id.GraphicView)
+        try
         {
-            // 画面をタッチした！
-            v.onTouchEvent(event)
-            return true
+            if (v.id == R.id.GraphicView)
+            {
+                // 画面をタッチした！
+                v.onTouchEvent(event)
+                return true
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
         return false
     }
@@ -355,7 +301,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 */
         return false
     }
-
 
     override fun commandSelected(menuId: Int): Boolean
     {
@@ -414,15 +359,22 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         return ret
     }
 
-
     /**
      * 操作を１つ戻す（Undo 処理）
      */
     private fun undoOperation(): Boolean
     {
-        val ret = objectHolder.undo()  // undo処理を実行する
-        redrawSurfaceView()  // 画面を再描画する
-        return ret
+        try
+        {
+            val ret = objectHolder.undo()  // undo処理を実行する
+            redrawSurfaceView()  // 画面を再描画する
+            return ret
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return false
     }
 
     /**
@@ -430,21 +382,73 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun insertPicture()
     {
-        val intent: Intent
-        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        try
         {
-            intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-            intent.addCategory(Intent.CATEGORY_OPENABLE)
-            intent.type = "image/*"
-            //intent.setAction(Intent.ACTION_GET_CONTENT);
+            val intent: Intent
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+            {
+                intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                intent.type = "image/*"
+                //intent.setAction(Intent.ACTION_GET_CONTENT);
+            }
+            else
+            {
+                intent = Intent()
+                intent.type = "image/*"
+                intent.action = Intent.ACTION_GET_CONTENT
+            }
+            val startForResult =
+                parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+                    if (result?.resultCode == Activity.RESULT_OK) {
+                        result.data?.let { data: Intent ->
+                            updateBackgroundUri(data)
+                        }
+                    }
+                }
+            startForResult.launch(intent)
         }
-        else
+        catch (e: Exception)
         {
-            intent = Intent()
-            intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
+            e.printStackTrace()
         }
-        parent.startActivityForResult(intent, MENU_ID_INSERT_PICTURE)
+    }
+
+    private fun updateBackgroundUri(data: Intent)
+    {
+        try
+        {
+            // ---- 取得したuri を preferenceに記録する
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val backgroundUri = data.data
+            if (backgroundUri != null)
+            {
+                try
+                {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+                    {
+                        parent.contentResolver.takePersistableUriPermission(
+                            backgroundUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        )
+                    }
+                    val editor = preferences.edit()
+                    editor.putString("backgroundUri", backgroundUri.toString())
+                    editor.apply()
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+                // 背景画像イメージの更新処理
+                updateBackgroundImage(backgroundUri.toString())
+            }
+            System.gc()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -452,16 +456,22 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun doCapture(isShare: Boolean)
     {
-        // 画面のスクリーンショットをとる処理を実行する
-        dataInOutManager.doScreenCapture(
-            parent.title as String,
-            objectHolder,
-            objectDrawer,
-            isShare
-        )
-
-        // 画面を再描画する
-        redrawSurfaceView()
+        try
+        {
+            // 画面のスクリーンショットをとる処理を実行する
+            dataInOutManager.doScreenCapture(
+                parent.title as String,
+                objectHolder,
+                objectDrawer,
+                isShare
+            )
+            // 画面を再描画する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -506,9 +516,22 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_FULLPATH, fullPath)
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE, dataTitle)
 
-        // データ表示用Activityを起動する
-        parent.startActivityForResult(intent, MENU_ID_EXTEND)
-        //parent.startActivity(intent);
+        val launcher =
+            parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+                if (result?.resultCode == Activity.RESULT_OK) {
+                    result.data?.let { _ ->
+                        try
+                        {
+                            dataInOutManager.loadFile(parent.title as String)
+                        }
+                        catch (e: Exception)
+                        {
+                            e.printStackTrace()
+                        }
+                    }
+                }
+            }
+        launcher.launch(intent)
     }
 
     private fun setPreferenceDataTitle(title: String)
@@ -532,18 +555,25 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun prepareMeMoMaInfo()
     {
-        //  設定に記録されているデータを画面のタイトルに反映させる
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val memomaInfo = preferences.getString("MeMoMaInfo", parent.getString(R.string.app_name))
-        parent.title = memomaInfo
-
-        // アクションバーとファイル名の準備
-        val bar = parent.supportActionBar
-        if (bar != null)
+        try
         {
-            dataInOutManager.prepare(objectHolder, bar, memomaInfo)
+            //  設定に記録されているデータを画面のタイトルに反映させる
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val memomaInfo = preferences.getString("MeMoMaInfo", parent.getString(R.string.app_name)) ?: parent.getString(R.string.app_name)
+            parent.title = memomaInfo
+
+            // アクションバーとファイル名の準備
+            val bar = parent.supportActionBar
+            if (bar != null)
+            {
+                dataInOutManager.prepare(objectHolder, bar, memomaInfo)
+            }
+            //dataInOutManager.loadFile((String) parent.getTitle());
         }
-        //dataInOutManager.loadFile((String) parent.getTitle());
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -554,7 +584,14 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun saveData(forceOverwrite: Boolean)
     {
-        dataInOutManager.saveFile(parent.title as String, forceOverwrite)
+        try
+        {
+            dataInOutManager.saveFile(parent.title as String, forceOverwrite)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -563,7 +600,28 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private fun alignData()
     {
         val aligner = ObjectAligner(parent, this)
-        aligner.execute(objectHolder)
+        Thread {
+            try
+            {
+                aligner.doAlignObject(objectHolder)
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+            parent.runOnUiThread {
+                try
+                {
+                    aligner.finishAlignObject()
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+        }.start()
+
+        // aligner.execute(objectHolder)
     }
 
     /**
@@ -588,7 +646,14 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun createNewScreen()
     {
-       confirmationDialog.show(parent.getString(R.string.createnew_title), parent.getString(R.string.createnew_message), this)
+        try
+        {
+            confirmationDialog.show(parent.getString(R.string.createnew_title), parent.getString(R.string.createnew_message), this)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -596,54 +661,34 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun selectLineShapeDialog()
     {
-        // 接続線の設定ダイアログを表示する...
-        parent.showDialog(R.id.selectline_dialog)
+        try
+        {
+            // 接続線の設定ダイアログを表示する...
+            val dialog = lineSelectionDialog.getDialog()
+            lineSelectionDialog.prepareSelectLineShapeDialog(dialog, selectedObjectKey)
+            dialog.show()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * メッセージ編集ダイアログの表示を準備する
      *
      */
-    private fun prepareInfoMessageEditDialog(dialog: androidx.appcompat.app.AlertDialog)
+    private fun prepareInfoMessageEditDialog(dialog: AlertDialog)
     {
-        val message = parent.title as String
-        editTextDialog.prepare(dialog, this, parent.getString(R.string.dataTitle), message, true)
-    }
-
-    /**
-     * オブジェクト入力用ダイアログの表示を準備する
-     */
-    private fun prepareObjectInputDialog(dialog: AlertDialog)
-    {
-        Log.v(
-            TAG,
-            "MeMoMaListener::prepareObjectInputDialog(), key: $selectedObjectKey"
-        )
-        //  ダイアログの準備を行う
-        objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey)
-    }
-
-    /**
-     * アイテム選択ダイアログの表示を準備する
-     */
-    private fun prepareItemSelectionDialog(dialog: Dialog)
-    {
-        // アイテム選択ダイアログの表示設定
-        // (動的変更時。。。今回は固定なので何もしない）
-    }
-
-    /**
-     * 接続線選択用ダイアログの表示を準備する
-     *
-     */
-    private fun prepareLineSelectionDialog(dialog: AlertDialog)
-    {
-        Log.v(
-            TAG,
-            "MeMoMaListener::prepareLineSelectionDialog(), key: $selectedObjectKey"
-        )
-        //  ダイアログの準備を行う
-        lineSelectionDialog.prepareSelectLineShapeDialog(dialog, selectedObjectKey)
+        try
+        {
+            val message = parent.title as String
+            editTextDialog.prepare(dialog, this, parent.getString(R.string.dataTitle), message, true)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -654,14 +699,37 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         try
         {
             // 設定画面を呼び出す
-            val prefIntent = Intent(parent, Preference::class.java)
-            parent.startActivityForResult(prefIntent, MENU_ID_PREFERENCES)
+            val intent = Intent(parent, Preference::class.java)
+
+            val launcher =
+                parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+                    if (result?.resultCode == Activity.RESULT_OK) {
+                        result.data?.let { data: Intent ->
+                            try
+                            {
+                                // 背景色、背景画像の設定を行う。
+                                val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+                                val colorString = preferences.getString("backgroundColor", "#ff004000") ?: "#ff004000"
+                                objectDrawer.setBackgroundColor(colorString)
+
+                                // 背景画像イメージの更新処理
+                                val backgroundString = preferences.getString("backgroundUri", "") ?: ""
+                                updateBackgroundImage(backgroundString)
+                                Log.v(TAG, "RETURNED PREFERENCES $backgroundString")
+                            }
+                            catch (e: Exception)
+                            {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                }
+            launcher.launch(intent)
         }
         catch (e: Exception)
         {
             // 例外発生...なにもしない。
             e.printStackTrace()
-            //updater.showMessage("ERROR", MainUpdater.SHOWMETHOD_DONTCARE);
         }
     }
 
@@ -671,12 +739,19 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun setLineStyle()
     {
-        val buttonId = LineStyleHolder.getLineShapeImageId(
-            lineStyleHolder.lineStyle,
-            lineStyleHolder.lineShape
-        )
-        val lineStyleObj = parent.findViewById<ImageButton>(R.id.LineStyleButton)
-        lineStyleObj.setImageResource(buttonId)
+        try
+        {
+            val buttonId = LineStyleHolder.getLineShapeImageId(
+                lineStyleHolder.getLineStyle(),
+                lineStyleHolder.getLineShape()
+            )
+            val lineStyleObj = parent.findViewById<ImageButton>(R.id.LineStyleButton)
+            lineStyleObj.setImageResource(buttonId)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -684,12 +759,19 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     override fun objectCreated()
     {
-        // ここで動作モードを移動モードに戻す。
-        drawModeHolder.changeOperationMode(OperationModeHolder.OPERATIONMODE_MOVE)
-        updateButtons(OperationModeHolder.OPERATIONMODE_MOVE)
+        try
+        {
+            // ここで動作モードを移動モードに戻す。
+            drawModeHolder.changeOperationMode(OperationModeHolder.OPERATIONMODE_MOVE)
+            updateButtons(OperationModeHolder.OPERATIONMODE_MOVE)
 
-        // 画面を再描画する
-        redrawSurfaceView()
+            // 画面を再描画する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -726,11 +808,11 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         // OKボタンの生成
         alertDialogBuilder.setPositiveButton(
             parent.getString(R.string.confirmYes)
-        ) { dialog, id -> //  削除モードの時... 確認後削除だけど、今は確認なしで削除を行う。
+        ) { dialog, _ -> //  削除モードの時... 確認後削除だけど、今は確認なしで削除を行う。
             objectHolder.removePosition(objectKeyToDelete)
 
             // 削除するオブジェクトに接続されている線もすべて削除する
-            objectHolder.connectLineHolder.removeAllConnection(objectKeyToDelete)
+            objectHolder.getConnectLineHolder().removeAllConnection(objectKeyToDelete)
 
             // ダイアログを閉じる
             dialog.dismiss()
@@ -747,7 +829,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         // Cancelボタンの生成
         alertDialogBuilder.setNegativeButton(
             parent.getString(R.string.confirmNo)
-        ) { dialog, id -> dialog.cancel() }
+        ) { dialog, _ -> dialog.cancel() }
 
         // ダイアログはキャンセル可能に設定する
         alertDialogBuilder.setCancelable(true)
@@ -787,12 +869,20 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      *
      *
      */
-    private fun expandObject(key: Int) {
-        // 選択中オブジェクトを拡大する
-        objectHolder.expandObjectSize(key)
+    private fun expandObject(key: Int)
+    {
+        try
+        {
+            // 選択中オブジェクトを拡大する
+            objectHolder.expandObjectSize(key)
 
-        // 画面を再描画する
-        redrawSurfaceView()
+            // 画面を再描画する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -800,24 +890,38 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      *
      *
      */
-    private fun shrinkObject(key: Int) {
-        // 選択中オブジェクトを縮小する
-        objectHolder.shrinkObjectSize(key)
+    private fun shrinkObject(key: Int)
+    {
+        try
+        {
+            // 選択中オブジェクトを縮小する
+            objectHolder.shrinkObjectSize(key)
 
-        // 画面を再描画する
-        redrawSurfaceView()
+            // 画面を再描画する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    private fun setButtonBorder(button: ImageButton, isHighlight: Boolean) {
-        try {
+    private fun setButtonBorder(button: ImageButton, isHighlight: Boolean)
+    {
+        try
+        {
             val btnBackgroundShape = button.background as BitmapDrawable
-            if (isHighlight) {
+            if (isHighlight)
+            {
                 btnBackgroundShape.setColorFilter(Color.BLUE, PorterDuff.Mode.LIGHTEN)
-            } else {
+            }
+            else
+            {
                 btnBackgroundShape.setColorFilter(Color.BLACK, PorterDuff.Mode.LIGHTEN)
             }
-        } catch (ex: Exception) {
-            //
+        }
+        catch (ex: Exception)
+        {
             Log.v(TAG, "MeMoMaListener::setButtonBorder(): $ex")
         }
     }
@@ -826,19 +930,32 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      * ボタンを更新する
      *
      */
-    private fun updateButtons(mode: Int) {
-        val createObjectButton = parent.findViewById<ImageButton>(R.id.CreateObjectButton)
-        val deleteObjectButton = parent.findViewById<ImageButton>(R.id.DeleteObjectButton)
-        if (mode == OperationModeHolder.OPERATIONMODE_DELETE) {
-            setButtonBorder(createObjectButton, false)
-            setButtonBorder(deleteObjectButton, true)
-        } else if (mode == OperationModeHolder.OPERATIONMODE_CREATE) {
-            setButtonBorder(createObjectButton, true)
-            setButtonBorder(deleteObjectButton, false)
-        } else  // if (mode == OperationModeHolder.OPERATIONMODE_MOVE)
+    private fun updateButtons(mode: Int)
+    {
+        try
         {
-            setButtonBorder(createObjectButton, false)
-            setButtonBorder(deleteObjectButton, false)
+            val createObjectButton = parent.findViewById<ImageButton>(R.id.CreateObjectButton)
+            val deleteObjectButton = parent.findViewById<ImageButton>(R.id.DeleteObjectButton)
+            when (mode)
+            {
+                OperationModeHolder.OPERATIONMODE_DELETE -> {
+                    setButtonBorder(createObjectButton, false)
+                    setButtonBorder(deleteObjectButton, true)
+                }
+                OperationModeHolder.OPERATIONMODE_CREATE -> {
+                    setButtonBorder(createObjectButton, true)
+                    setButtonBorder(deleteObjectButton, false)
+                }
+                else  // if (mode == OperationModeHolder.OPERATIONMODE_MOVE)
+                -> {
+                    setButtonBorder(createObjectButton, false)
+                    setButtonBorder(deleteObjectButton, false)
+                }
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
@@ -846,112 +963,68 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      * オブジェクトが選択された（長押しで！）
      *
      */
-    override fun objectSelectedContext(key: Int?) {
-        Log.v(TAG, "MeMoMaListener::objectSelectedContext(),  key:$key")
-        selectedContextKey = key?: 0
+    override fun objectSelectedContext(key: Int?)
+    {
+        try
+        {
+            Log.v(TAG, "MeMoMaListener::objectSelectedContext(),  key:$key")
+            selectedContextKey = key?: 0
 
-        // オブジェクトのアイテム選択ダイアログを表示する...
-        parent.showDialog(MENU_ID_OPERATION)
+            //  ダイアログの準備を行う
+            val dialog = objectDataInputDialog.getDialog()
+            objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey)
+            dialog.show()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * オブジェクトが選択された！
      *
      */
-    override fun objectSelected(key: Int?): Boolean {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val operationMode = preferences.getString("operationMode", "0")?.toInt()
-        if ((operationMode == OperationModeHolder.OPERATIONMODE_DELETE)&&(key != null))
+    override fun objectSelected(key: Int?): Boolean
+    {
+        try
         {
-            // オブジェクトを削除する
-            removeObject(key)
-            return true
-        }
-        run {
-            try
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val operationMode = preferences.getString("operationMode", "0")?.toInt()
+            if ((operationMode == OperationModeHolder.OPERATIONMODE_DELETE)&&(key != null))
             {
-                if (key != null) {
-                    // 選択されたオブジェクトを記憶する
-                    selectedObjectKey = key
-                    Log.v(TAG, "MeMoMaListener::objectSelected() key : $key")
+                // オブジェクトを削除する
+                removeObject(key)
+                return true
+            }
+            run {
+                try
+                {
+                    if (key != null)
+                    {
+                        // 選択されたオブジェクトを記憶する
+                        selectedObjectKey = key
+                        Log.v(TAG, "MeMoMaListener::objectSelected() key : $key")
 
-                    // オブジェクトの詳細設定ダイアログを表示する...
-                    parent.showDialog(R.id.objectinput_dialog)
+                        // オブジェクトの詳細設定ダイアログを表示する...
+                        val dialog = objectDataInputDialog.getDialog()
+                        objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey)
+                        dialog.show()
+                    }
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
                 }
             }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
-            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
         return true
     }
 
-    /**
-     * ダイアログの生成
-     *
-     */
-/*
-    fun onCreateDialog(id: Int): Dialog?
-    {
-        if (id == R.id.info_about_gokigen) {
-            // クレジットダイアログを表示
-            //val dialog = CreditDialog(parent)
-            //return dialog.dialog
-        }
-        if (id == R.id.editTextArea) {
-            // 変更するテキストを表示
-            return editTextDialog.dialog
-        }
-        if (id == R.id.confirmation) {
-            // 確認するメッセージを表示する
-            return confirmationDialog.dialog
-        }
-        if (id == R.id.objectinput_dialog) {
-            // オブジェクト入力のダイアログを表示する
-            return objectDataInputDialog.getDialog()
-        }
-        if (id == MENU_ID_OPERATION) {
-            // アイテム選択ダイアログの準備を行う
-            return itemSelectionDialog.dialog
-        }
-        return if (id == R.id.selectline_dialog) {
-            // 接続線選択ダイアログの準備を行う
-            lineSelectionDialog.getDialog()
-        } else null
-    }
-*/
-
-    /**
-     * ダイアログ表示の準備
-     *
-     */
-/*
-    fun onPrepareDialog(id: Int, dialog: AlertDialog) {
-        if (id == R.id.editTextArea) {
-            // 変更するデータを表示する
-            prepareInfoMessageEditDialog(dialog)
-            return
-        }
-        if (id == R.id.confirmation) {
-            // 確認ダイアログを表示する。
-            prepareConfirmationDialog(dialog)
-            return
-        }
-        if (id == R.id.objectinput_dialog) {
-            // オブジェクト入力のダイアログを表示する
-            prepareObjectInputDialog(dialog)
-        }
-        if (id == MENU_ID_OPERATION) {
-            // オブジェクト操作選択のダイアログを表示する
-            prepareItemSelectionDialog(dialog)
-        }
-        if (id == R.id.selectline_dialog) {
-            // 接続線選択のダイアログを表示する
-            prepareLineSelectionDialog(dialog)
-        }
-    }
-*/
     /**
      * 新規状態に変更する。
      *
@@ -966,7 +1039,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
             // オブジェクトデータをクリアする。
             objectHolder.removeAllPositions() // オブジェクトの保持クラス
-            objectHolder.connectLineHolder.removeAllLines() // オブジェクト間の接続状態保持クラス
+            objectHolder.getConnectLineHolder().removeAllLines() // オブジェクト間の接続状態保持クラス
 
             // 画面の倍率と表示位置を初期状態に戻す
             val zoomBar = parent.findViewById<SeekBar>(R.id.ZoomInOut)
@@ -988,11 +1061,15 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      * 画面を再描画する
      *
      */
-    private fun redrawSurfaceView() {
-        try {
+    private fun redrawSurfaceView()
+    {
+        try
+        {
             val surfaceView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
             surfaceView.doDraw()
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             e.printStackTrace()
         }
     }
@@ -1010,17 +1087,32 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      *
      */
     override fun objectAligned() {
-        // 画面の再描画を指示する
-        redrawSurfaceView()
+        try
+        {
+            // 画面の再描画を指示する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
      *
      */
-    override fun finishObjectInput() {
-        // 画面の再描画を指示する
-        redrawSurfaceView()
+    override fun finishObjectInput()
+    {
+        try
+        {
+            // 画面の再描画を指示する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -1035,24 +1127,37 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      * アイテムが選択された！
      *
      */
-    override fun itemSelected(index: Int, itemValue: String) {
-        //
-        Log.v(TAG, "MeMoMaListener::itemSelected() : $itemValue [$index]")
-        if (index == ObjectOperationCommandHolder.OBJECTOPERATION_DELETE) {
-            // オブジェクト削除の確認
-            removeObject(selectedContextKey)
-        } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_DUPLICATE) {
-            // オブジェクトの複製
-            duplicateObject(selectedContextKey)
-        } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_SIZEBIGGER) {
-            // オブジェクトの拡大
-            expandObject(selectedContextKey)
-        } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_SIZESMALLER) {
-            // オブジェクトの縮小
-            shrinkObject(selectedContextKey)
-        } else if (index == ObjectOperationCommandHolder.OBJECTOPERATION_SHARE) {
-            // オブジェクトの共有
-            shareObject(selectedContextKey)
+    override fun itemSelected(index: Int, itemValue: String)
+    {
+        try
+        {
+            Log.v(TAG, "MeMoMaListener::itemSelected() : $itemValue [$index]")
+            when (index) {
+                ObjectOperationCommandHolder.OBJECTOPERATION_DELETE -> {
+                    // オブジェクト削除の確認
+                    removeObject(selectedContextKey)
+                }
+                ObjectOperationCommandHolder.OBJECTOPERATION_DUPLICATE -> {
+                    // オブジェクトの複製
+                    duplicateObject(selectedContextKey)
+                }
+                ObjectOperationCommandHolder.OBJECTOPERATION_SIZEBIGGER -> {
+                    // オブジェクトの拡大
+                    expandObject(selectedContextKey)
+                }
+                ObjectOperationCommandHolder.OBJECTOPERATION_SIZESMALLER -> {
+                    // オブジェクトの縮小
+                    shrinkObject(selectedContextKey)
+                }
+                ObjectOperationCommandHolder.OBJECTOPERATION_SHARE -> {
+                    // オブジェクトの共有
+                    shareObject(selectedContextKey)
+                }
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
@@ -1107,10 +1212,18 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      * 接続線
      *
      */
-    override fun finishSelectLineShape(style: Int, shape: Int, thickness: Int) {
-        val buttonId = LineStyleHolder.getLineShapeImageId(style, shape)
-        val lineStyleObj = parent.findViewById<ImageButton>(R.id.LineStyleButton)
-        lineStyleObj.setImageResource(buttonId)
+    override fun finishSelectLineShape(style: Int, shape: Int, thickness: Int)
+    {
+        try
+        {
+            val buttonId = LineStyleHolder.getLineShapeImageId(style, shape)
+            val lineStyleObj = parent.findViewById<ImageButton>(R.id.LineStyleButton)
+            lineStyleObj.setImageResource(buttonId)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -1120,16 +1233,5 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     companion object {
         private val TAG = MeMoMaListener::class.java.simpleName
-        private const val MENU_ID_PREFERENCES = Menu.FIRST + 1 // 設定画面の表示
-        private const val MENU_ID_ABOUT_GOKIGEN = Menu.FIRST + 2 // アプリケーションの情報表示
-        private const val MENU_ID_NEW = Menu.FIRST + 3 // 新規作成
-        private const val MENU_ID_EXTEND = Menu.FIRST + 4 // 拡張機能
-        private const val MENU_ID_ALIGN = Menu.FIRST + 5 // オブジェクトの整列
-        private const val MENU_ID_INSERT_PICTURE = Menu.FIRST + 6 // 画像の指定
-        private const val MENU_ID_OPERATION = Menu.FIRST + 7 // 操作コマンド
-        private const val MENU_ID_RENAME = Menu.FIRST + 8 // リネーム
-        private const val MENU_ID_CAPTURE = Menu.FIRST + 9 // 画像のキャプチャ
-        private const val MENU_ID_SHARE = Menu.FIRST + 10 // 画像の共有
-        private const val MENU_ID_UNDO = Menu.FIRST + 11 // 処理の UNDO
     }
 }

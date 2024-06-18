@@ -30,8 +30,6 @@ import kotlin.math.pow
 
 /**
  * メモまの描画クラス
- *
- * @author MRSa
  */
 class MeMoMaCanvasDrawer(
     private val parent: AppCompatActivity,
@@ -68,9 +66,8 @@ class MeMoMaCanvasDrawer(
     private var displayObjectInformation = 1 // オブジェクトラベルの表示
 
     private var backgroundBitmapUri: String = ""
-    private lateinit var backgroundBitmap: Bitmap
-
-    private val lineHolder: MeMoMaConnectLineHolder = objectHolder.connectLineHolder
+    private var backgroundBitmap: Bitmap? = null
+    private val lineHolder: MeMoMaConnectLineHolder = objectHolder.getConnectLineHolder()
 
     // ジェスチャを検出するクラスを生成する
     private val gestureDetector = GestureDetector(parent, this)
@@ -124,7 +121,7 @@ class MeMoMaCanvasDrawer(
 
             // 背景画像を取得して設定する。
             backgroundBitmap =
-                ImageLoader.getBitmapFromUri(parent, ImageLoader.parseUri(uri), width, height)
+                ImageLoader().getBitmapFromUri(parent, ImageLoader().parseUri(uri), width, height)
         }
         catch (ex: Throwable)
         {
@@ -206,9 +203,9 @@ class MeMoMaCanvasDrawer(
             canvas.drawColor(backgroundColor)
 
             // 背景画像が設定されていた場合は、背景画像を描画する
-            if (::backgroundBitmap.isInitialized)
+            if (backgroundBitmap != null)
             {
-                canvas.drawBitmap(backgroundBitmap, 0f, 0f, Paint())
+                canvas.drawBitmap(backgroundBitmap!!, 0f, 0f, Paint())
             }
 
             // 表示位置を移動させる
@@ -248,9 +245,9 @@ class MeMoMaCanvasDrawer(
             canvas.drawColor(backgroundColor)
 
             // 背景画像が設定されていた場合は、背景画像を描画する
-            if (::backgroundBitmap.isInitialized)
+            if (backgroundBitmap != null)
             {
-                canvas.drawBitmap(backgroundBitmap, offsetX, offsetY, paint)
+                canvas.drawBitmap(backgroundBitmap!!, offsetX, offsetY, paint)
             }
 
             // オブジェクト間の接続線をすべて表示する
@@ -268,7 +265,7 @@ class MeMoMaCanvasDrawer(
             paint.style = Paint.Style.FILL_AND_STROKE
             paint.setShadowLayer(0.5f, 0.5f, 0.5f, Color.DKGRAY)
             paint.textSize = DATA_LABEL_TEXT_SIZE.toFloat()
-            canvas.drawText(objectHolder.dataTitle, (bitmap.width + 10.0f), 32.0f, paint)
+            canvas.drawText(objectHolder.getDataTitle(), (bitmap.width + 10.0f), 32.0f, paint)
         }
         catch (ex: Exception)
         {
@@ -299,12 +296,15 @@ class MeMoMaCanvasDrawer(
         while (keys.hasMoreElements()) {
             val key = keys.nextElement()
             val line = lineHolder.getLine(key)
-            if (line.key > 0) {
-                // 実際にラインを引く
-                drawLine(canvas, paint, dashLinePaint, line, offsetX, offsetY)
-            } else {
-                // ここは呼ばれないはず。。。消したはずのものが残っている
-                Log.v(TAG, "DETECTED DELETED LINE")
+            if (line != null)
+            {
+                if (line.getKey() > 0) {
+                    // 実際にラインを引く
+                    drawLine(canvas, paint, dashLinePaint, line, offsetX, offsetY)
+                } else {
+                    // ここは呼ばれないはず。。。消したはずのものが残っている
+                    Log.v(TAG, "DETECTED DELETED LINE")
+                }
             }
         }
     }
@@ -317,7 +317,7 @@ class MeMoMaCanvasDrawer(
         canvas: Canvas?,
         paint: Paint,
         dashPaint: Paint,
-        line: ObjectConnector,
+        line: ObjectConnector?,
         offsetX: Float,
         offsetY: Float
     )
@@ -329,9 +329,14 @@ class MeMoMaCanvasDrawer(
                 // なにもしない
                 return
             }
+            if (line == null)
+            {
+                // なにもしない
+                return
+            }
 
-            val from = objectHolder.getPosition(line.fromObjectKey)
-            val to = objectHolder.getPosition(line.toObjectKey)
+            val from = objectHolder.getPosition(line.getFromObjectKey())
+            val to = objectHolder.getPosition(line.getToObjectKey())
             if ((from == null) || (to == null))
             {
                 // なにもしない
@@ -339,18 +344,18 @@ class MeMoMaCanvasDrawer(
             }
 
             // ラインの太さを設定する。
-            paint.strokeWidth = line.lineThickness.toFloat()
+            paint.strokeWidth = line.getLineThickness().toFloat()
 
             // ラインの太さを設定する。
-            dashPaint.strokeWidth = line.lineThickness.toFloat()
+            dashPaint.strokeWidth = line.getLineThickness().toFloat()
 
             // ラインのスタイル(連続線 or 点線)を設定する
             val linePaint =
-                if ((line.lineShape == LineStyleHolder.LINESHAPE_DASH)) dashPaint else paint
+                if ((line.getLineShape() == LineStyleHolder.LINESHAPE_DASH)) dashPaint else paint
 
             // 初期値として、各オブジェクトの中心座標を設定する
-            val fromRect = from.rect
-            val toRect = to.rect
+            val fromRect = from.getRect()
+            val toRect = to.getRect()
             var startX = fromRect.centerX() + offsetX
             var endX = toRect.centerX() + offsetX
             var startY = fromRect.centerY() + offsetY
@@ -376,7 +381,7 @@ class MeMoMaCanvasDrawer(
                 }
             }
 
-            val lineStyle = line.lineStyle
+            val lineStyle = line.getLineStyle()
             if ((lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_NO_ARROW) ||
                 (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_L_ARROW) ||
                 (lineStyle == LineStyleHolder.LINESTYLE_TREESTYLE_R_ARROW)
@@ -490,8 +495,9 @@ class MeMoMaCanvasDrawer(
         val paint = Paint()
         paint.style = Paint.Style.STROKE
         paint.color = Color.GRAY
-        if (selectedPosition != null) {
-            val objRect = selectedPosition!!.rect
+        if (selectedPosition != null)
+        {
+            val objRect = selectedPosition!!.getRect()
             val objX = (objRect.right - objRect.left) / 2
             val objY = (objRect.bottom - objRect.top) / 2
             canvas.drawLine(objRect.centerX(), objRect.centerY(), x, y, paint)
@@ -542,20 +548,20 @@ class MeMoMaCanvasDrawer(
             paint.style = Paint.Style.STROKE
             paint.strokeWidth = `object`.getstrokeWidth()
         } else {
-            paint.color = `object`.objectColor
-            paint.style = Paint.Style.valueOf(`object`.paintStyle)
+            paint.color = `object`.getObjectColor()
+            paint.style = Paint.Style.valueOf(`object`.getPaintStyle())
             paint.strokeWidth = `object`.getstrokeWidth()
         }
 
 
         // 図形の形状に合わせて描画する
-        val objectShape = RectF(`object`.rect)
+        val objectShape = RectF(`object`.getRect())
         objectShape.left += offsetX
         objectShape.right += offsetX
         objectShape.top += offsetY
         objectShape.bottom += offsetY
 
-        val drawStyle = `object`.drawStyle
+        val drawStyle = `object`.getDrawStyle()
         if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_OVAL) {
             // 楕円形の描画
             labelOffsetY = ObjectShapeDrawer.drawObjectOval(canvas, objectShape, paint)
@@ -584,14 +590,14 @@ class MeMoMaCanvasDrawer(
                 canvas,
                 objectShape,
                 paint,
-                Paint.Style.valueOf(`object`.paintStyle)
+                Paint.Style.valueOf(`object`.getPaintStyle())
             )
         } else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE) {
             // 円を描画する
             labelOffsetY = ObjectShapeDrawer.drawObjectCircle(canvas, objectShape, paint)
         } else if (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_NO_REGION) {
             // 枠なしを描画（？）する ... なにもしない
-            if (`object`.label.isEmpty()) {
+            if (`object`.getLabel().isEmpty()) {
                 // 何も表示しないとわからないので、ラベルが無いときには枠を表示する
                 ObjectShapeDrawer.drawObjectNoRegion(canvas, objectShape, paint)
             }
@@ -620,7 +626,7 @@ class MeMoMaCanvasDrawer(
         }
 
         // 文字サイズを設定する。
-        paint.textSize = `object`.fontSize
+        paint.textSize = `object`.getFontSize()
 
         // 文字ラベルを表示する
         ObjectShapeDrawer.drawTextLabel(
@@ -639,11 +645,17 @@ class MeMoMaCanvasDrawer(
      */
     private fun drawObjects(canvas: Canvas, offsetX: Float, offsetY: Float) {
         // オブジェクトの描画 （保持しているものはすべて表示する）
-        val keys = objectHolder.objectKeys
-        while (keys.hasMoreElements()) {
-            val key = keys.nextElement()
-            val pos = objectHolder.getPosition(key)
-            drawObject(canvas, pos, false, offsetX, offsetY)
+        val keys = objectHolder.getObjectKeys()
+        if (keys != null)
+        {
+            while (keys.hasMoreElements()) {
+                val key = keys.nextElement()
+                val pos = objectHolder.getPosition(key)
+                if (pos != null)
+                {
+                    drawObject(canvas, pos, false, offsetX, offsetY)
+                }
+            }
         }
     }
 
@@ -740,7 +752,7 @@ class MeMoMaCanvasDrawer(
             return (true)
         }
 
-        val selectedRect = selectedPosition!!.rect
+        val selectedRect = selectedPosition!!.getRect()
         if (selectedRect.contains(x, y)) {
             //  タッチが離された位置がタッチしたオブジェクトと同じ位置だった場合......
 
@@ -762,7 +774,7 @@ class MeMoMaCanvasDrawer(
             //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。
             Log.v(TAG, " ITEM SELECTED :$x,$y")
             // アイテムが選択されたよ！と教える
-            val isDraw = selectionReceiver.objectSelected(selectedPosition!!.key)
+            val isDraw = selectionReceiver.objectSelected(selectedPosition!!.getKey())
 
             // 移動位置をクリアする
             tempPosX = Float.MIN_VALUE
@@ -775,7 +787,7 @@ class MeMoMaCanvasDrawer(
         if ((position != null) && (!longPress)) {
             // 他のオブジェクトと重なるように操作した、この場合は、オブジェクト間を線をつなげる
             // （ただし、ボタンを長押ししていなかったとき。）
-            lineHolder.setLines(selectedPosition!!.key, position.key, lineStyleHolder)
+            lineHolder.setLines(selectedPosition!!.getKey(), position.getKey(), lineStyleHolder)
             tempPosX = Float.MIN_VALUE
             tempPosY = Float.MIN_VALUE
             return (true)
@@ -800,7 +812,7 @@ class MeMoMaCanvasDrawer(
      *
      */
     private fun moveObjectPosition(x: Float, y: Float) {
-        val curRect = selectedPosition!!.rect
+        val curRect = selectedPosition!!.getRect()
         tempPosX = Float.MIN_VALUE
         tempPosY = Float.MIN_VALUE
         val sizeX = curRect.right - curRect.left
@@ -808,8 +820,8 @@ class MeMoMaCanvasDrawer(
 
         val positionX = alignPosition(x, (sizeX / 2) * (-1))
         val positionY = alignPosition(y, (sizeY / 2) * (-1))
-        selectedPosition!!.rect =
-            RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY))
+        selectedPosition!!.setRect(
+            RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY)))
     }
 
     /**
@@ -873,20 +885,24 @@ class MeMoMaCanvasDrawer(
      *
      */
     private fun checkSelectedObject(x: Float, y: Float): PositionObject? {
-        val keys = objectHolder.objectKeys
+        val keys = objectHolder.getObjectKeys()
         //Log.v(Main.APP_IDENTIFIER, "CHECK POS "  + x + "," + y);
-        while (keys.hasMoreElements()) {
-            val key = keys.nextElement()
-            val pos = objectHolder.getPosition(key)
-            val posRect = pos.rect
-            if (posRect.contains(x, y)) {
-                Log.v(
-                    TAG,
-                    "SELECTED :" + posRect.centerX() + "," + posRect.centerY() + " KEY :" + key
-                )
-                return (pos)
+        if (keys != null) {
+            while (keys.hasMoreElements()) {
+                val key = keys.nextElement()
+                val pos = objectHolder.getPosition(key)
+                if (pos != null) {
+                    val posRect = pos.getRect()
+                    if (posRect.contains(x, y)) {
+                        Log.v(
+                            TAG,
+                            "SELECTED :" + posRect.centerX() + "," + posRect.centerY() + " KEY :" + key
+                        )
+                        return (pos)
+                    }
+                }
+                //Log.v(Main.APP_IDENTIFIER, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
             }
-            //Log.v(Main.APP_IDENTIFIER, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
         }
         //Log.v(Main.APP_IDENTIFIER, "RETURN NULL...");
         return (null)
@@ -906,26 +922,29 @@ class MeMoMaCanvasDrawer(
             while (keys.hasMoreElements()) {
                 val key = keys.nextElement()
                 val line = lineHolder.getLine(key)
-                if (line.key > 0) {
-                    // 線の始点と終点を取り出す
-                    val fromRect = objectHolder.getPosition(line.fromObjectKey).rect
-                    val toRect = objectHolder.getPosition(line.toObjectKey).rect
-
-                    // 線が交差しているかチェックする
-                    if (checkIntersection(
-                            startX,
-                            startY,
-                            endX,
-                            endY,
-                            fromRect.centerX(),
-                            fromRect.centerY(),
-                            toRect.centerX(),
-                            toRect.centerY()
-                        )
-                    ) {
-                        // 線が交差していた！ 線を切る！
-                        //Log.v(Main.APP_IDENTIFIER, "CUT LINE [" +  from.rect.centerX() + "," +  from.rect.centerY() +"]-[" + to.rect.centerX() + "," + to.rect.centerY() + "]");
-                        lineHolder.disconnectLines(line.key)
+                if (line != null) {
+                    if (line.getKey() > 0) {
+                        // 線の始点と終点を取り出す
+                        val fromRect = objectHolder.getPosition(line.getFromObjectKey())?.getRect()
+                        val toRect = objectHolder.getPosition(line.getToObjectKey())?.getRect()
+                        if ((fromRect != null)&&(toRect != null)) {
+                            // 線が交差しているかチェックする
+                            if (checkIntersection(
+                                    startX,
+                                    startY,
+                                    endX,
+                                    endY,
+                                    fromRect.centerX(),
+                                    fromRect.centerY(),
+                                    toRect.centerX(),
+                                    toRect.centerY()
+                                )
+                            ) {
+                                // 線が交差していた！ 線を切る！
+                                //Log.v(Main.APP_IDENTIFIER, "CUT LINE [" +  from.rect.centerX() + "," +  from.rect.centerY() +"]-[" + to.rect.centerX() + "," + to.rect.centerY() + "]");
+                                lineHolder.disconnectLines(line.getKey())
+                            }
+                        }
                     }
                 }
             }
@@ -1093,7 +1112,7 @@ class MeMoMaCanvasDrawer(
             onGestureProcessed = true
 
             // タッチした場所にオブジェクトが存在した！！
-            selectionReceiver.objectSelectedContext(position.key)
+            selectionReceiver.objectSelectedContext(position.getKey())
         }
     }
 

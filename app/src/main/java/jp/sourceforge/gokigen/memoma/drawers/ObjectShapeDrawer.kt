@@ -353,20 +353,20 @@ object ObjectShapeDrawer {
         offsetY: Float
     ) {
         // タイトルの先頭部分を表示する場合...
-        var labelToShow = pos.label
+        var labelToShow = pos.getLabel()
         if (displayObjectInformation == 0) {
             val width = region.width() - MeMoMaCanvasDrawer.OBJECT_LABEL_MARGIN_WIDTH
-            val textLen = paint.breakText(pos.label, true, width, null) // 省略文字を追加するから、そのぶん減らす
+            val textLen = paint.breakText(pos.getLabel(), true, width, null) // 省略文字を追加するから、そのぶん減らす
             labelToShow = labelToShow.substring(0, textLen)
-            if (labelToShow != pos.label) {
+            if (labelToShow != pos.getLabel()) {
                 // truncate した場合には、省略文字を出す。
                 labelToShow = "$labelToShow..."
             }
         }
 
-        if (Paint.Style.valueOf(pos.paintStyle) != Paint.Style.STROKE) {
+        if (Paint.Style.valueOf(pos.getPaintStyle()) != Paint.Style.STROKE) {
             // オブジェクトを塗りつぶすのときは、文字の色を設定する
-            paint.color = pos.labelColor
+            paint.color = pos.getLabelColor()
         }
 
         // 文字をちょっと影付きにする
@@ -374,7 +374,7 @@ object ObjectShapeDrawer {
         paint.setShadowLayer(0.7f, 0.7f, 0.7f, Color.DKGRAY)
 
         // ユーザチェックの描画
-        if (pos.userChecked) {
+        if (pos.getUserChecked()) {
             canvas.drawText(
                 "*",
                 region.centerX(),
@@ -407,9 +407,9 @@ object ObjectShapeDrawer {
         val width = region.right - region.left - 12.0f // 幅
 
         var startChar = 0
-        val endChar = pos.label.length
+        val endChar = pos.getLabel().length
         do {
-            val textLen = paint.breakText(pos.label, startChar, endChar, true, width, null)
+            val textLen = paint.breakText(pos.getLabel(), startChar, endChar, true, width, null)
             canvas.drawText(labelToShow, startChar, (startChar + textLen), posX, posY, paint)
 
             posY -= tall

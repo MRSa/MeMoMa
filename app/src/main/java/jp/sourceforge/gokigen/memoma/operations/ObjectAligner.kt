@@ -51,21 +51,37 @@ class ObjectAligner(context: Context, private val receiver: IAlignCallback?) :
     {
         try
         {
-            val objectHolder = datas[0]
+            doAlignObject(datas[0])
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return ("")
+    }
+
+    fun doAlignObject(objectHolder: MeMoMaObjectHolder?)
+    {
+        try
+        {
             // オブジェクトの出力 （保持しているものはすべて表示する）
             if (objectHolder != null)
             {
-                val keys = objectHolder.objectKeys
-                while (keys.hasMoreElements())
-                {
-                    val key = keys.nextElement()
-                    val pos = objectHolder.getPosition(key)
-                    val posRect = pos.rect
-                    val newLeft = floor((posRect.left + 15.0f) / 30.0)
-                        .toFloat() * 30.0f
-                    val newTop = floor((posRect.top + 15.0f) / 30.0)
-                        .toFloat() * 30.0f
-                    pos.setRectOffsetTo(newLeft, newTop)
+                val keys = objectHolder.getObjectKeys()
+                if (keys != null) {
+                    while (keys.hasMoreElements()) {
+                        val key = keys.nextElement()
+                        val pos = objectHolder.getPosition(key)
+                        if (pos != null)
+                        {
+                            val posRect = pos.getRect()
+                            val newLeft = floor((posRect.left + 15.0f) / 30.0)
+                                .toFloat() * 30.0f
+                            val newTop = floor((posRect.top + 15.0f) / 30.0)
+                                .toFloat() * 30.0f
+                            pos.setRectOffsetTo(newLeft, newTop)
+                        }
+                    }
                 }
             }
             System.gc()
@@ -74,8 +90,20 @@ class ObjectAligner(context: Context, private val receiver: IAlignCallback?) :
         {
             e.printStackTrace()
         }
-        return ("")
     }
+
+    fun finishAlignObject()
+    {
+        try
+        {
+            receiver?.objectAligned()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
 
     /**
      * 非同期処理の進捗状況の更新
@@ -93,7 +121,7 @@ class ObjectAligner(context: Context, private val receiver: IAlignCallback?) :
     {
         try
         {
-            receiver?.objectAligned()
+            finishAlignObject()
         }
         catch (ex: Exception)
         {

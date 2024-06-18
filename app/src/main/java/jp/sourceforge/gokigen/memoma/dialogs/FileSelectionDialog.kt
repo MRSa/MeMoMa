@@ -74,7 +74,7 @@ class FileSelectionDialog(private val parent: Context, private val titleMessage:
     /**
      * ファイルダイアログのインタフェース
      */
-    interface IResultReceiver
+    fun interface IResultReceiver
     {
         fun selectedFileName(fileName: String?)
     }

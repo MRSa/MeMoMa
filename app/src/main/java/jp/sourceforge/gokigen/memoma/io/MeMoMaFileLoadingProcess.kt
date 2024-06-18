@@ -1,411 +1,233 @@
-package jp.sourceforge.gokigen.memoma.io;
+package jp.sourceforge.gokigen.memoma.io
 
-import java.io.File;
-import java.io.FileReader;
-
-import org.xmlpull.v1.XmlPullParser;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.RectF;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.util.Xml;
-
-import jp.sourceforge.gokigen.memoma.Main;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaConnectLineHolder;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
-import jp.sourceforge.gokigen.memoma.holders.ObjectConnector;
-import jp.sourceforge.gokigen.memoma.holders.PositionObject;
+import android.content.Context
+import android.graphics.RectF
+import android.util.Log
+import android.util.Xml
+import androidx.preference.PreferenceManager
+import jp.sourceforge.gokigen.memoma.Main
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
+import jp.sourceforge.gokigen.memoma.holders.ObjectConnector
+import jp.sourceforge.gokigen.memoma.holders.PositionObject
+import org.xmlpull.v1.XmlPullParser
+import java.io.File
+import java.io.FileReader
 
 /**
- *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
- *  AsyncTask
- *    MeMoMaObjectHolder : 実行時に渡すクラス(Param)
- *    Integer    : 途中経過を伝えるクラス(Progress)
- *    String     : 処理結果を伝えるクラス(Result)
- *    
- * @author MRSa
- *
+ * データをファイルに保存するとき用 アクセスラッパ (非同期処理を前提)
+ * MeMoMaObjectHolder : 実行時に渡すクラス(Param)
+ * Integer    : 途中経過を伝えるクラス(Progress)
+ * String     : 処理結果を伝えるクラス(Result)
  */
-public class MeMoMaFileLoadingProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
+class MeMoMaFileLoadingProcess(private val parent: Context, private val receiver: IResultReceiver)
 {
-    private final String TAG = toString();
-	private final Context parent;
-	private final IResultReceiver receiver;
+    private var position: PositionObject? = null
+    private var line: ObjectConnector? = null
+    private var backgroundUri = ""
+    private var userCheckboxString = ""
 
-	 private PositionObject position = null;
-	 private ObjectConnector line = null;
-
-	 private String backgroundUri = "";
-     private String userCheckboxString = "";
-	
-	/**
-	 *   コンストラクタ
-	 */
-    public MeMoMaFileLoadingProcess(Context context, IResultReceiver resultReceiver)
+    private fun parseStartTag(name: String, parser: XmlPullParser, objectHolder: MeMoMaObjectHolder)
     {
-    	parent = context;
-    	receiver = resultReceiver;
+        try
+        {
+            if ((name.equals("top", ignoreCase = true)) && (position != null)) {
+                position?.setRectTop(parser.nextText().toFloat())
+            } else if ((name.equals("bottom", ignoreCase = true)) && (position != null)) {
+                position?.setRectBottom(parser.nextText().toFloat())
+            } else if ((name.equals("left", ignoreCase = true)) && (position != null)) {
+                position?.setRectLeft(parser.nextText().toFloat())
+            } else if ((name.equals("right", ignoreCase = true)) && (position != null)) {
+                position?.setRectRight(parser.nextText().toFloat())
+            } else if ((name.equals("drawStyle", ignoreCase = true)) && (position != null)) {
+                position?.setDrawStyle(parser.nextText().toInt())
+            } else if ((name.equals("icon", ignoreCase = true)) && (position != null)) {
+                position?.setIcon(parser.nextText().toInt())
+            } else if ((name.equals("label", ignoreCase = true)) && (position != null)) {
+                position?.setLabel(parser.nextText())
+            } else if ((name.equals("detail", ignoreCase = true)) && (position != null)) {
+                position?.setDetail(parser.nextText())
+            } else if ((name.equals("userChecked", ignoreCase = true)) && (position != null)) {
+                val parseData = parser.nextText()
+                position?.setUserChecked(parseData.equals("true", ignoreCase = true))
+            } else if ((name.equals("labelColor", ignoreCase = true)) && (position != null)) {
+                position?.setLabelColor(parser.nextText().toInt())
+            } else if ((name.equals("objectColor", ignoreCase = true)) && (position != null)) {
+                position?.setObjectColor(parser.nextText().toInt())
+            } else if ((name.equals("paintStyle", ignoreCase = true)) && (position != null)) {
+                position?.setPaintStyle(parser.nextText())
+            } else if ((name.equals("strokeWidth", ignoreCase = true)) && (position != null)) {
+                position?.setStrokeWidth(parser.nextText().toFloat())
+            } else if ((name.equals("fontSize", ignoreCase = true)) && (position != null)) {
+                position?.setFontSize(parser.nextText().toFloat())
+            } else if ((name.equals("fromObjectKey", ignoreCase = true)) && (line != null)) {
+                line?.setFromObjectKey(parser.nextText().toInt())
+            } else if ((name.equals("toObjectKey", ignoreCase = true)) && (line != null)) {
+                line?.setToObjectKey(parser.nextText().toInt())
+            } else if ((name.equals("lineStyle", ignoreCase = true)) && (line != null)) {
+                line?.setLineStyle(parser.nextText().toInt())
+            } else if ((name.equals("lineShape", ignoreCase = true)) && (line != null)) {
+                line?.setLineShape(parser.nextText().toInt())
+            } else if ((name.equals("lineThickness", ignoreCase = true)) && (line != null)) {
+                line?.setLineThickness(parser.nextText().toInt())
+            } else if (name.equals("title", ignoreCase = true)) {
+                objectHolder.setDataTitle(parser.nextText())
+            } else if (name.equals("background", ignoreCase = true)) {
+                objectHolder.setBackground(parser.nextText())
+            } else if (name.equals("backgroundUri", ignoreCase = true)) {
+                backgroundUri = parser.nextText()
+            } else if (name.equals("userCheckboxString", ignoreCase = true)) {
+                userCheckboxString = parser.nextText()
+            } else if (name.equals("objserial", ignoreCase = true)) {
+                objectHolder.setSerialNumber(parser.nextText().toInt())
+            } else if (name.equals("lineserial", ignoreCase = true)) {
+                objectHolder.getConnectLineHolder().setSerialNumber(parser.nextText().toInt())
+            } else if (name.equals("object", ignoreCase = true)) {
+                val key = parser.getAttributeValue(Main.APP_NAMESPACE, "key").toInt()
+                position = objectHolder.createPosition(key)
+            } else if (name.equals("line", ignoreCase = true)) {
+                val key = parser.getAttributeValue(Main.APP_NAMESPACE, "key").toInt()
+                line = objectHolder.getConnectLineHolder().createLine(key)
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    /**
-     *  非同期処理実施前の前処理
-     * 
-     */
-    @Override
-    protected void onPreExecute()
+    private fun parseEndTag(name: String)
     {
-         // 今回は何もしない
-    }
+        try
+        {
+            if (position == null)
+            {
+                Log.v(TAG, "Specified position is null...")
+                return
+            }
 
-    private void parseStartTag(String name, XmlPullParser parser, MeMoMaObjectHolder objectHolder)
-    {
-    	try
-    	{
-	    	//Log.v(Main.APP_IDENTIFIER, "parseStartTag() name = " + name);
-            if ((name.equalsIgnoreCase("top"))&&(position != null))
+            if (name.equals("object", ignoreCase = true))
             {
-            	position.setRectTop(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("bottom"))&&(position != null))
-            {
-            	position.setRectBottom(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("left"))&&(position != null))
-            {
-            	position.setRectLeft(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("right"))&&(position != null))
-            {
-            	position.setRectRight(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("drawStyle"))&&(position != null))
-            {
-            	position.setDrawStyle(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("icon"))&&(position != null))
-            {
-            	position.setIcon(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("label"))&&(position != null))
-            {
-            	position.setLabel(parser.nextText());
-            }
-            else if ((name.equalsIgnoreCase("detail"))&&(position != null))
-            {
-            	position.setDetail(parser.nextText());
-            }
-/*
-            else if ((name.equalsIgnoreCase("backgroundUri"))&&(position != null))
-            {
-            	position.backgroundUri = parser.nextText();            	            	
-            }
-            else if ((name.equalsIgnoreCase("otherInfoUri"))&&(position != null))
-            {
-            	position.otherInfoUri = parser.nextText();            	            	
-            }
-            else if ((name.equalsIgnoreCase("objectStatus"))&&(position != null))
-            {
-            	position.objectStatus = parser.nextText();            	
-            }
-**/
-            else if ((name.equalsIgnoreCase("userChecked"))&&(position != null))
-            {
-            	String parseData = parser.nextText();
-            	position.setUserChecked((parseData.equalsIgnoreCase("true")));
-            }
-            else if ((name.equalsIgnoreCase("labelColor"))&&(position != null))
-            {
-            	position.setLabelColor(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("objectColor"))&&(position != null))
-            {
-            	position.setObjectColor(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("paintStyle"))&&(position != null))
-            {
-            	position.setPaintStyle(parser.nextText());
-            }
-            else if ((name.equalsIgnoreCase("strokeWidth"))&&(position != null))
-            {
-            	position.setStrokeWidth(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("fontSize"))&&(position != null))
-            {
-            	position.setFontSize(Float.parseFloat(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("fromObjectKey"))&&(line != null))
-            {
-            	line.setFromObjectKey(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("toObjectKey"))&&(line != null))
-            {
-            	line.setToObjectKey(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("lineStyle"))&&(line != null))
-            {
-            	line.setLineStyle(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("lineShape"))&&(line != null))
-            {
-            	line.setLineShape(Integer.parseInt(parser.nextText()));
-            }
-            else if ((name.equalsIgnoreCase("lineThickness"))&&(line != null))
-            {
-            	line.setLineThickness(Integer.parseInt(parser.nextText()));
-            }
-/*
-            else if ((name.equalsIgnoreCase("fromShape"))&&(line != null))
-            {
-            	line.fromShape = Integer.parseInt(parser.nextText());            	
-            }
-            else if ((name.equalsIgnoreCase("toShape"))&&(line != null))
-            {
-            	line.toShape = Integer.parseInt(parser.nextText());            	
-            }
-            else if ((name.equalsIgnoreCase("fromString"))&&(line != null))
-            {
-            	line.fromString = parser.nextText();            	
-            }
-            else if ((name.equalsIgnoreCase("toString"))&&(line != null))
-            {
-            	line.toString = parser.nextText();            	
-            }
-**/
-            else if ((name.equalsIgnoreCase("title"))&&(objectHolder != null))
-            {
-            	objectHolder.setDataTitle(parser.nextText());
-            }
-            else if ((name.equalsIgnoreCase("background"))&&(objectHolder != null))
-            {
-            	objectHolder.setBackground(parser.nextText());
-            }
-            else if ((name.equalsIgnoreCase("backgroundUri"))&&(objectHolder != null))
-            {
-                backgroundUri = parser.nextText();
-            }
-            else if ((name.equalsIgnoreCase("userCheckboxString"))&&(objectHolder != null))
-            {
-                userCheckboxString = parser.nextText();
-            }
-            else if ((name.equalsIgnoreCase("objserial"))&&(objectHolder != null))
-            {
-            	objectHolder.setSerialNumber(Integer.parseInt(parser.nextText()));
-            	//Log.v(Main.APP_IDENTIFIER, "objSerial : " + objectHolder.getSerialNumber());
-            }
-            else if ((name.equalsIgnoreCase("lineserial"))&&(objectHolder != null))
-            {
-            	objectHolder.getConnectLineHolder().setSerialNumber(Integer.parseInt(parser.nextText()));            	
-            	//Log.v(Main.APP_IDENTIFIER, "lineSerial : " + objectHolder.getSerialNumber());
-            }
-            else if (name.equalsIgnoreCase("object"))
-            {
-                int key = Integer.parseInt(parser.getAttributeValue(Main.APP_NAMESPACE, "key"));
-                //Log.v(Main.APP_IDENTIFIER, "create object, key :" + key);
-                if (objectHolder != null)
-                {
-                    position = objectHolder.createPosition(key);
+                // 領域サイズがおかしい場合には、オブジェクトサイズを補正する (ふつーありえないはずなんだけど...)
+                val posRect : RectF = position?.getRect() ?: RectF()
+                if ((posRect.left > posRect.right) || (posRect.top > posRect.bottom)) {
+                    Log.v(
+                        TAG,
+                        "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]"
+                    )
+                    position?.setRectRight(posRect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X)
+                    position?.setRectBottom(posRect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y)
                 }
             }
-            else if (name.equalsIgnoreCase("line"))
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * (XML形式の)データを読みだす。
+     */
+    private fun restoreFromXmlFile(fileName: String, objectHolder: MeMoMaObjectHolder): String
+    {
+        var resultMessage = ""
+        try
+        {
+            val parser = Xml.newPullParser()
+            val inputFile = File(fileName)
+            if (!inputFile.exists())
             {
-                int key = Integer.parseInt(parser.getAttributeValue(Main.APP_NAMESPACE, "key"));
-                //Log.v(Main.APP_IDENTIFIER, "create line, key :" + key);
-                line = null;
-                if (objectHolder != null)
+                // ファイルが見つからないときは、存在しないファイルを生成する
+                if (!inputFile.createNewFile())
                 {
-                    line = objectHolder.getConnectLineHolder().createLine(key);
+                    // ファイルの新規作成が失敗したときには、「ファイルなし」と報告する。
+                    resultMessage = "ERR>File not found."
+                    return (resultMessage)
                 }
             }
-    	}
-        catch (Exception e)
-        {
-            Log.v(TAG, "ERR>parseStartTag() name:" + name + " " + e.toString());
-        }
-    }
-    
-    private void parseEndTag(String name, XmlPullParser parser, MeMoMaObjectHolder objectHolder)
-    {
-    	try
-    	{
-            if (name.equalsIgnoreCase("object"))
+            // ファイルの読み込み
+            val reader = FileReader(inputFile)
+            parser.setInput(reader)
+
+            var eventType = parser.eventType
+
+            // オブジェクトとラインをすべてクリアする
+            objectHolder.removeAllPositions()
+            val lineHolder = objectHolder.getConnectLineHolder()
+            lineHolder.removeAllLines()
+
+            while ((eventType != XmlPullParser.END_DOCUMENT))
             {
-                //Log.v(Main.APP_IDENTIFIER, "parseEndTag() : OBJECT");
-                //objectHolder.dumpPositionObject(position);
-
-            	// 領域サイズがおかしい場合には、オブジェクトサイズを補正する (ふつーありえないはずなんだけど...)
-                RectF posRect = position.getRect();
-            	if ((posRect.left > posRect.right)||(posRect.top > posRect.bottom))
-            	{
-            		Log.v(TAG, "RECT IS ILLEGAL. : [" + posRect.left + "," + posRect.top + "-[" + posRect.right + "," + posRect.bottom + "]");
-            		position.setRectRight(posRect.left + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_X);
-            		position.setRectBottom(posRect.top + MeMoMaObjectHolder.OBJECTSIZE_DEFAULT_Y);
-            	}
+                when (eventType)
+                {
+                    XmlPullParser.START_DOCUMENT -> {}
+                    XmlPullParser.START_TAG -> parseStartTag(parser.name, parser, objectHolder)
+                    XmlPullParser.END_TAG -> parseEndTag(parser.name)
+                    else -> {}
+                }
+                eventType = parser.next()
             }
-/*
-            else if (name.equalsIgnoreCase("line"))
-            {
-                //
-                //Log.v(Main.APP_IDENTIFIER, "parseEndTag() : LINE");       
-                //objectHolder.getConnectLineHolder().dumpConnectLine(line);
-            }
-*/
+            reader.close()
         }
-        catch (Exception e)
+        catch (e: Exception)
         {
-            Log.v(TAG, "ERR>parseEndTag() name:" + name + " " + e.toString());
+            e.printStackTrace()
         }
-    }
-    
-    /**
-     *    (XML形式の)データを読みだす。
-     *
-     */
-    private String restoreToXmlFile(String fileName, MeMoMaObjectHolder objectHolder)
-    {
-    	String resultMessage = "";
-    	 XmlPullParser parser = Xml.newPullParser();
-    	 
-    	 if (objectHolder == null)
-    	 {
-    		 return ("ERR>objectHolder is null.");
-    	 }
-    	 
-    	 try
-    	 {
-    		 File inputFile = new File(fileName);
-    		 if (!inputFile.exists())
-    		 {
-                 // ファイルが見つからないときは、存在しないファイルを生成する
-                 if (!inputFile.createNewFile())
-                 {
-                     // ファイルの新規作成が失敗したときには、「ファイルなし」と報告する。
-                     resultMessage = "ERR>File not found.";
-                     return (resultMessage);
-                 }
-    		 }
-    		 // ファイルの読み込み
-    		 FileReader reader = new FileReader(inputFile);
-    		 parser.setInput(reader);
-
-    		 int eventType = parser.getEventType();
-
-             // オブジェクトとラインをすべてクリアする
-             objectHolder.removeAllPositions();
-             MeMoMaConnectLineHolder lineHolder = objectHolder.getConnectLineHolder();
-             if (lineHolder == null)
-             {
-        		 return ("ERR>lineHolder is null.");            	 
-             }
-             lineHolder.removeAllLines();
-             
-             while ((eventType != XmlPullParser.END_DOCUMENT))
-             {
-                 switch (eventType)
-                 {
-                     case XmlPullParser.START_DOCUMENT:
-                         break;
-
-                     case XmlPullParser.START_TAG:
-                         parseStartTag(parser.getName(), parser, objectHolder);
-                         break;
-
-                     case XmlPullParser.END_TAG:
-                    	 parseEndTag(parser.getName(), parser, objectHolder);
-                         break;
-
-                     default:
-                    	 // 省略...
-                    	 break;
-                 }
-                 eventType = parser.next();
-             }
-             reader.close();
-    	 }
-    	 catch (Exception e)
-    	 {
-             resultMessage = " ERR " + e.getMessage();
-             Log.v(TAG, resultMessage);
-             e.printStackTrace();
-    	 }
-    	return (resultMessage);
+        return (resultMessage)
     }
 
     /**
-     *  非同期処理
-     *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
+     * 非同期処理 （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
      */
-    @Override
-    protected String doInBackground(MeMoMaObjectHolder... datas)
+    fun parseObjectFromXml(data: MeMoMaObjectHolder): String
     {
         // ファイル名の設定 ... (拡張子あり...保存時とは違う)
-    	String fileName = parent.getFilesDir() + "/" + datas[0].getDataTitle() + ".xml";
-    	
-    	// データを読みだす。
-        String result = restoreToXmlFile(fileName, datas[0]);
+        val fileName = parent.filesDir.toString() + "/" + data.getDataTitle() + ".xml"
+
+        // データを読みだす。
+        val result = restoreFromXmlFile(fileName, data)
 
         //何か必要な場合、 非同期処理をここで実効
-        if (receiver != null)
-        {
-        	receiver.onLoadingProcess();
-        }
-        System.gc();
-        return (result);
+        receiver.onLoadingProcess()
+        System.gc()
+        return (result)
     }
-    /**
-     *  非同期処理の進捗状況の更新
-     * 
-     */
-	@Override
-	protected void onProgressUpdate(Integer... values)
-	{
-        // 今回は何もしない
-	}
 
     /**
-     *  非同期処理の後処理
-     *  (結果を応答する)
+     * 非同期処理の後処理 (結果を応答する)
      */
-    @Override
-    protected void onPostExecute(String result)
+    fun onFinishProcess(result: String)
     {
-    	try
-    	{
-    		if (result.isEmpty())
-    		{
-    	    	//  エラーが発生していない場合には、読みだしたデータをPreferenceに設定登録...
-    	    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(parent);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("backgroundUri", backgroundUri);
-                editor.putString("userCheckboxString", userCheckboxString);
-                editor.apply();
-    		}
-
-            if (receiver != null)
+        try
+        {
+            if (result.isEmpty())
             {
-            	receiver.onLoadedResult(!(result.isEmpty()), result);
+                //  エラーが発生していない場合には、読みだしたデータをPreferenceに設定登録...
+                val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+                val editor = preferences.edit()
+                editor.putString("backgroundUri", backgroundUri)
+                editor.putString("userCheckboxString", userCheckboxString)
+                editor.apply()
             }
-    	}
-    	catch (Exception ex)
-    	{
-    		Log.v(TAG, "MeMoMaFileSavingProcess::onPostExecute() : " + ex.getMessage());
-    	}
-    }     
-	
+            receiver.onLoadedResult(result.isNotEmpty(), result)
+        }
+        catch (ex: Exception)
+        {
+            ex.printStackTrace()
+        }
+    }
+
     /**
-     *    結果報告用のインタフェース（積極的に使う予定はないけど...）
-     *    
-     * @author MRSa
-     *
+     * 結果報告用のインタフェース（積極的に使う予定はないけど...）
      */
-    public interface IResultReceiver
+    interface IResultReceiver
     {
-        /**   処理中の処理   **/
-    	void onLoadingProcess();
-    	
-        /**  保存結果の報告 **/
-        void onLoadedResult(boolean isError, String detail);
+        fun onLoadingProcess()  // 処理中の処理
+        fun onLoadedResult(isError: Boolean, detail: String) // 保存結果の報告
+    }
+
+    companion object
+    {
+        private val TAG = MeMoMaFileLoadingProcess::class.java.simpleName
     }
 }

@@ -1,66 +1,48 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
-import android.app.Activity;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
+import jp.sourceforge.gokigen.memoma.R
 
-import jp.sourceforge.gokigen.memoma.R;
-
-/**
- * 
- * @author MRSa
- *
- */
-public class OperationModeHolder 
+class OperationModeHolder(private val activity: AppCompatActivity)
 {
-	private Activity activity = null;
-
-    public static final int OPERATIONMODE_CREATE = 0;
-    public static final int OPERATIONMODE_DELETE = 1;
-    public static final int OPERATIONMODE_MOVE = 2;
-
-	public OperationModeHolder(Activity arg)
-	{
-		activity = arg;
-	}
-
-	public void changeOperationMode(int value)
-	{
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("operationMode", "" + value);
-        editor.commit();
-	}
-
-    public int updateOperationMode(int buttonId)
+    fun changeOperationMode(value: Int)
     {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
-    	int operationMode = Integer.parseInt(preferences.getString("operationMode", "0"));
-   	 
-    	if (buttonId == R.id.CreateObjectButton)
-    	{
-    		if (operationMode == OPERATIONMODE_CREATE)
-    		{
-    			operationMode = OPERATIONMODE_MOVE;
-    		}
-    		else
-    		{
-    			operationMode = OPERATIONMODE_CREATE;
-    		}
-    	}
-    	else if (buttonId == R.id.DeleteObjectButton)
-    	{
-    		if (operationMode == OPERATIONMODE_DELETE)
-    		{
-    			operationMode = OPERATIONMODE_MOVE;
-    		}
-    		else
-    		{
-    			operationMode = OPERATIONMODE_DELETE;
-    		}
-    	}
-    	changeOperationMode(operationMode);
-    	
-    	return (operationMode);
+        val preferences = PreferenceManager.getDefaultSharedPreferences(activity)
+        val editor = preferences.edit()
+        editor.putString("operationMode", "" + value)
+        editor.apply()
+    }
+
+    fun updateOperationMode(buttonId: Int): Int{
+        val preferences = PreferenceManager.getDefaultSharedPreferences(activity)
+        var operationMode = (preferences.getString("operationMode", "0")?:"0").toInt()
+
+        if (buttonId == R.id.CreateObjectButton)
+        {
+            operationMode = if (operationMode == OPERATIONMODE_CREATE)
+            {
+                OPERATIONMODE_MOVE
+            }
+            else
+            {
+                OPERATIONMODE_CREATE
+            }
+        } else if (buttonId == R.id.DeleteObjectButton) {
+            operationMode = if (operationMode == OPERATIONMODE_DELETE) {
+                OPERATIONMODE_MOVE
+            } else {
+                OPERATIONMODE_DELETE
+            }
+        }
+        changeOperationMode(operationMode)
+
+        return (operationMode)
+    }
+
+    companion object {
+        const val OPERATIONMODE_CREATE: Int = 0
+        const val OPERATIONMODE_DELETE: Int = 1
+        const val OPERATIONMODE_MOVE: Int = 2
     }
 }

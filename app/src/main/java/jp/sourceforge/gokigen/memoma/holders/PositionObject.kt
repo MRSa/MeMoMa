@@ -1,210 +1,159 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
-import android.graphics.RectF;
+import android.graphics.RectF
 
-import androidx.annotation.NonNull;
-
-public class PositionObject
-{
-    private final Integer key;            // オブジェクト識別子 (変更不可）
-    private final IOperationHistoryHolder historyHolder;  // 履歴を保持するところ
-
-    private RectF rect;                    // オブジェクトの大きさ
-    private int drawStyle;               // オブジェクトの形状
-
-    private int icon;                     // オブジェクトのアイコン
-    private String label;                 // オブジェクトの表示ラベル
-    private String detail;                // オブジェクトの説明
-    //public String backgroundUri;         // オブジェクトの背景画像
-    //public String otherInfoUri;          // 補足（写真とかへのURI）
-    //public String objectStatus;          // オブジェクトの状態
-    private boolean userChecked;        // ユーザチェックボックス
-
-    private int labelColor;              // オブジェクト内に表示する色
-    private int objectColor;             // オブジェクトの色
-    private String paintStyle;           // オブジェクトの表示方法 （枠線のみ、塗りつぶし、塗りつぶしと枠線）
-    private float strokeWidth;          // 枠線の太さ
-    private float fontSize;             // フォントサイズ
+class PositionObject(
+    private val key: Int,
+    private var rect: RectF,
+    private var drawStyle: Int,
+    private var icon: Int,
+    private var label: String,
+    private var detail: String,
+    private var userChecked: Boolean,
+    private var labelColor: Int,
+    private var objectColor: Int,
+    private var paintStyle: String,
+    private var strokeWidth: Float,
+    private var fontSize: Float,
+    private val historyHolder: IOperationHistoryHolder
+) {
 
     /**
-     *    コンストラクタ (キーを設定する)
-     *
+     * コンストラクタ (キーを設定する)
      */
-    public PositionObject(int id, RectF rect, int drawStyle, int icon, String label, String detail, boolean userChecked, int labelColor, int objectColor, String paintStyle, float strokeWidth, float fontSize, @NonNull IOperationHistoryHolder historyHolder)
-    {
-        key = id;
-        this.rect = rect;
-        this.drawStyle = drawStyle;
-        this.icon = icon;
-        this.label = label;
-        this.detail = detail;
-        this.userChecked = userChecked;
-        this.labelColor = labelColor;
-        this.objectColor = objectColor;
-        this.paintStyle = paintStyle;
-        this.strokeWidth = strokeWidth;
-        this.fontSize = fontSize;
-        this.historyHolder = historyHolder;
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.NEW_OBJECT, this);
+    init {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.NEW_OBJECT, this)
     }
 
     /**
-     *    オブジェクトのキーを取得する
+     * オブジェクトのキーを取得する
      *
      */
-    public Integer getKey()
-    {
-        return (key);
+    fun getKey(): Int {
+        return (key)
     }
 
-    public void setRect(RectF rectF)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect = rectF;
+    fun setRect(rectF: RectF) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect = rectF
     }
 
-    public void setRectTop(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect.top = value;
+    fun setRectTop(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect.top = value
     }
 
-    public void setRectLeft(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect.left = value;
+    fun setRectLeft(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect.left = value
     }
 
-    public void setRectRight(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect.right = value;
+    fun setRectRight(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect.right = value
     }
 
-    public void setRectBottom(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect.bottom = value;
+    fun setRectBottom(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect.bottom = value
     }
 
-    public void setDrawStyle(int value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DRAW_STYLE, drawStyle);
-        drawStyle = value;
+    fun setDrawStyle(value: Int) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DRAW_STYLE, drawStyle)
+        drawStyle = value
     }
 
-    public void setIcon(int value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.ICON, icon);
-        icon = value;
+    fun setIcon(value: Int) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.ICON, icon)
+        icon = value
     }
 
-    public void setLabel(String value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.LABEL, label);
-        label = value;
+    fun setLabel(value: String) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.LABEL, label)
+        label = value
     }
 
-    public void setDetail(String value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DETAIL, detail);
-        detail = value;
+    fun setDetail(value: String) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.DETAIL, detail)
+        detail = value
     }
 
-    public void setUserChecked(boolean value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.USER_CHECKED, userChecked);
-        userChecked = value;
+    fun setUserChecked(value: Boolean) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.USER_CHECKED, userChecked)
+        userChecked = value
     }
 
-    public void setLabelColor(int value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.LABEL_COLOR, labelColor);
-        labelColor = value;
+    fun setLabelColor(value: Int) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.LABEL_COLOR, labelColor)
+        labelColor = value
     }
 
-    public void setObjectColor(int value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.OBJECT_COLOR, objectColor);
-        objectColor = value;
+    fun setObjectColor(value: Int) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.OBJECT_COLOR, objectColor)
+        objectColor = value
     }
 
-    public void setPaintStyle(String value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.PAINT_STYLE, paintStyle);
-        paintStyle = value;
+    fun setPaintStyle(value: String) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.PAINT_STYLE, paintStyle)
+        paintStyle = value
     }
 
-    public void setStrokeWidth(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.STROKE_WIDTH, strokeWidth);
-        strokeWidth = value;
+    fun setStrokeWidth(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.STROKE_WIDTH, strokeWidth)
+        strokeWidth = value
     }
 
-    public void setFontSize(float value)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.FONT_SIZE, fontSize);
-        fontSize = value;
+    fun setFontSize(value: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.FONT_SIZE, fontSize)
+        fontSize = value
     }
 
-    public void setRectOffsetTo(float newLeft, float newTop)
-    {
-        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect);
-        rect.offsetTo(newLeft, newTop);
+    fun setRectOffsetTo(newLeft: Float, newTop: Float) {
+        historyHolder.addHistory(key, IOperationHistoryHolder.ChangeKind.RECTANGLE, rect)
+        rect.offsetTo(newLeft, newTop)
     }
 
-    public RectF getRect()
-    {
-        return (rect);
+    fun getRect(): RectF {
+        return (rect)
     }
 
-    public int getDrawStyle()
-    {
-        return (drawStyle);
+    fun getDrawStyle(): Int {
+        return (drawStyle)
     }
 
-    public int getIcon()
-    {
-        return (icon);
+    fun getIcon(): Int {
+        return (icon)
     }
 
-    public String getLabel()
-    {
-        return (label);
+    fun getLabel(): String {
+        return (label)
     }
 
-    public String getDetail()
-    {
-        return (detail);
+    fun getDetail(): String {
+        return (detail)
     }
 
-    public boolean getUserChecked()
-    {
-        return (userChecked);
+    fun getUserChecked(): Boolean {
+        return (userChecked)
     }
 
-    public int getLabelColor()
-    {
-        return (labelColor);
+    fun getLabelColor(): Int {
+        return (labelColor)
     }
 
-    public int getObjectColor()
-    {
-        return (objectColor);
+    fun getObjectColor(): Int {
+        return (objectColor)
     }
 
-    public String getPaintStyle()
-    {
-        return (paintStyle);
+    fun getPaintStyle(): String {
+        return (paintStyle)
     }
 
-    public float getstrokeWidth()
-    {
-        return (strokeWidth);
+    fun getstrokeWidth(): Float {
+        return (strokeWidth)
     }
 
-    public float getFontSize()
-    {
-        return (fontSize);
+    fun getFontSize(): Float {
+        return (fontSize)
     }
 }

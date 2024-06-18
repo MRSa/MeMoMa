@@ -1,8 +1,8 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
 interface IOperationHistoryHolder
 {
-    enum ChangeKind
+    enum class ChangeKind
     {
         RECTANGLE,
         DRAW_STYLE,
@@ -24,13 +24,10 @@ interface IOperationHistoryHolder
         CONNECT_LINE_STYLE,
         CONNECT_LINE_SHAPE,
         CONNECT_LINE_THICKNESS,
-    };
+    }
 
-
-    void addHistory(int key, ChangeKind kind, Object object);
-    void reset();
-
-    boolean undo();
-    boolean isHistoryExist();
-
+    fun addHistory(key: Int, kind: ChangeKind?, `object`: Any?)
+    fun reset()
+    fun undo(): Boolean
+    fun isHistoryExist(): Boolean
 }

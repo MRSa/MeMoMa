@@ -191,32 +191,32 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
             {
                 // 色を設定する
                 val borderColorProgress = dialog.findViewById<SeekBar>(R.id.borderColorSelectionBar)
-                borderColorProgress?.progress = convertProgress(position.objectColor)
+                borderColorProgress?.progress = convertProgress(position.getObjectColor())
 
                 val boldTextCheck = dialog.findViewById<CheckBox>(R.id.checkBoldText)
                 boldTextCheck?.isChecked =
-                    position.getstrokeWidth() == MeMoMaObjectHolder.STOROKE_BOLD_WIDTH
+                    position.getstrokeWidth() == MeMoMaObjectHolder.STROKE_BOLD_WIDTH
 
                 val fillObjectCheck = dialog.findViewById<CheckBox>(R.id.checkFillObject)
                 fillObjectCheck?.isChecked =
-                    Paint.Style.valueOf(position.paintStyle) != Paint.Style.STROKE
+                    Paint.Style.valueOf(position.getPaintStyle()) != Paint.Style.STROKE
 
                 // フォントサイズを設定する
-                textFontSize = position.fontSize / 2.0f
+                textFontSize = position.getFontSize() / 2.0f
 
                 // 入力文字列を設定する
                 val targetLabel = dialog.findViewById<EditText>(R.id.labelInputArea)
-                targetLabel?.setText(position.label)
+                targetLabel?.setText(position.getLabel())
 
                 val targetDetail = dialog.findViewById<EditText>(R.id.descriptionInputArea)
-                targetDetail?.setText(position.detail)
+                targetDetail?.setText(position.getDetail())
 
                 //  設定に記録されているデータを画面に反映させる
                 val preferences = PreferenceManager.getDefaultSharedPreferences(context)
                 val userCheckboxTitle = preferences.getString("userCheckboxString", "")
 
                 // 描画スタイルを設定する
-                currentObjectDrawStyle = position.drawStyle
+                currentObjectDrawStyle = position.getDrawStyle()
                 updateObjectDrawStyleImageButton(currentObjectDrawStyle)
 
                 // 背景色を設定する
@@ -234,7 +234,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
                 val userCheckbox = dialog.findViewById<CheckBox>(R.id.checkUserCheckbox)
                 userCheckbox?.isEnabled = true
                 userCheckbox?.text = userCheckboxTitle
-                userCheckbox?.isChecked = position.userChecked
+                userCheckbox?.isChecked = position.getUserChecked()
             }
         }
         catch (e: Exception)
@@ -261,19 +261,19 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
         {
             val positionObject = objectHolder.getPosition(key)
             if (positionObject != null) {
-                positionObject.label = label
-                positionObject.detail = detail
+                positionObject.setLabel(label)
+                positionObject.setDetail(detail)
                 var color = convertColor(progress)
-                positionObject.objectColor = color
+                positionObject.setObjectColor(color)
                 color = (color xor 0x00ffffff)
-                positionObject.fontSize = textFontSize * 2.0f
-                positionObject.labelColor = color
-                positionObject.setStrokeWidth(if ((boldText)) MeMoMaObjectHolder.STOROKE_BOLD_WIDTH else MeMoMaObjectHolder.STOROKE_NORMAL_WIDTH)
-                positionObject.paintStyle =
-                    (if ((fillObject)) Paint.Style.FILL else Paint.Style.STROKE).toString()
-                positionObject.userChecked = userCheck
+                positionObject.setFontSize(textFontSize * 2.0f)
+                positionObject.setLabelColor(color)
+                positionObject.setStrokeWidth(if ((boldText)) MeMoMaObjectHolder.STROKE_BOLD_WIDTH else MeMoMaObjectHolder.STROKE_NORMAL_WIDTH)
+                positionObject.setPaintStyle(
+                    (if ((fillObject)) Paint.Style.FILL else Paint.Style.STROKE).toString())
+                positionObject.setUserChecked(userCheck)
 
-                val posDrawStyle = positionObject.drawStyle
+                val posDrawStyle = positionObject.getDrawStyle()
                 if (posDrawStyle != drawStyle) {
                     if ((drawStyle == MeMoMaObjectHolder.DRAWSTYLE_CIRCLE) ||
                         (drawStyle == MeMoMaObjectHolder.DRAWSTYLE_LEFT_ARROW) ||
@@ -292,7 +292,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
                         // 正方形の形状から、長方形の形状にする場合...
                         setRectFromSquare(positionObject)
                     }
-                    positionObject.drawStyle = drawStyle
+                    positionObject.setDrawStyle(drawStyle)
                 }
             }
         }
@@ -309,7 +309,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
     {
         try
         {
-            val posRect = positionObject.rect
+            val posRect = positionObject.getRect()
             val bandWidth = ((posRect.right - posRect.left)) / 2.0f
             val center = posRect.centerY()
 
@@ -329,7 +329,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
     {
         try
         {
-            val posRect = positionObject.rect
+            val posRect = positionObject.getRect()
             val bandWidth = ((posRect.right - posRect.left) / 16.0f * 9.0f) / 2.0f
             val center = posRect.centerY()
 

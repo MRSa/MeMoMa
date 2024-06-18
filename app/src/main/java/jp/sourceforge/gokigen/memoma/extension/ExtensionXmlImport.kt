@@ -34,7 +34,7 @@ class ExtensionXmlImport(private val context: Context, private val objectHolder:
 
             // オブジェクトとラインをすべてクリアする
             objectHolder.removeAllPositions()
-            val lineHolder = objectHolder.connectLineHolder ?: return "ERR>lineHolder is null."
+            val lineHolder = objectHolder.getConnectLineHolder()
             lineHolder.removeAllLines()
             while (eventType != XmlPullParser.END_DOCUMENT)
             {
@@ -106,9 +106,9 @@ class ExtensionXmlImport(private val context: Context, private val objectHolder:
             } else if (name.equals("lineThickness", ignoreCase = true) && line != null) {
                 line?.setLineThickness(parser.nextText().toInt())
             } else if (name.equals("title", ignoreCase = true) && objectHolder != null) {
-                objectHolder.dataTitle = parser.nextText()
+                objectHolder.setDataTitle(parser.nextText())
             } else if (name.equals("background", ignoreCase = true) && objectHolder != null) {
-                objectHolder.background = parser.nextText()
+                objectHolder.setBackground(parser.nextText())
             } else if (name.equals("backgroundUri", ignoreCase = true) && objectHolder != null) {
                 backgroundUri = parser.nextText()
             } else if (name.equals(
@@ -118,10 +118,10 @@ class ExtensionXmlImport(private val context: Context, private val objectHolder:
             ) {
                 userCheckboxString = parser.nextText()
             } else if (name.equals("objserial", ignoreCase = true) && objectHolder != null) {
-                objectHolder.serialNumber = parser.nextText().toInt()
+                objectHolder.setSerialNumber(parser.nextText().toInt())
                 //Log.v(Main.APP_IDENTIFIER, "objSerial : " + objectHolder.getSerialNumber());
             } else if (name.equals("lineserial", ignoreCase = true) && objectHolder != null) {
-                objectHolder.connectLineHolder.serialNumber = parser.nextText().toInt()
+                objectHolder.getConnectLineHolder().setSerialNumber(parser.nextText().toInt())
                 //Log.v(Main.APP_IDENTIFIER, "lineSerial : " + objectHolder.getSerialNumber());
             } else if (name.equals("object", ignoreCase = true)) {
                 val key = parser.getAttributeValue(Main.APP_NAMESPACE, "key").toInt()
@@ -134,7 +134,7 @@ class ExtensionXmlImport(private val context: Context, private val objectHolder:
                 //Log.v(Main.APP_IDENTIFIER, "create line, key :" + key);
                 line = null
                 if (objectHolder != null) {
-                    line = objectHolder.connectLineHolder.createLine(key)
+                    line = objectHolder.getConnectLineHolder().createLine(key)
                 }
             }
         } catch (e: java.lang.Exception) {
@@ -148,7 +148,7 @@ class ExtensionXmlImport(private val context: Context, private val objectHolder:
             if (name.equals("object", ignoreCase = true))
             {
                 // 領域サイズがおかしい場合には、オブジェクトサイズを補正する (ふつーありえないはずなんだけど...)
-                val posRect: RectF? = position?.rect
+                val posRect: RectF? = position?.getRect()
                 if (posRect != null)
                 {
                     if (posRect.left > posRect.right || posRect.top > posRect.bottom)

@@ -1,85 +1,75 @@
-package jp.sourceforge.gokigen.memoma.holders;
+package jp.sourceforge.gokigen.memoma.holders
 
-import android.graphics.RectF;
-import android.util.Log;
+import android.graphics.RectF
+import android.util.Log
+import jp.sourceforge.gokigen.memoma.holders.IOperationHistoryHolder.ChangeKind
 
-import androidx.annotation.NonNull;
-
-public class OperationHistoryHolder implements IOperationHistoryHolder
+class OperationHistoryHolder(private val objectHolder: MeMoMaObjectHolder) : IOperationHistoryHolder
 {
-    private final String TAG = toString();
-    private final MeMoMaObjectHolder objectHolder;
+    private var previousRect: RectF? = null
+    private var previousKey = -1
 
-    private RectF previousRect = null;
-    private int previousKey = -1;
-
-    public OperationHistoryHolder(@NonNull MeMoMaObjectHolder objectHolder)
+    override fun addHistory(key: Int, kind: ChangeKind?, `object`: Any?)
     {
-        this.objectHolder = objectHolder;
-    }
-
-    @Override
-    public void addHistory(int key, ChangeKind kind, Object object)
-    {
-        // Log.v(TAG, "addHistory() KEY : " + key + " KIND : " + kind.toString() + " OBJ : " + object.toString());
         try
         {
             if (kind == ChangeKind.RECTANGLE)
             {
                 // オブジェクトが移動したとき、１つだけ記録する
-                previousKey = key;
-                previousRect = (RectF) object;
-                // Log.v(TAG, " id : " + previousKey + "(" + previousRect.left + "," + previousRect.top + ")-(" + previousRect.right + "," + previousRect.bottom + ")");
+                previousKey = key
+                previousRect = `object` as RectF?
             }
             else
             {
-                previousKey = -1;
-                previousRect = null;
+                previousKey = -1
+                previousRect = null
             }
         }
-        catch (Exception e)
+        catch (e: Exception)
         {
-            e.printStackTrace();
+            e.printStackTrace()
         }
     }
 
-    @Override
-    public void reset()
+    override fun reset()
     {
-        Log.v(TAG, "Histry Reset() ");
-        previousKey = -1;
-        previousRect = null;
+        Log.v(TAG, "Histry Reset() ")
+        previousKey = -1
+        previousRect = null
     }
 
-    @Override
-    public boolean undo()
+    override fun undo(): Boolean
     {
-        boolean ret = false;
-        Log.v(TAG, "undo() ");
+        var ret = false
+        Log.v(TAG, "undo() ")
         try
         {
-            PositionObject pos = objectHolder.getPosition(previousKey);
-            if (pos != null)
+            val pos = objectHolder.getPosition(previousKey)
+            if ((previousRect != null)&&(pos != null))
             {
                 // 移動したオブジェクトを戻す
-                pos.setRect(previousRect);
+                pos.setRect(previousRect!!)
 
                 // undo を実行したら、履歴を消す
-                previousKey = -1;
-                previousRect = null;
-                ret = true;
+                previousKey = -1
+                previousRect = null
+                ret = true
             }
         }
-        catch (Exception e)
+        catch (e: Exception)
         {
-            e.printStackTrace();
+            e.printStackTrace()
         }
-        return (ret);
+        return (ret)
     }
 
-    @Override
-    public boolean isHistoryExist()
+    override fun isHistoryExist(): Boolean
     {
-        return (previousKey != -1);
+        return (previousKey != -1)
+    }
+
+    companion object
+    {
+        private val TAG = OperationHistoryHolder::class.java.simpleName
     }
 }

@@ -127,10 +127,10 @@ class ExtensionCsvImport(private val context: Context, private val objectHolder:
             }
             pos.setRectRight(left + width)
             pos.setRectBottom(top + height)
-            pos.label = label
-            pos.detail = detail
-            pos.paintStyle = paintStyle
-            pos.userChecked = userChecked
+            pos.setLabel(label)
+            pos.setDetail(detail)
+            pos.setPaintStyle(paintStyle)
+            pos.setUserChecked(userChecked)
             Log.v(TAG, "OBJECT CREATED: $label($left,$top) [$drawStyle]")
         }
         catch (ex: Exception)
