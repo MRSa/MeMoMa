@@ -127,7 +127,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * 保存終了時の処理
      */
-    override fun onSavedResult(isError: Boolean, detail: String) {
+    override fun onSavedResult(isError: Boolean, detail: String?) {
         // 保存したことを伝達する
         val outputMessage =
             parent.getString(R.string.save_data) + " " + objectHolder.getDataTitle() + " " + detail
@@ -243,7 +243,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
         val backgroundUri = preferences.getString("backgroundUri", "")
         val userCheckboxString = preferences.getString("userCheckboxString", "")
-        val saveEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+        val saveEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
         return (saveEngine.saveObjects(objectHolder))
     }
 

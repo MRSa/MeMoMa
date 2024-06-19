@@ -49,7 +49,7 @@ class MeMoMaFileSavingProcess(
 
 
         // 未保管状態にリセットする
-        statusHolder.savingStatus = false
+        statusHolder.setSavingStatus(false)
     }
 
     /**
@@ -58,7 +58,7 @@ class MeMoMaFileSavingProcess(
      */
     override fun onPreExecute() {
         // 未保管状態にリセットする
-        statusHolder.savingStatus = false
+        statusHolder.setSavingStatus(false)
     }
 
     /**
@@ -67,16 +67,16 @@ class MeMoMaFileSavingProcess(
      */
     protected override fun doInBackground(vararg datas: MeMoMaObjectHolder?): String {
         // 保管中状態を設定する
-        statusHolder.savingStatus = true
+        statusHolder.setSavingStatus(true)
 
         // データの保管メイン
-        val savingEngine = MeMoMaFileSavingEngine(context, backgroundUri, userCheckboxString)
-        val result = savingEngine.saveObjects(datas[0])
+        val savingEngine = MeMoMaFileSavingEngine(context, backgroundUri!!, userCheckboxString!!)
+        val result = savingEngine.saveObjects(datas[0]!!)
 
         System.gc()
 
         // 未保管状態にリセットする
-        statusHolder.savingStatus = false
+        statusHolder.setSavingStatus(false)
 
         return (result)
     }
@@ -103,7 +103,7 @@ class MeMoMaFileSavingProcess(
         savingDialog.dismiss()
 
         // 未保管状態にセットする
-        statusHolder.savingStatus = false
+        statusHolder.setSavingStatus(false)
         return
     }
 
@@ -119,9 +119,8 @@ class MeMoMaFileSavingProcess(
      * ファイル保存実施状態を記憶するインタフェースクラス
      */
     interface ISavingStatusHolder {
-        // 保存中状態を設定する
-        // 保存中状態を取得する
-        var savingStatus: Boolean
+        fun getSavingStatus(): Boolean
+        fun setSavingStatus(isSaving: Boolean)
     }
     companion object
     {

@@ -193,7 +193,7 @@ class ExtensionActivityListener internal constructor(
                     val userCheckboxString = preferences.getString("userCheckboxString", "")
 
                     // データの保管メイン
-                    val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+                    val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
                     val result = savingEngine.saveObjects(objectHolder)
                     parent.runOnUiThread {
                         try
@@ -236,7 +236,7 @@ class ExtensionActivityListener internal constructor(
                 val userCheckboxString = preferences.getString("userCheckboxString", "")
 
                 // データの保管を実施する (現状)
-                val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+                val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
                 val result0 = savingEngine.saveObjects(objectHolder)
                 Log.v(TAG, "Saved : $result0")
 
@@ -677,7 +677,7 @@ class ExtensionActivityListener internal constructor(
      * ファイルのエクスポート結果を受け取る
      *
      */
-    override fun onExportedResult(documentUri: Uri, detail: String)
+    override fun onExportedResult(documentUri: Uri?, detail: String?)
     {
         try
         {
@@ -689,7 +689,7 @@ class ExtensionActivityListener internal constructor(
             if (isShareExportedData)
             {
                 // エクスポートしたファイルを共有する
-                shareContent(documentUri)
+                shareContent(documentUri!!)
             }
             isShareExportedData = false
         }
@@ -788,7 +788,7 @@ class ExtensionActivityListener internal constructor(
      * インポート結果の受信
      *
      */
-    override fun onImportedResult(detail: String)
+    override fun onImportedResult(detail: String?)
     {
         Log.v(TAG, "ExtensionActivityListener::onImportedResult() '${objectHolder.getDataTitle()}' : + $detail")
         try

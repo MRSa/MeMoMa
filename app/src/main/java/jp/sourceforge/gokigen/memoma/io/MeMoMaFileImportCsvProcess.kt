@@ -235,10 +235,11 @@ class MeMoMaFileImportCsvProcess(
         fileSavedResult = detail
     }
 
-    override var savingStatus: Boolean
-        get() = (false)
-        set(isSaving) {
-        }
+    private var savingStatus = false
+    override fun getSavingStatus(): Boolean { return false }
+    override fun setSavingStatus(isSaving: Boolean) {
+        savingStatus = isSaving
+    }
 
     /**
      * 結果報告用のインタフェース（積極的に使う予定はないけど...）
