@@ -1,6 +1,5 @@
-package jp.sourceforge.gokigen.memoma.preference;
+package jp.sourceforge.gokigen.memoma.preference
 
-public interface IPreferenceIntentCaller
-{
-    boolean selectBackgroundImageFileFromGallery(int code);
+interface IPreferenceIntentCaller {
+    fun selectBackgroundImageFileFromGallery(code: Int): Boolean
 }

@@ -1,233 +1,193 @@
-package jp.sourceforge.gokigen.memoma.io;
+package jp.sourceforge.gokigen.memoma.io
 
-import static jp.sourceforge.gokigen.memoma.Main.APP_NAMESPACE;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Locale;
-
-import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.graphics.RectF;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
-
-import jp.sourceforge.gokigen.memoma.R;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
-import jp.sourceforge.gokigen.memoma.holders.PositionObject;
+import android.app.ProgressDialog
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.AsyncTask
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
+import jp.sourceforge.gokigen.memoma.Main
+import jp.sourceforge.gokigen.memoma.R
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 /**
- *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
+ * データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
  */
-public class MeMoMaFileExportCsvProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String>
-{
-    private final String TAG = toString();
-    private final Context context;
-    private final IResultReceiver receiver;
-    private Uri documentUri;
+class MeMoMaFileExportCsvProcess(
+    private val context: Context,
+    private val receiver: IResultReceiver?
+) :
+    AsyncTask<MeMoMaObjectHolder?, Int?, String>() {
+    private val TAG = toString()
+    private var documentUri: Uri? = null
 
-    private final ProgressDialog savingDialog;
+    //  プログレスダイアログ（「保存中...」）を表示する。
+    private val savingDialog = ProgressDialog(context)
 
     /**
-     *   コンストラクタ
+     * コンストラクタ
      */
-    public MeMoMaFileExportCsvProcess(Context context,  IResultReceiver resultReceiver)
-    {
-        this.context = context;
-        receiver = resultReceiver;
-
-        //  プログレスダイアログ（「保存中...」）を表示する。
-        savingDialog = new ProgressDialog(context);
-        savingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        savingDialog.setMessage(context.getString(R.string.dataSaving));
-        savingDialog.setIndeterminate(true);
-        savingDialog.setCancelable(false);
-        savingDialog.show();
-
-
+    init {
+        savingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        savingDialog.setMessage(context.getString(R.string.dataSaving))
+        savingDialog.isIndeterminate = true
+        savingDialog.setCancelable(false)
+        savingDialog.show()
     }
 
     /**
-     *  非同期処理実施前の前処理
+     * 非同期処理実施前の前処理
      *
      */
-    @Override
-    protected void onPreExecute()
-    {
-
+    override fun onPreExecute() {
     }
 
     /**
-     *    データを(CSV形式で)保管する。
+     * データを(CSV形式で)保管する。
      *
      */
-    private String exportToCsvFile(String baseName, MeMoMaObjectHolder objectHolder)
-    {
-        String resultMessage = "";
-        try
-        {
-            String outputDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/" + APP_NAMESPACE + "/";
-            ContentResolver resolver = context.getContentResolver();
+    private fun exportToCsvFile(baseName: String, objectHolder: MeMoMaObjectHolder): String {
+        var resultMessage = ""
+        try {
+            val outputDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path + "/" + Main.APP_NAMESPACE + "/"
+            val resolver = context.contentResolver
 
             // エクスポートするファイル名を決定する
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat outFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_", Locale.US);
-            String exportedFileName =  outFormat.format(calendar.getTime()) + baseName + ".csv";
+            val calendar = Calendar.getInstance()
+            val outFormat = SimpleDateFormat("yyyyMMdd_HHmmss_", Locale.US)
+            val exportedFileName = outFormat.format(calendar.time) + baseName + ".csv"
 
-            Uri extStorageUri;
-            OutputStreamWriter writer;
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Downloads.TITLE, exportedFileName);
-            values.put(MediaStore.Downloads.DISPLAY_NAME, exportedFileName);
-            values.put(MediaStore.Downloads.MIME_TYPE, "text/csv"); // text/plain or text/csv
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            {
-                values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + APP_NAMESPACE);
-                values.put(MediaStore.Downloads.IS_PENDING, true);
-                extStorageUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            val extStorageUri: Uri
+            val writer: OutputStreamWriter
+            val values = ContentValues()
+            values.put(MediaStore.Downloads.TITLE, exportedFileName)
+            values.put(MediaStore.Downloads.DISPLAY_NAME, exportedFileName)
+            values.put(MediaStore.Downloads.MIME_TYPE, "text/csv") // text/plain or text/csv
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.Downloads.RELATIVE_PATH, "Download/" + Main.APP_NAMESPACE)
+                values.put(MediaStore.Downloads.IS_PENDING, true)
+                extStorageUri =
+                    MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
-                Log.v(TAG, "---------- " + exportedFileName + " " + values);
+                Log.v(TAG, "---------- $exportedFileName $values")
 
-                documentUri = resolver.insert(extStorageUri, values);
+                documentUri = resolver.insert(extStorageUri, values)
 
-                if (documentUri == null)
-                {
-                    resultMessage = "documentUri is NULL.";
-                    return (resultMessage);
+                if (documentUri == null) {
+                    resultMessage = "documentUri is NULL."
+                    return (resultMessage)
                 }
-                OutputStream outputStream = resolver.openOutputStream(documentUri, "wa");
-                writer = new OutputStreamWriter(outputStream);
-            }
-            else
-            {
-                File path = new File(outputDir);
-                path.mkdir();
-                values.put(MediaStore.Downloads.DATA, path.getAbsolutePath() + File.separator + exportedFileName);
-                File targetFile = new File(outputDir + File.separator + exportedFileName);
-                FileOutputStream outputStream = new FileOutputStream(targetFile);
-                writer = new OutputStreamWriter(outputStream);
+                val outputStream = resolver.openOutputStream(documentUri!!, "wa")
+                writer = OutputStreamWriter(outputStream)
+            } else {
+                val path = File(outputDir)
+                path.mkdir()
+                values.put(
+                    MediaStore.Downloads.DATA,
+                    path.absolutePath + File.separator + exportedFileName
+                )
+                val targetFile = File(outputDir + File.separator + exportedFileName)
+                val outputStream = FileOutputStream(targetFile)
+                writer = OutputStreamWriter(outputStream)
             }
 
             //  データのタイトルを出力
-            String str = "; label,detail,userChecked,shape,style,centerX,centerY,width,height,;!<_$ (';!<_$' is a record Separator)\r\n";
-            writer.write(str);
+            var str =
+                "; label,detail,userChecked,shape,style,centerX,centerY,width,height,;!<_$ (';!<_$' is a record Separator)\r\n"
+            writer.write(str)
 
             // オブジェクトの出力 （保持しているものをすべて表示する）
-            Enumeration<Integer> keys = objectHolder.getObjectKeys();
-            while (keys.hasMoreElements())
-            {
-                Integer key = keys.nextElement();
-                PositionObject pos = objectHolder.getPosition(key);
-                RectF posRect = pos.getRect();
+            val keys = objectHolder.getObjectKeys()
+            while (keys!!.hasMoreElements()) {
+                val key = keys.nextElement()
+                val pos = objectHolder.getPosition(key)
+                val posRect = pos!!.getRect()
 
                 // TODO:  絞り込み条件がある場合には、その条件に従ってしぼり込む必要あり。
-
-                str = "";
-                str = str + "\"" + pos.getLabel() + "\"";
-                str = str + ",\"" + pos.getDetail() + "\"";
-                if (pos.getUserChecked())
-                {
-                    str = str + ",True";
+                str = ""
+                str = str + "\"" + pos.getLabel() + "\""
+                str = str + ",\"" + pos.getDetail() + "\""
+                str = if (pos.getUserChecked()) {
+                    "$str,True"
+                } else {
+                    "$str,False"
                 }
-                else
-                {
-                    str = str + ",False";
-                }
-                str = str + "," + pos.getDrawStyle();   // オブジェクトの形状
-                str = str + "," + pos.getPaintStyle();   // オブジェクトの塗りつぶし状態
-                str = str + "," + (Math.round(posRect.centerX() * 100.0f) / 100.0f);
-                str = str + "," + (Math.round(posRect.centerY() * 100.0f) / 100.0f);
-                str = str + "," + (Math.round(posRect.width() * 100.0f) / 100.0f);
-                str = str + "," + (Math.round(posRect.height() * 100.0f) / 100.0f);
-                str = str + ",;!<_$\r\n";
-                writer.write(str);
+                str = str + "," + pos.getDrawStyle() // オブジェクトの形状
+                str = str + "," + pos.getPaintStyle() // オブジェクトの塗りつぶし状態
+                str = str + "," + (Math.round(posRect.centerX() * 100.0f) / 100.0f)
+                str = str + "," + (Math.round(posRect.centerY() * 100.0f) / 100.0f)
+                str = str + "," + (Math.round(posRect.width() * 100.0f) / 100.0f)
+                str = str + "," + (Math.round(posRect.height() * 100.0f) / 100.0f)
+                str = "$str,;!<_$\r\n"
+                writer.write(str)
             }
-            writer.flush();
-            writer.close();
+            writer.flush()
+            writer.close()
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            {
-                values.put(MediaStore.Downloads.IS_PENDING, false);
-                resolver.update(documentUri, values, null, null);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.Downloads.IS_PENDING, false)
+                resolver.update(documentUri!!, values, null, null)
             }
+        } catch (e: Exception) {
+            resultMessage = " ERR " + e.message + " " + documentUri
+            Log.v(TAG, resultMessage)
+            e.printStackTrace()
         }
-        catch (Exception e)
-        {
-            resultMessage = " ERR " + e.getMessage() + " " + documentUri;
-            Log.v(TAG, resultMessage);
-            e.printStackTrace();
-        }
-        return (resultMessage);
+        return (resultMessage)
     }
 
     /**
-     *  非同期処理
-     *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
+     * 非同期処理
+     * （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
      *
      */
-    @Override
-    protected String doInBackground(MeMoMaObjectHolder... datas)
-    {
+    protected override fun doInBackground(vararg datas: MeMoMaObjectHolder?): String {
         // データを保管する
-        String result = exportToCsvFile(datas[0].getDataTitle(), datas[0]);
+        val result = exportToCsvFile(datas[0]!!.getDataTitle(), datas[0]!!)
 
-        System.gc();
-        return (result);
+        System.gc()
+        return (result)
     }
 
     /**
-     *  非同期処理の進捗状況の更新
+     * 非同期処理の進捗状況の更新
      *
      */
-    @Override
-    protected void onProgressUpdate(Integer... values)
-    {
+    protected override fun onProgressUpdate(vararg values: Int?) {
         // 今回は何もしない
     }
 
     /**
-     *  非同期処理の後処理
-     *  (結果を応答する)
+     * 非同期処理の後処理
+     * (結果を応答する)
      */
-    @Override
-    protected void onPostExecute(String result)
-    {
-        try
-        {
-            if (receiver != null)
-            {
-                receiver.onExportedResult(documentUri, result);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.v(TAG, "MeMoMaFileExportCsvProcess::onPostExecute() : " + ex.toString());
+    override fun onPostExecute(result: String) {
+        try {
+            receiver?.onExportedResult(documentUri, result)
+        } catch (ex: Exception) {
+            Log.v(TAG, "MeMoMaFileExportCsvProcess::onPostExecute() : $ex")
         }
         // プログレスダイアログを消す
-        savingDialog.dismiss();
+        savingDialog.dismiss()
     }
 
     /**
-     *    結果報告用のインタフェース（積極的に使う予定はないけど...）
+     * 結果報告用のインタフェース（積極的に使う予定はないけど...）
      *
      * @author MRSa
-     *
      */
-    public interface IResultReceiver
-    {
-        /**  保存結果の報告 **/
-        void onExportedResult(Uri documentUri, String detail);
+    interface IResultReceiver {
+        /**  保存結果の報告  */
+        fun onExportedResult(documentUri: Uri?, detail: String?)
     }
 }

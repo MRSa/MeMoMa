@@ -1,29 +1,20 @@
-package jp.sourceforge.gokigen.memoma.preference;
+package jp.sourceforge.gokigen.memoma.preference
 
-import android.app.Activity;
-import android.content.Intent;
+import android.app.Activity
+import android.content.Intent
 
-public class PreferenceIntentCaller implements IPreferenceIntentCaller
-{
-    private final Activity activity;
-
-    public static IPreferenceIntentCaller newInstance(Activity activity)
-    {
-        return (new PreferenceIntentCaller(activity));
+class PreferenceIntentCaller private constructor(private val activity: Activity) :
+    IPreferenceIntentCaller {
+    override fun selectBackgroundImageFileFromGallery(code: Int): Boolean {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.setType("image/*")
+        activity.startActivityForResult(intent, code)
+        return (false)
     }
 
-    private PreferenceIntentCaller(Activity activity)
-    {
-        this.activity = activity;
-    }
-
-
-    @Override
-    public boolean selectBackgroundImageFileFromGallery(int code)
-    {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        activity.startActivityForResult(intent, code);
-        return (false);
+    companion object {
+        fun newInstance(activity: Activity): IPreferenceIntentCaller {
+            return (PreferenceIntentCaller(activity))
+        }
     }
 }

@@ -1,288 +1,250 @@
-package jp.sourceforge.gokigen.memoma.io;
+package jp.sourceforge.gokigen.memoma.io
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.util.Log;
-
-import jp.sourceforge.gokigen.memoma.R;
-import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder;
-import jp.sourceforge.gokigen.memoma.holders.PositionObject;
+import android.app.ProgressDialog
+import android.content.Context
+import android.os.AsyncTask
+import android.preference.PreferenceManager
+import android.util.Log
+import jp.sourceforge.gokigen.memoma.R
+import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
+import jp.sourceforge.gokigen.memoma.io.MeMoMaFileSavingProcess.ISavingStatusHolder
+import java.io.BufferedReader
+import java.io.FileReader
 
 /**
- *  データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
+ * データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
  */
-public class MeMoMaFileImportCsvProcess extends AsyncTask<MeMoMaObjectHolder, Integer, String> implements MeMoMaFileSavingProcess.ISavingStatusHolder, MeMoMaFileSavingProcess.IResultReceiver
-{
-    private final String TAG = toString();
-	private final Context context;
-	private IResultReceiver receiver = null;
+class MeMoMaFileImportCsvProcess(
+    private val context: Context,
+    resultReceiver: IResultReceiver?,
+    fileName: String?
+) :
+    AsyncTask<MeMoMaObjectHolder?, Int?, String>(), ISavingStatusHolder,
+    MeMoMaFileSavingProcess.IResultReceiver {
+    private val TAG = toString()
+    private var receiver: IResultReceiver? = null
 
-	private String targetFileName = null;
-    private String fileSavedResult = "";
-	private ProgressDialog importingDialog = null;
+    private var targetFileName: String? = null
+    private var fileSavedResult: String? = ""
+    private var importingDialog: ProgressDialog? = null
 
-	private String backgroundUri = null;
-	private String userCheckboxString = null;
-	
-	/**
-	 *   コンストラクタ
-	 */
-    public MeMoMaFileImportCsvProcess(Context context, IResultReceiver resultReceiver, String fileName)
-    {
-    	this.context = context;
-    	receiver = resultReceiver;
-    	targetFileName = fileName;
+    private var backgroundUri: String? = null
+    private var userCheckboxString: String? = null
+
+    /**
+     * コンストラクタ
+     */
+    init {
+        receiver = resultReceiver
+        targetFileName = fileName
 
         //  プログレスダイアログ（「データインポート中...」）を表示する。
-    	importingDialog = new ProgressDialog(context);
-    	importingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-    	importingDialog.setMessage(context.getString(R.string.dataImporting));
-    	importingDialog.setIndeterminate(true);
-    	importingDialog.setCancelable(false);
-    	importingDialog.show();
+        importingDialog = ProgressDialog(context)
+        importingDialog!!.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        importingDialog!!.setMessage(context.getString(R.string.dataImporting))
+        importingDialog!!.setIndeterminate(true)
+        importingDialog!!.setCancelable(false)
+        importingDialog!!.show()
 
-    	//  設定読み出し用...あらかじめ、UIスレッドで読みだしておく。   	
-    	SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    	backgroundUri = preferences.getString("backgroundUri","");
-    	userCheckboxString = preferences.getString("userCheckboxString","");
-    }
-	
-    /**
-     *  非同期処理実施前の前処理
-     */
-    @Override
-    protected void onPreExecute()
-    {
+        //  設定読み出し用...あらかじめ、UIスレッドで読みだしておく。
+        val preferences = PreferenceManager.getDefaultSharedPreferences(
+            context
+        )
+        backgroundUri = preferences.getString("backgroundUri", "")
+        userCheckboxString = preferences.getString("userCheckboxString", "")
     }
 
     /**
-     *    １レコード分のデータを読み込む。
+     * 非同期処理実施前の前処理
      */
-    private String readRecord(BufferedReader buf )
-    {
-    	String oneRecord = null;
-    	try
-    	{
-    		String oneLine = buf.readLine();
-            while (oneLine != null)
-            {
-            	oneRecord = (oneRecord == null) ? oneLine : oneRecord + oneLine;
-            	if (oneRecord.indexOf(",;!<_$") > 0)
-            	{
-            		// レコード末尾が見つかったので break する。
-            		break;
-            	}
-            	// 次の行を読みだす。
-            	oneLine = buf.readLine();
+    override fun onPreExecute() {
+    }
+
+    /**
+     * １レコード分のデータを読み込む。
+     */
+    private fun readRecord(buf: BufferedReader): String? {
+        var oneRecord: String? = null
+        try {
+            var oneLine = buf.readLine()
+            while (oneLine != null) {
+                oneRecord = if ((oneRecord == null)) oneLine else oneRecord + oneLine
+                if (oneRecord.indexOf(",;!<_$") > 0) {
+                    // レコード末尾が見つかったので break する。
+                    break
+                }
+                // 次の行を読みだす。
+                oneLine = buf.readLine()
             }
-    	}
-    	catch (Exception ex)
-    	{
+        } catch (ex: Exception) {
             //
-    		Log.v(TAG, "CSV:readRecord() ex : " + ex.toString());
-    		oneRecord = null;
-    	}
-    	return (oneRecord);
+            Log.v(TAG, "CSV:readRecord() ex : $ex")
+            oneRecord = null
+        }
+        return (oneRecord)
     }
 
     /**
-     *   1レコード分のデータを区切る
+     * 1レコード分のデータを区切る
      */
-    private void parseRecord(String dataLine,  MeMoMaObjectHolder objectHolder)
-    {
-        int detailIndex = 0;
-        int userCheckIndexTrue = 0;
-        int userCheckIndexFalse = 0;
-        int nextIndex = 0;
-        String label = "";
-        String detail = "";
-        boolean userChecked = false;
-        try
-        {
-            detailIndex = dataLine.indexOf("\",\"");
-            if (detailIndex < 0)
-            {
-                Log.v(TAG, "parseRecord() : label wrong : " + dataLine);
-            	return;
+    private fun parseRecord(dataLine: String, objectHolder: MeMoMaObjectHolder) {
+        var detailIndex = 0
+        var userCheckIndexTrue = 0
+        var userCheckIndexFalse = 0
+        var nextIndex = 0
+        var label = ""
+        var detail = ""
+        var userChecked = false
+        try {
+            detailIndex = dataLine.indexOf("\",\"")
+            if (detailIndex < 0) {
+                Log.v(TAG, "parseRecord() : label wrong : $dataLine")
+                return
             }
-            label = dataLine.substring(1, detailIndex);
-            userCheckIndexTrue = dataLine.indexOf("\",True,", detailIndex);
-            userCheckIndexFalse = dataLine.indexOf("\",False,", detailIndex);
-            if (userCheckIndexFalse > detailIndex)
-            {
+            label = dataLine.substring(1, detailIndex)
+            userCheckIndexTrue = dataLine.indexOf("\",True,", detailIndex)
+            userCheckIndexFalse = dataLine.indexOf("\",False,", detailIndex)
+            if (userCheckIndexFalse > detailIndex) {
                 //
-                detail = dataLine.substring(detailIndex + 3, userCheckIndexFalse);
-            	userChecked = false;
-            	nextIndex = userCheckIndexFalse + 8; // 8は、 ",False, を足した数
-            }
-            else if (userCheckIndexTrue > detailIndex)
-            {
+                detail = dataLine.substring(detailIndex + 3, userCheckIndexFalse)
+                userChecked = false
+                nextIndex = userCheckIndexFalse + 8 // 8は、 ",False, を足した数
+            } else if (userCheckIndexTrue > detailIndex) {
                 //
-                detail = dataLine.substring(detailIndex + 3, userCheckIndexTrue);
-            	userChecked = true;
-            	nextIndex = userCheckIndexTrue + 7; // 7は、 ",True,  を足した数
-            }
-            else // if ((userCheckIndexTrue <= detailIndex)&&(userCheckIndexFalse <= detailIndex))
+                detail = dataLine.substring(detailIndex + 3, userCheckIndexTrue)
+                userChecked = true
+                nextIndex = userCheckIndexTrue + 7 // 7は、 ",True,  を足した数
+            } else  // if ((userCheckIndexTrue <= detailIndex)&&(userCheckIndexFalse <= detailIndex))
             {
-                Log.v(TAG, "parseRecord() : detail wrong : " + dataLine);
-            	return;            	
+                Log.v(TAG, "parseRecord() : detail wrong : $dataLine")
+                return
             }
-            
-            //  残りのデータを切り出す。
-            String[] datas = (dataLine.substring(nextIndex)).split(",");
-            if (datas.length < 6)
-            {
-            	Log.v(TAG, "parseRecord() : data size wrong : " + datas.length);
-            	return;
-            }
-            int drawStyle = Integer.parseInt(datas[0]);
-            String paintStyle = datas[1];
-            float centerX = Float.parseFloat(datas[2]);
-            float centerY = Float.parseFloat(datas[3]);
-            float width = Float.parseFloat(datas[4]);
-            float height = Float.parseFloat(datas[5]);
 
-            float left = centerX - (width / 2.0f);
-            float top = centerY - (height / 2.0f);
+
+            //  残りのデータを切り出す。
+            val datas =
+                dataLine.substring(nextIndex).split(",".toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
+            if (datas.size < 6) {
+                Log.v(TAG, "parseRecord() : data size wrong : " + datas.size)
+                return
+            }
+            val drawStyle = datas[0].toInt()
+            val paintStyle = datas[1]
+            val centerX = datas[2].toFloat()
+            val centerY = datas[3].toFloat()
+            val width = datas[4].toFloat()
+            val height = datas[5].toFloat()
+
+            val left = centerX - (width / 2.0f)
+            val top = centerY - (height / 2.0f)
 
             // オブジェクトのデータを作成する
-            PositionObject pos = objectHolder.createPosition(left, top, drawStyle);
-            if (pos == null)
-            {
-                Log.v(TAG, "parseRecord() : object create failure.");
-            	return;            	
+            val pos = objectHolder.createPosition(left, top, drawStyle)
+            if (pos == null) {
+                Log.v(TAG, "parseRecord() : object create failure.")
+                return
             }
-            pos.setRectRight(left + width);
-            pos.setRectBottom(top + height);
-            pos.setLabel(label);
-            pos.setDetail(detail);
-            pos.setPaintStyle(paintStyle);
-            pos.setUserChecked(userChecked);
-            Log.v(TAG, "OBJECT CREATED: " + label + "(" + left + "," + top + ") [" +drawStyle + "]");
+            pos.setRectRight(left + width)
+            pos.setRectBottom(top + height)
+            pos.setLabel(label)
+            pos.setDetail(detail)
+            pos.setPaintStyle(paintStyle)
+            pos.setUserChecked(userChecked)
+            Log.v(TAG, "OBJECT CREATED: $label($left,$top) [$drawStyle]")
+        } catch (ex: Exception) {
+            Log.v(TAG, "parseRecord() $ex")
         }
-        catch (Exception ex)
-        {
-        	Log.v(TAG, "parseRecord() " + ex.toString());
-        }
-    	
     }
 
-    
+
     /**
-     *    (CSV形式の)データを読み込んで格納する。
+     * (CSV形式の)データを読み込んで格納する。
      */
-    private String importFromCsvFile(String fileName, MeMoMaObjectHolder objectHolder)
-    {
-    	String resultMessage = "";
-        try
-        {
-            Log.v(TAG, "CSV(import)>> " + fileName);
-        	BufferedReader buf = new BufferedReader(new FileReader(fileName));
-            String dataLine = readRecord(buf);
-            while (dataLine != null)
-            {
-        		if (!dataLine.startsWith(";"))
-        		{
-        			// データ行だった。ログに出力する！
-                    parseRecord(dataLine, objectHolder);
-        		}
+    private fun importFromCsvFile(fileName: String, objectHolder: MeMoMaObjectHolder): String {
+        var resultMessage = ""
+        try {
+            Log.v(TAG, "CSV(import)>> $fileName")
+            val buf = BufferedReader(FileReader(fileName))
+            var dataLine = readRecord(buf)
+            while (dataLine != null) {
+                if (!dataLine.startsWith(";")) {
+                    // データ行だった。ログに出力する！
+                    parseRecord(dataLine, objectHolder)
+                }
                 // 次のデータ行を読み出す
-        		dataLine = readRecord(buf);
+                dataLine = readRecord(buf)
             }
+        } catch (e: Exception) {
+            resultMessage = " ERR(import) " + e.message
+            Log.v(TAG, resultMessage)
+            e.printStackTrace()
         }
-        catch (Exception e)
-        {
-        	resultMessage = " ERR(import) " + e.getMessage();
-            Log.v(TAG, resultMessage);
-            e.printStackTrace();
-        } 
-        return (resultMessage);
+        return (resultMessage)
     }
 
     /**
-     *  非同期処理
-     *  （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     * 
+     * 非同期処理
+     * （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
+     *
      */
-    @Override
-    protected String doInBackground(MeMoMaObjectHolder... datas)
-    {
+    protected override fun doInBackground(vararg datas: MeMoMaObjectHolder?): String {
         // ファイル名の設定 ... (拡張子なし)
-        String fileName = context.getFilesDir() + "/exported/" + targetFileName;
+        val fileName = context.filesDir.toString() + "/exported/" + targetFileName
 
         // データを読み込む
-        String result = importFromCsvFile(fileName, datas[0]);
+        val result = importFromCsvFile(fileName, datas[0]!!)
 
         // データを保存する
-        MeMoMaFileSavingEngine savingEngine = new MeMoMaFileSavingEngine(context, backgroundUri, userCheckboxString);
-        String message = savingEngine.saveObjects(datas[0]);
+        val savingEngine = MeMoMaFileSavingEngine(
+            context,
+            backgroundUri!!, userCheckboxString!!
+        )
+        val message = savingEngine.saveObjects(datas[0]!!)
 
-        System.gc();
+        System.gc()
 
-        return (result + " " + message);
+        return ("$result $message")
     }
 
     /**
-     *  非同期処理の進捗状況の更新
+     * 非同期処理の進捗状況の更新
      */
-	@Override
-	protected void onProgressUpdate(Integer... values)
-	{
+    protected override fun onProgressUpdate(vararg values: Int?) {
         // 今回は何もしない
-	}
-
-    /**
-     *  非同期処理の後処理
-     *  (結果を応答する)
-     */
-    @Override
-    protected void onPostExecute(String result)
-    {
-    	try
-    	{
-            if (receiver != null)
-            {
-            	receiver.onImportedResult(result + "  " + fileSavedResult);
-            }
-            fileSavedResult = "";
-    	}
-    	catch (Exception ex)
-    	{
-    		Log.v(TAG, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.getMessage());
-    	}
-    	// プログレスダイアログを消す
-    	importingDialog.dismiss();
-
-    	return;
-    }
-    
-    public void onSavedResult(boolean isError, String detail)
-    {
-        fileSavedResult = detail;
-    }
-
-    public void setSavingStatus(boolean isSaving)
-    {
-    	
-    }
-
-    public boolean getSavingStatus()
-    {
-        return (false);
     }
 
     /**
-     *    結果報告用のインタフェース（積極的に使う予定はないけど...）
+     * 非同期処理の後処理
+     * (結果を応答する)
      */
-    public interface IResultReceiver
-    {
-        /**  保存結果の報告 **/
-        void onImportedResult(String fileName);
+    override fun onPostExecute(result: String) {
+        try {
+            receiver?.onImportedResult("$result  $fileSavedResult")
+            fileSavedResult = ""
+        } catch (ex: Exception) {
+            Log.v(TAG, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.message)
+        }
+        // プログレスダイアログを消す
+        importingDialog!!.dismiss()
+
+        return
+    }
+
+    override fun onSavedResult(isError: Boolean, detail: String?) {
+        fileSavedResult = detail
+    }
+
+    override var savingStatus: Boolean
+        get() = (false)
+        set(isSaving) {
+        }
+
+    /**
+     * 結果報告用のインタフェース（積極的に使う予定はないけど...）
+     */
+    interface IResultReceiver {
+        /**  保存結果の報告  */
+        fun onImportedResult(fileName: String?)
     }
 }
