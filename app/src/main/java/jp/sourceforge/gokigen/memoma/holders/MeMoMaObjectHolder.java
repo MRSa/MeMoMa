@@ -3,6 +3,7 @@ package jp.sourceforge.gokigen.memoma.holders;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
@@ -49,7 +50,7 @@ public class MeMoMaObjectHolder
     
     public static final float DUPLICATEPOSITION_MARGIN = 15.0f;
 
-    public static final float OBJECTSIZE_DEFAULT_X = 256.0f;
+    public static final float OBJECTSIZE_DEFAULT_X = 198.0f;
 	public static final float OBJECTSIZE_DEFAULT_Y = (OBJECTSIZE_DEFAULT_X / 16.0f * 10.0f);
 
 	public static final float OBJECTSIZE_MINIMUM_X = 90.0f;
@@ -187,6 +188,39 @@ public class MeMoMaObjectHolder
         Log.v(TAG, "[" + posRect.left + "," + posRect.top + "][" + posRect.right + "," + posRect.bottom + "] " + "label : " + position.getLabel() + " detail : " + position.getDetail());
     }
 */
+
+	/**
+	 *   オブジェクトを共有する
+	 */
+	public void shareObject(int key)
+	{
+		Log.v(TAG, " shareObject " + key);
+		PositionObject targetPosition = objectPoints.get(key);
+		if (targetPosition == null)
+		{
+			// 元のオブジェクトが見つからなかったので、何もせずに戻る
+			return;
+		}
+		String title = targetPosition.getLabel();
+		String detail = targetPosition.getDetail();
+
+		try
+		{
+			Intent intent = new Intent();
+			intent.setAction(Intent.ACTION_SEND);
+			intent.setType("text/plain");
+			intent.putExtra(Intent.EXTRA_TITLE, title);
+			intent.putExtra(Intent.EXTRA_SUBJECT, title);
+			intent.putExtra(Intent.EXTRA_TEXT, detail);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			parent.startActivity(intent);
+			Log.v(TAG, "<<< SEND INTENT >>> : " + title);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
 
     /**
      *   オブジェクトを複製する。

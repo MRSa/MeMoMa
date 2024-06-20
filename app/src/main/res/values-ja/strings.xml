@@ -61,6 +61,7 @@
     <string name="object_duplicate">複製</string>
     <string name="object_bigger">サイズ拡大</string>
     <string name="object_smaller">サイズ縮小</string>
+    <string name="object_share">共有</string>
     <string name="object_bringtop">最前面にする</string>
     <string name="object_small_limit">これ以上縮小できません</string>
     <string name="object_bigger_limit">これ以上拡大できません</string>
