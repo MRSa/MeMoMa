@@ -85,6 +85,7 @@ public class MeMoMaFileSavingEngine
             
             
         	// オブジェクトの出力 （保持しているものはすべて表示する）
+            int objectCount = 0;
         	Enumeration<Integer> keys = objectHolder.getObjectKeys();
             while (keys.hasMoreElements())
             {
@@ -163,6 +164,7 @@ public class MeMoMaFileSavingEngine
                 serializer. endTag(Main.APP_NAMESPACE, "fontSize");
 
                 serializer.endTag(Main.APP_NAMESPACE, "object");
+                objectCount++;
             }
 
             // 接続線の出力 （保持しているものはすべて表示する）
@@ -211,12 +213,15 @@ public class MeMoMaFileSavingEngine
                 serializer.endTag(Main.APP_NAMESPACE, "toString");
 */
                 serializer.endTag(Main.APP_NAMESPACE, "line");
+                objectCount++;
             }
 
             serializer.endTag(Main.APP_NAMESPACE, "memoma");
             serializer.endDocument();
             serializer.flush();
             writer.close();
+
+            Log.v(TAG, "SAVE XML... objects: " + objectCount);
         }
         catch (Exception e)
         {
@@ -224,6 +229,7 @@ public class MeMoMaFileSavingEngine
             Log.v(TAG, resultMessage);
             e.printStackTrace();
         }
+
         return (resultMessage);
     }
 
@@ -233,7 +239,7 @@ public class MeMoMaFileSavingEngine
     public String saveObjects(MeMoMaObjectHolder objectHolder)
     {
 		// データタイトルがない場合...保存処理は行わない。
-    	if (objectHolder.getDataTitle().length() == 0)
+    	if (objectHolder.getDataTitle().isEmpty())
         {
     		Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle() );
     		return ("");
