@@ -3,6 +3,7 @@ package jp.sourceforge.gokigen.memoma.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
@@ -18,6 +19,8 @@ import jp.sourceforge.gokigen.memoma.R;
  */
 public class FileSelectionDialog
 {
+    private final String TAG = toString();
+
 	private final Context context;
 	private final IResultReceiver resultReceiver;
     private final MeMoMaDataFileHolder dataFileHolder;
@@ -44,6 +47,7 @@ public class FileSelectionDialog
 	 */
 	public void prepare()
 	{
+        Log.v(TAG, "prepare()");
 		dataFileHolder.updateFileList("");
 	}
 

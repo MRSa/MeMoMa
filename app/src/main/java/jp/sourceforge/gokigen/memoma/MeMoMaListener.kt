@@ -142,7 +142,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     fun finishListener()
     {
         // 終了時に状態を保存する
-        saveData(true)
+        // saveData(true)
     }
 
     /**
@@ -624,7 +624,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     {
         //  設定に記録されているデータを画面のタイトルに反映させる
         val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val memomaInfo = preferences.getString("MeMoMaInfo", parent.getString(R.string.app_name))
+        val memomaInfo = preferences.getString("MeMoMaInfo", parent.getString(R.string.app_name)) ?: parent.getString(R.string.app_name)
         parent.title = memomaInfo
 
         // アクションバーとファイル名の準備
@@ -644,7 +644,14 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun saveData(forceOverwrite: Boolean)
     {
-        dataInOutManager.saveFile(parent.title as String, forceOverwrite)
+        try
+        {
+            dataInOutManager.saveFile(parent.title as String, forceOverwrite)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**

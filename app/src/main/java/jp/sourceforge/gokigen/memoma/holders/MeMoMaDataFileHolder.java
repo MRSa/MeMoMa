@@ -70,7 +70,7 @@ public class MeMoMaDataFileHolder extends ArrayAdapter<String> implements Filena
 		}
     	System.gc();
     	
-    	Log.v(TAG, "::::::: "  + " (" + currentFileName + ") : " + outputIndex + " <" + getCount() + ">");
+    	Log.v(TAG, "MeMoMaDataFileHolder::updateFileList:::: "  + " (" + currentFileName + ") : " + outputIndex + " <" + getCount() + ">");
     	return (outputIndex);
     }
 
