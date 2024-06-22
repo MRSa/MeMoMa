@@ -1,5 +1,6 @@
 package jp.sourceforge.gokigen.memoma.extension
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -18,6 +19,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.Main
 import jp.sourceforge.gokigen.memoma.R

@@ -10,7 +10,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
@@ -40,13 +39,13 @@ import jp.sourceforge.gokigen.memoma.operations.ObjectAligner.IAlignCallback
 import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog
 import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder
 import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog
-import jp.sourceforge.gokigen.memoma.preference.Preference
+import jp.sourceforge.gokigen.memoma.preference.PreferenceFragment
 
 /**
  * メモま！ のメイン画面処理
  *
  */
-class MeMoMaListener internal constructor(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager) :
+class MeMoMaListener internal constructor(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager, private val sceneChanger: IChangeScene) :
     View.OnClickListener, OnTouchListener, View.OnKeyListener,
     IObjectSelectionReceiver, ConfirmationDialog.ConfirmationCallback,
     ObjectDataInputDialog.IResultReceiver,
@@ -498,6 +497,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun callExtendMenu()
     {
+/**
         val dataTitle = parent.title as String
 
         // 現在表示中のデータをファイルに保存する
@@ -532,6 +532,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                 }
             }
         launcher.launch(intent)
+**/
     }
 
     private fun setPreferenceDataTitle(title: String)
@@ -698,8 +699,21 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     {
         try
         {
+            // 設定画面を開く
+            sceneChanger.changeSceneToPreference()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+
+
+
+/*
+        try
+        {
             // 設定画面を呼び出す
-            val intent = Intent(parent, Preference::class.java)
+            val intent = Intent(parent, PreferenceFragment::class.java)
 
             val launcher =
                 parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
@@ -731,6 +745,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             // 例外発生...なにもしない。
             e.printStackTrace()
         }
+*/
     }
 
     /**

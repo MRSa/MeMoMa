@@ -3,28 +3,39 @@ package jp.sourceforge.gokigen.memoma.extension
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import jp.sourceforge.gokigen.memoma.R
+import androidx.fragment.app.Fragment
 
-
-class ExtensionActivity : AppCompatActivity()
+class ExtensionActivity : Fragment()
 {
-    private val listener: ExtensionActivityListener = ExtensionActivityListener(this)
+    private var listener: ExtensionActivityListener? = null
+    init {
+        val activity = this.activity as AppCompatActivity
+        listener = ExtensionActivityListener(activity)
+    }
 
-    public override fun onCreate(savedInstanceState: Bundle?)
+    override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         try
         {
             Log.v(TAG, "ExtensionActivity::onCreate()")
 
-            // レイアウトを設定する
-            setContentView(R.layout.extensionview)
+            //// レイアウトを設定する
+            //setContentView(R.layout.extensionview)
 
             // リスナクラスの準備
-            listener.prepareExtraDatas(intent)
-            listener.prepareListener()
+            val intent = this.activity?.intent
+            if (intent != null)
+            {
+                listener?.prepareExtraDatas(intent)
+            }
+            listener?.prepareListener()
+
+            // メニューがあるよ
+            setHasOptionsMenu(true)
         }
         catch (e: Exception)
         {
@@ -35,17 +46,17 @@ class ExtensionActivity : AppCompatActivity()
     /**
      * メニューの生成
      */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater)
     {
         try
         {
-            listener.onCreateOptionsMenu(menu)
+            listener?.onCreateOptionsMenu(menu)
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
-        return (super.onCreateOptionsMenu(menu))
+        return (super.onCreateOptionsMenu(menu, inflater))
     }
 
     /**
@@ -53,23 +64,27 @@ class ExtensionActivity : AppCompatActivity()
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
-        return (listener.onOptionsItemSelected(item))
+        if (listener != null)
+        {
+            return (listener?.onOptionsItemSelected(item)?: false)
+        }
+        return (false)
     }
 
     /**
      * メニュー表示前の処理
      */
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean
+    override fun onPrepareOptionsMenu(menu: Menu)
     {
         try
         {
-            listener.onPrepareOptionsMenu(menu)
+            super.onPrepareOptionsMenu(menu)
+            listener?.onPrepareOptionsMenu(menu)
         }
         catch (e: Exception)
         {
             e.printStackTrace()
         }
-        return (super.onPrepareOptionsMenu(menu))
     }
 
     /**
@@ -82,7 +97,7 @@ class ExtensionActivity : AppCompatActivity()
             super.onPause()
 
             // 動作を止めるようイベント処理クラスに指示する
-            listener.shutdown()
+            listener?.shutdown()
         }
         catch (ex: Exception)
         {
@@ -98,7 +113,7 @@ class ExtensionActivity : AppCompatActivity()
         try
         {
             super.onResume()
-            listener.prepareToStart()
+            listener?.prepareToStart()
         }
         catch (ex: Exception)
         {
@@ -114,7 +129,7 @@ class ExtensionActivity : AppCompatActivity()
     {
         try
         {
-            listener.finishListener()
+            //listener?.finishListener()
             super.onDestroy()
         }
         catch (e: Exception)
