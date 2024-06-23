@@ -617,9 +617,9 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     {
         try
         {
-            val dialog = editTextDialog.dialog
-            prepareInfoMessageEditDialog(dialog)
-            dialog.show()
+            val message = parent.title as String
+            editTextDialog.prepare(this, parent.getString(R.string.dataTitle), message, true)
+            editTextDialog.dialog.show()
         }
         catch (e: Exception)
         {
@@ -653,22 +653,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             val dialog = lineSelectionDialog.getDialog()
             lineSelectionDialog.prepareSelectLineShapeDialog(dialog, selectedObjectKey)
             dialog.show()
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * メッセージ編集ダイアログの表示を準備する
-     */
-    private fun prepareInfoMessageEditDialog(dialog: AlertDialog)
-    {
-        try
-        {
-            val message = parent.title as String
-            editTextDialog.prepare(dialog, this, parent.getString(R.string.dataTitle), message, true)
         }
         catch (e: Exception)
         {

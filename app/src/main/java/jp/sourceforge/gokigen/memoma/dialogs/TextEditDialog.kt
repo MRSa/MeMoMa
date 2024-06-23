@@ -13,42 +13,25 @@ class TextEditDialog(private val parent: Context, private val titleIcon: Int) : 
 {
     private lateinit var resultReceiver: ITextEditResultReceiver
     private var title: String = ""
+    private var editTextString: String = ""
+    private var isSingleLine = false
 
     fun prepare(
-        layout: AlertDialog,
         receiver: ITextEditResultReceiver,
         titleMessage: String?,
         initialMessage: String?,
         isSingleLine: Boolean
     )
     {
-        resultReceiver = receiver
-
         try
         {
-            val editComment = layout.findViewById<View>(R.id.editTextArea) as TextView
-            if (titleMessage != null)
-            {
-                layout.setTitle(titleMessage)
-                title = titleMessage
-            }
-
-            // テキスト入力エリアの文字を設定する
-            if (initialMessage != null)
-            {
-                editComment.text = initialMessage
-            }
-            else
-            {
-                editComment.text = parent.getString(R.string.blank)
-            }
-
-            // 入力領域の行数を更新する
-            editComment.isSingleLine = isSingleLine
+            this.resultReceiver = receiver
+            this.isSingleLine = isSingleLine  // 1行表示かどうか
+            this.title = titleMessage ?: "" // ダイアログのタイトル
+            this.editTextString = initialMessage ?: "" // テキスト入力エリアの文字
         }
         catch (ex: Exception)
         {
-            // ログだけ吐いて、何もしない
             ex.printStackTrace()
         }
     }
@@ -58,32 +41,41 @@ class TextEditDialog(private val parent: Context, private val titleIcon: Int) : 
      */
     override fun getDialog(): AlertDialog
     {
-        val inflater =
-            parent.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val layout = inflater.inflate(R.layout.messagedialog, null)
         val builder = AlertDialog.Builder(parent)
-        val editComment = layout.findViewById<View>(R.id.editTextArea) as TextView
+        try
+        {
+            val inflater = parent.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val layout = inflater.inflate(R.layout.messagedialog, null)
 
-        // 表示するデータ（アイコン、ダイアログタイトル、メッセージ）を準備する
-        if (titleIcon != 0) {
-            builder.setIcon(titleIcon)
+            val editComment = layout.findViewById<View>(R.id.editTextArea) as TextView
+            editComment.text = editTextString
+            editComment.isSingleLine = isSingleLine
+
+            // 表示するデータ（アイコン、ダイアログタイトル、メッセージ）を準備する
+            if (titleIcon != 0) {
+                builder.setIcon(titleIcon)
+            }
+            builder.setView(layout)
+            builder.setTitle(title)
+            builder.setCancelable(false)
+            builder.setPositiveButton(
+                parent.getString(R.string.confirmYes)
+            ) { dialog, _ ->
+                resultReceiver.finishTextEditDialog(editComment.text.toString())
+                Log.v(TAG, "$title --- ENTER TEXT : ${editComment.text}")
+                dialog.dismiss()
+                System.gc()
+            }
+            builder.setNegativeButton(parent.getString(R.string.confirmNo))
+            { dialog, _ ->
+                resultReceiver.cancelTextEditDialog()
+                dialog.cancel()
+                System.gc()
+            }
         }
-        builder.setTitle(title)
-        builder.setView(layout)
-        builder.setCancelable(false)
-        builder.setPositiveButton(
-            parent.getString(R.string.confirmYes)
-        ) { dialog, _ ->
-            resultReceiver.finishTextEditDialog(editComment.text.toString())
-            Log.v(TAG, "ENTER TEXT : ${editComment.text}")
-            dialog.dismiss()
-            System.gc()
-        }
-        builder.setNegativeButton(parent.getString(R.string.confirmNo))
-        { dialog, _ ->
-            resultReceiver.cancelTextEditDialog()
-            dialog.cancel()
-            System.gc()
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
         return (builder.create())
     }
