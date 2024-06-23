@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="blank"> </string>
-    <string name="app_credit">An idea planner.\n</string>
+    <string name="app_credit">An idea planner.\n   https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/MeMoMa/README.md</string>
     <string name="app_name">MeMoMa</string>
     <string name="createnew">New</string>
     <string name="createnew_title">Discard confirmation</string>

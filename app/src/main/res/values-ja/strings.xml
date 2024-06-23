@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="blank"> </string>
-    <string name="app_credit">An idea planner\n http://sourceforge.jp/projects/gokigen/wiki/MeMoMa</string>
+    <string name="app_credit">An idea planner.\n   https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/MeMoMa/README.md</string>
     <string name="app_name">めもま</string>
     <string name="createnew">新規作成</string>
     <string name="createnew_title">破棄確認</string>
