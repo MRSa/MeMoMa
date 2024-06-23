@@ -10,16 +10,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".preference.PreferenceFragment" android:label="@string/preference_name">
-        </activity>
-        <activity android:name=".extension.ExtensionActivity"
-            android:exported="false"
-            android:label="@string/extent_name">
-            <intent-filter>
-                <action android:name="jp.sfjp.gokigen.memoma.extension.activity" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="jp.sourceforge.gokigen.memoma.fileprovider"

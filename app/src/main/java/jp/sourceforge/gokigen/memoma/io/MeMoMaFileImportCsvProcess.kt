@@ -244,8 +244,8 @@ class MeMoMaFileImportCsvProcess(
     /**
      * 結果報告用のインタフェース（積極的に使う予定はないけど...）
      */
-    interface IResultReceiver {
-        /**  保存結果の報告  */
-        fun onImportedResult(fileName: String?)
+    interface IResultReceiver
+    {
+        fun onImportedResult(fileName: String) // 保存結果の報告
     }
 }

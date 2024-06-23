@@ -3,13 +3,16 @@ package jp.sourceforge.gokigen.memoma
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
+import jp.sourceforge.gokigen.memoma.extension.ExtensionFragment
 import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager
 import jp.sourceforge.gokigen.memoma.preference.PreferenceFragment
 
-class ChangeScene(private val parent: AppCompatActivity) : IChangeScene {
+class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
+{
     private lateinit var mainFragment: MainFragment
     private lateinit var preferenceFragment: PreferenceFragment
-    private lateinit var listener: MeMoMaListener // イベント処理クラス
+    private lateinit var extentionFragment: ExtensionFragment
+    private lateinit var listener: MeMoMaListener
 
     fun prepare() {
         if (!::listener.isInitialized)
@@ -20,28 +23,45 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene {
 
     override fun changeSceneToMain()
     {
-        try {
+        try
+        {
             // 念のための初期化
             prepare()
 
             // ----- メイン画面に遷移させる
-            if (!::mainFragment.isInitialized) {
+            if (!::mainFragment.isInitialized)
+            {
                 mainFragment = MainFragment.newInstance(this, listener)
             }
             val transaction: FragmentTransaction = parent.supportFragmentManager.beginTransaction()
             transaction.replace(R.id.fragment1, mainFragment)
             transaction.commitAllowingStateLoss()
-
-            // --- backstackに追加してcommit
-            //transaction.addToBackStack(null)
-            //transaction.commit()
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             e.printStackTrace()
         }
     }
 
-    override fun changeSceneToExtension() {
-        TODO("Not yet implemented")
+    override fun changeSceneToExtension(title: String)
+    {
+        try
+        {
+            // ----- オブジェクト一覧画面に遷移させる
+            if (!::extentionFragment.isInitialized)
+            {
+                extentionFragment = ExtensionFragment.newInstance(parent)
+            }
+            extentionFragment.setDataTitle(title)
+            val transaction: FragmentTransaction = parent.supportFragmentManager.beginTransaction()
+            transaction.replace(R.id.fragment1, extentionFragment)
+            transaction.addToBackStack(null)
+            transaction.commit()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     override fun changeSceneToPreference()
@@ -55,7 +75,6 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene {
             }
             val transaction: FragmentTransaction = parent.supportFragmentManager.beginTransaction()
             transaction.replace(R.id.fragment1, preferenceFragment)
-            // --- backstackに追加してcommit
             transaction.addToBackStack(null)
             transaction.commit()
         }

@@ -58,7 +58,8 @@ class Main : AppCompatActivity()
     private fun allPermissionsGranted() : Boolean
     {
         var result = true
-        for (param in REQUIRED_PERMISSIONS) {
+        for (param in REQUIRED_PERMISSIONS)
+        {
             if (ContextCompat.checkSelfPermission(
                     baseContext,
                     param
@@ -116,7 +117,8 @@ class Main : AppCompatActivity()
         }
     }
 
-    companion object {
+    companion object
+    {
         const val APP_NAMESPACE = "gokigen"
         private val TAG = Main::class.java.simpleName
         private const val REQUEST_CODE_PERMISSIONS = 10

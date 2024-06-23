@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -28,7 +27,6 @@ import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog
 import jp.sourceforge.gokigen.memoma.dialogs.TextEditDialog.ITextEditResultReceiver
 import jp.sourceforge.gokigen.memoma.drawers.GokigenSurfaceView
 import jp.sourceforge.gokigen.memoma.drawers.MeMoMaCanvasDrawer
-import jp.sourceforge.gokigen.memoma.extension.ExtensionActivity
 import jp.sourceforge.gokigen.memoma.holders.LineStyleHolder
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
 import jp.sourceforge.gokigen.memoma.holders.OperationModeHolder
@@ -39,7 +37,6 @@ import jp.sourceforge.gokigen.memoma.operations.ObjectAligner.IAlignCallback
 import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog
 import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder
 import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog
-import jp.sourceforge.gokigen.memoma.preference.PreferenceFragment
 
 /**
  * メモま！ のメイン画面処理
@@ -54,7 +51,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     IListener
 {
     private lateinit var objectDrawer: MeMoMaCanvasDrawer
-
     private val editTextDialog: TextEditDialog = TextEditDialog(parent, R.drawable.icon)
     private val objectHolder: MeMoMaObjectHolder = MeMoMaObjectHolder(parent)
     private val drawModeHolder: OperationModeHolder = OperationModeHolder(parent)
@@ -69,7 +65,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * コンストラクタ
-     *
      */
     init
     {
@@ -94,34 +89,39 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             commandHolder,
             parent.getString(R.string.object_operation)
         )
-
     }
 
     // イベントリスナの登録
     override fun prepareListener(view: View)
     {
-        // ボタンクリック時のイベントを受信する設定...
-        (view.findViewById<ImageButton>(R.id.HomeButton)).setOnClickListener(this)
-        (view.findViewById<ImageButton>(R.id.ExpandButton)).setOnClickListener(this)
-        (view.findViewById<ImageButton>(R.id.CreateObjectButton)).setOnClickListener(this)
-        (view.findViewById<ImageButton>(R.id.DeleteObjectButton)).setOnClickListener(this)
-        (view.findViewById<ImageButton>(R.id.LineStyleButton)).setOnClickListener(this)
-        (view.findViewById<ImageButton>(R.id.SaveButton)).setOnClickListener(this)
-        (view.findViewById<GokigenSurfaceView>(R.id.GraphicView)).setOnTouchListener(this)
+        try
+        {
+            // ボタンクリック時のイベントを受信する設定...
+            (view.findViewById<ImageButton>(R.id.HomeButton)).setOnClickListener(this)
+            (view.findViewById<ImageButton>(R.id.ExpandButton)).setOnClickListener(this)
+            (view.findViewById<ImageButton>(R.id.CreateObjectButton)).setOnClickListener(this)
+            (view.findViewById<ImageButton>(R.id.DeleteObjectButton)).setOnClickListener(this)
+            (view.findViewById<ImageButton>(R.id.LineStyleButton)).setOnClickListener(this)
+            (view.findViewById<ImageButton>(R.id.SaveButton)).setOnClickListener(this)
+            (view.findViewById<GokigenSurfaceView>(R.id.GraphicView)).setOnTouchListener(this)
 
-        prepareObjectDrawer()
+            prepareObjectDrawer()
 
-        // スライドバーが動かされた時の処理
-        val seekbar = view.findViewById<SeekBar>(R.id.ZoomInOut)
-        seekbar.setOnSeekBarChangeListener(objectDrawer)
+            // スライドバーが動かされた時の処理
+            val seekbar = view.findViewById<SeekBar>(R.id.ZoomInOut)
+            seekbar.setOnSeekBarChangeListener(objectDrawer)
 
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val progress = preferences.getInt("zoomProgress", 50)
-        seekbar.progress = progress
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val progress = preferences.getInt("zoomProgress", 50)
+            seekbar.progress = progress
 
-        // 起動時にデータを読み出す
-        prepareMeMoMaInfo()
-
+            // 起動時にデータを読み出す
+            prepareMeMoMaInfo()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     private fun prepareObjectDrawer()
@@ -143,36 +143,34 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     }
 
     /**
-     * 終了準備
-     */
-    fun finishListener()
-    {
-        // 終了時に状態を保存する
-        saveData(true)
-    }
-
-    /**
      * スタート準備
      */
     override fun prepareToStart(view: View)
     {
-        prepareObjectDrawer()
+        try
+        {
+            prepareObjectDrawer()
 
-        //  設定に記録されているデータを画面に反映させる
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            //  設定に記録されているデータを画面に反映させる
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
 
-        // ラインの形状を取得し、設定する
-        setLineStyle()
+            // ラインの形状を取得し、設定する
+            setLineStyle()
 
-        // 操作モードを画面に反映させる
-        updateButtons((preferences.getString("operationMode", "0")?:"0").toInt())
+            // 操作モードを画面に反映させる
+            updateButtons((preferences.getString("operationMode", "0")?:"0").toInt())
 
-        // 条件に合わせて、描画クラスを変更する
-        (view.findViewById<GokigenSurfaceView>(R.id.GraphicView)).setCanvasDrawer(objectDrawer)
+            // 条件に合わせて、描画クラスを変更する
+            (view.findViewById<GokigenSurfaceView>(R.id.GraphicView)).setCanvasDrawer(objectDrawer)
 
-        // 背景画像（の名前）を設定しておく
-        val backgroundString = preferences.getString("backgroundUri", "") ?: ""
-        objectDrawer.setBackgroundUri(backgroundString)
+            // 背景画像（の名前）を設定しておく
+            val backgroundString = preferences.getString("backgroundUri", "") ?: ""
+            objectDrawer.setBackgroundUri(backgroundString)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -195,15 +193,11 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     override fun shutdown()
     {
-        // 保存シーケンスを走らせる
-        saveData(true)
+        saveData()  // 保存シーケンスを走らせる
     }
-
-
 
     /**
      * 背景画像イメージの更新処理
-     *
      */
     private fun updateBackgroundImage(uri: String)
     {
@@ -229,36 +223,43 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     override fun onClick(v: View)
     {
-        Log.v(TAG, "onClick()")
-        when (val id = v.id)
+        try
         {
-            R.id.MeMoMaInfo -> {
-                // テキスト編集ダイアログを表示する
-                showInfoMessageEditDialog()
-            }
-            R.id.LineStyleButton -> {
-                // ライン形状を変えるダイアログ
-                selectLineShapeDialog()
-            }
-            R.id.ExpandButton -> {
-                // 拡張メニューを呼び出す
-                callExtendMenu()
-            }
-            R.id.DeleteObjectButton, R.id.CreateObjectButton -> {
-                // 削除ボタン or 作成ボタンが押された時の処理
-                updateButtons(drawModeHolder.updateOperationMode(id))
-            }
-            R.id.HomeButton -> {
-                //  表示位置、表示倍率と並行移動についてリセットする
-                objectDrawer.resetScaleAndLocation(parent.findViewById(R.id.ZoomInOut))
+            Log.v(TAG, "onClick()")
+            when (val id = v.id)
+            {
+                R.id.MeMoMaInfo -> {
+                    // テキスト編集ダイアログを表示する
+                    showInfoMessageEditDialog()
+                }
+                R.id.LineStyleButton -> {
+                    // ライン形状を変えるダイアログ
+                    selectLineShapeDialog()
+                }
+                R.id.ExpandButton -> {
+                    // 拡張メニューを呼び出す
+                    callExtendMenu()
+                }
+                R.id.DeleteObjectButton, R.id.CreateObjectButton -> {
+                    // 削除ボタン or 作成ボタンが押された時の処理
+                    updateButtons(drawModeHolder.updateOperationMode(id))
+                }
+                R.id.HomeButton -> {
+                    //  表示位置、表示倍率と並行移動についてリセットする
+                    objectDrawer.resetScaleAndLocation(parent.findViewById(R.id.ZoomInOut))
 
-                // 画面の再描画を指示する
-                redrawSurfaceView()
+                    // 画面の再描画を指示する
+                    redrawSurfaceView()
+                }
+                R.id.SaveButton -> {
+                    // データ保存が指示された！
+                    saveData()
+                }
             }
-            R.id.SaveButton -> {
-                // データ保存が指示された！
-                saveData(true)
-            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
@@ -290,14 +291,15 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     override fun onKey(v: View, keyCode: Int, event: KeyEvent): Boolean
     {
-/*
-        val action = event.action
-        if (action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_DPAD_CENTER)
+        try
         {
-            //Log.v(TAG, "KEY ENTER")
+            val action = event.action
+            Log.v(TAG, "MeMoMaListener::onKey() keyCode: $keyCode [$action]")
         }
-        //Log.v(TAG, "MeMoMaListener::onKey() ")
-*/
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
         return false
     }
 
@@ -475,7 +477,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * アプリの情報を表示する
-     *
      */
     private fun showAboutGokigen()
     {
@@ -492,47 +493,28 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     }
 
     /**
-     * 拡張メニューを呼び出す
-     *
+     * オブジェクト一覧メニューを呼び出す
      */
     private fun callExtendMenu()
     {
-/**
-        val dataTitle = parent.title as String
+        try
+        {
+            // データタイトルを取得する
+            val dataTitle = parent.title as String
 
-        // 現在表示中のデータをファイルに保存する
-        dataInOutManager.saveFile(dataTitle, true)
+            // 現在表示中のデータをファイルに保存する
+            dataInOutManager.saveFile(dataTitle, true)
 
-        // Preferenceにもデータタイトル名称を記録する
-        setPreferenceDataTitle(dataTitle)
+            // Preferenceにもデータタイトル名称を記録する
+            setPreferenceDataTitle(dataTitle)
 
-        // 現在読み込んでいるファイルのファイル名を生成する
-        val fullPath = dataInOutManager.getDataFileFullPath(dataTitle, ".xml")
-
-        //  ここで拡張メニューを呼び出す
-        // (渡すデータを作って Intentとする)
-        val intent = Intent()
-        intent.action = ExtensionActivity.MEMOMA_EXTENSION_LAUNCH_ACTIVITY
-        intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_FULLPATH, fullPath)
-        intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE, dataTitle)
-
-        val launcher =
-            parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
-                if (result?.resultCode == Activity.RESULT_OK) {
-                    result.data?.let { _ ->
-                        try
-                        {
-                            dataInOutManager.loadFile(parent.title as String)
-                        }
-                        catch (e: Exception)
-                        {
-                            e.printStackTrace()
-                        }
-                    }
-                }
-            }
-        launcher.launch(intent)
-**/
+            // オブジェクト一覧画面を表示する
+            sceneChanger.changeSceneToExtension(dataTitle)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     private fun setPreferenceDataTitle(title: String)
@@ -579,14 +561,12 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * データの保存を行う
-     *
-     *
-     * @param forceOverwrite  trueの時は、ファイル名が確定していたときは（確認せずに）上書き保存を自動で行う。
      */
-    private fun saveData(forceOverwrite: Boolean)
+    private fun saveData()
     {
         try
         {
+            val forceOverwrite = true
             dataInOutManager.saveFile(parent.title as String, forceOverwrite)
         }
         catch (e: Exception)
@@ -600,29 +580,34 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
      */
     private fun alignData()
     {
-        val aligner = ObjectAligner(parent, this)
-        Thread {
-            try
-            {
-                aligner.doAlignObject(objectHolder)
-            }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
-            }
-            parent.runOnUiThread {
+        try
+        {
+            val aligner = ObjectAligner(parent, this)
+            Thread {
                 try
                 {
-                    aligner.finishAlignObject()
+                    aligner.doAlignObject(objectHolder)
                 }
                 catch (e: Exception)
                 {
                     e.printStackTrace()
                 }
-            }
-        }.start()
-
-        // aligner.execute(objectHolder)
+                parent.runOnUiThread {
+                    try
+                    {
+                        aligner.finishAlignObject()
+                    }
+                    catch (e: Exception)
+                    {
+                        e.printStackTrace()
+                    }
+                }
+            }.start()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -677,7 +662,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * メッセージ編集ダイアログの表示を準備する
-     *
      */
     private fun prepareInfoMessageEditDialog(dialog: AlertDialog)
     {
@@ -706,46 +690,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         {
             e.printStackTrace()
         }
-
-
-
-/*
-        try
-        {
-            // 設定画面を呼び出す
-            val intent = Intent(parent, PreferenceFragment::class.java)
-
-            val launcher =
-                parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
-                    if (result?.resultCode == Activity.RESULT_OK) {
-                        result.data?.let { data: Intent ->
-                            try
-                            {
-                                // 背景色、背景画像の設定を行う。
-                                val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-                                val colorString = preferences.getString("backgroundColor", "#ff004000") ?: "#ff004000"
-                                objectDrawer.setBackgroundColor(colorString)
-
-                                // 背景画像イメージの更新処理
-                                val backgroundString = preferences.getString("backgroundUri", "") ?: ""
-                                updateBackgroundImage(backgroundString)
-                                Log.v(TAG, "RETURNED PREFERENCES $backgroundString")
-                            }
-                            catch (e: Exception)
-                            {
-                                e.printStackTrace()
-                            }
-                        }
-                    }
-                }
-            launcher.launch(intent)
-        }
-        catch (e: Exception)
-        {
-            // 例外発生...なにもしない。
-            e.printStackTrace()
-        }
-*/
     }
 
     /**
@@ -795,7 +739,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     override fun touchedVacantArea(): Int
     {
         val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        return preferences.getString("operationMode", "0")!!.toInt()
+        return ((preferences.getString("operationMode", "0")?:"0").toInt())
     }
 
     /**
@@ -804,85 +748,108 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     override fun touchUppedVacantArea(): Int
     {
         val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        return preferences.getString("operationMode", "0")!!.toInt()
+        return ((preferences.getString("operationMode", "0")?:"0").toInt())
     }
 
     /**
      * オブジェクトを本当に削除して良いか確認した後に、オブジェクトを削除する。
      */
-    private fun removeObject(key: Int) {
-        // 本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
-        val alertDialogBuilder = AlertDialog.Builder(parent)
-        alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
-        alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-        alertDialogBuilder.setMessage(parent.getString(R.string.deleteconfirm_message))
+    private fun removeObject(key: Int)
+    {
+        try
+        {
+            // 本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
+            val alertDialogBuilder = AlertDialog.Builder(parent)
+            alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
+            alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
+            alertDialogBuilder.setMessage(parent.getString(R.string.deleteconfirm_message))
 
-        // 削除するオブジェクトのキーを覚えこむ。
-        objectKeyToDelete = key
+            // 削除するオブジェクトのキーを覚えこむ。
+            objectKeyToDelete = key
 
-        // OKボタンの生成
-        alertDialogBuilder.setPositiveButton(
-            parent.getString(R.string.confirmYes)
-        ) { dialog, _ -> //  削除モードの時... 確認後削除だけど、今は確認なしで削除を行う。
-            objectHolder.removePosition(objectKeyToDelete)
+            // OKボタンの生成
+            alertDialogBuilder.setPositiveButton(
+                parent.getString(R.string.confirmYes)
+            ) { dialog, _ -> //  削除モードの時... 確認後削除だけど、今は確認なしで削除を行う。
+                try
+                {
+                    objectHolder.removePosition(objectKeyToDelete)
 
-            // 削除するオブジェクトに接続されている線もすべて削除する
-            objectHolder.getConnectLineHolder().removeAllConnection(objectKeyToDelete)
+                    // 削除するオブジェクトに接続されている線もすべて削除する
+                    objectHolder.getConnectLineHolder().removeAllConnection(objectKeyToDelete)
 
-            // ダイアログを閉じる
-            dialog.dismiss()
+                    // ダイアログを閉じる
+                    dialog.dismiss()
 
-            // ここで動作モードを削除モードから移動モードに戻す。
-            drawModeHolder.changeOperationMode(OperationModeHolder.OPERATIONMODE_MOVE)
-            updateButtons(OperationModeHolder.OPERATIONMODE_MOVE)
+                    // ここで動作モードを削除モードから移動モードに戻す。
+                    drawModeHolder.changeOperationMode(OperationModeHolder.OPERATIONMODE_MOVE)
+                    updateButtons(OperationModeHolder.OPERATIONMODE_MOVE)
 
+                    // 画面を再描画する
+                    redrawSurfaceView()
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
 
-            // 画面を再描画する
-            redrawSurfaceView()
+            // Cancelボタンの生成
+            alertDialogBuilder.setNegativeButton(
+                parent.getString(R.string.confirmNo)
+            ) { dialog, _ -> dialog.cancel() }
+
+            // ダイアログはキャンセル可能に設定する
+            alertDialogBuilder.setCancelable(true)
+
+            // ダイアログを表示する
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
         }
-
-        // Cancelボタンの生成
-        alertDialogBuilder.setNegativeButton(
-            parent.getString(R.string.confirmNo)
-        ) { dialog, _ -> dialog.cancel() }
-
-        // ダイアログはキャンセル可能に設定する
-        alertDialogBuilder.setCancelable(true)
-
-        // ダイアログを表示する
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * オブジェクトを複製する
-     *
-     *
      */
-    private fun duplicateObject(key: Int) {
-        // 選択中オブジェクトを複製する
-        objectHolder.duplicatePosition(key)
+    private fun duplicateObject(key: Int)
+    {
+        try
+        {
+            // 選択中オブジェクトを複製する
+            objectHolder.duplicatePosition(key)
 
-        // 画面を再描画する
-        redrawSurfaceView()
+            // 画面を再描画する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * オブジェクトを共有する
-     *
-     *
      */
     private fun shareObject(key: Int)
     {
-        // 選択中オブジェクトを共有する
-        objectHolder.shareObject(key)
+        try
+        {
+            // 選択中オブジェクトを共有する
+            objectHolder.shareObject(key)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
 
     /**
      * オブジェクトを拡大する
-     *
-     *
      */
     private fun expandObject(key: Int)
     {
@@ -902,8 +869,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * オブジェクトを縮小する
-     *
-     *
      */
     private fun shrinkObject(key: Int)
     {
@@ -943,7 +908,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * ボタンを更新する
-     *
      */
     private fun updateButtons(mode: Int)
     {
@@ -976,7 +940,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * オブジェクトが選択された（長押しで！）
-     *
      */
     override fun objectSelectedContext(key: Int?)
     {
@@ -986,8 +949,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             selectedContextKey = key?: 0
 
             //  ダイアログの準備を行う
-            val dialog = objectDataInputDialog.getDialog()
-            objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey)
+            val dialog = objectDataInputDialog.getDialog(selectedContextKey)
             dialog.show()
         }
         catch (e: Exception)
@@ -997,8 +959,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     }
 
     /**
-     * オブジェクトが選択された！
-     *
+     * オブジェクトが選択された！ オブジェクトの編集ダイアログを表示する
      */
     override fun objectSelected(key: Int?): Boolean
     {
@@ -1022,8 +983,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                         Log.v(TAG, "MeMoMaListener::objectSelected() key : $key")
 
                         // オブジェクトの詳細設定ダイアログを表示する...
-                        val dialog = objectDataInputDialog.getDialog()
-                        objectDataInputDialog.prepareObjectInputDialog(dialog, selectedObjectKey)
+                        val dialog = objectDataInputDialog.getDialog(key)
                         dialog.show()
                     }
                 }
@@ -1042,15 +1002,15 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * 新規状態に変更する。
-     *
      */
     override fun acceptConfirmation()
     {
-        Log.v(TAG, "MeMoMaListener::acceptConfirmation()")
-        try
+         try
         {
+            Log.v(TAG, "MeMoMaListener::acceptConfirmation()")
+
             // 現在のデータを保管する
-            saveData(true);
+            saveData()
 
             // オブジェクトデータをクリアする。
             objectHolder.removeAllPositions() // オブジェクトの保持クラス
@@ -1074,7 +1034,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * 画面を再描画する
-     *
      */
     private fun redrawSurfaceView()
     {
@@ -1091,33 +1050,13 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * 不許可。何もしない。
-     *
      */
-    override fun cancelConfirmation() {
-        Log.v(TAG, "MeMoMaListener::cancelConfirmation()")
-    }
+    override fun cancelConfirmation() {}
 
     /**
      * オブジェクトが整列された時の処理
-     *
      */
-    override fun objectAligned() {
-        try
-        {
-            // 画面の再描画を指示する
-            redrawSurfaceView()
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * オブジェクト編集ダイアログが閉じられた時の処理
-     *
-     */
-    override fun finishObjectInput()
+    override fun objectAligned()
     {
         try
         {
@@ -1132,16 +1071,22 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
-     *
      */
-    override fun cancelObjectInput() {
-        // 何もしない
+    override fun finishObjectInput()
+    {
+        try
+        {
+            // 画面の再描画を指示する
+            redrawSurfaceView()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    /**
-     * アイテムが選択された！
-     *
-     */
+    override fun cancelObjectInput() {}
+
     override fun itemSelected(index: Int, itemValue: String)
     {
         try
@@ -1176,23 +1121,12 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         }
     }
 
-    /**
-     * (今回未使用)
-     *
-     */
     override fun itemSelectedMulti(items: Array<String?>, status: BooleanArray) {}
+
     override fun canceledSelection() {}
-    fun onSaveInstanceState(outState: Bundle) {
-        /* ここで状態を保存 */
-        Log.v(TAG, "MeMoMaListener::onSaveInstanceState() : $outState")
-    }
 
-    fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        /* ここで状態を復元 */
-        Log.v(TAG, "MeMoMaListener::onRestoreInstanceState() : $savedInstanceState")
-    }
-
-    override fun finishTextEditDialog(message: String) {
+    override fun finishTextEditDialog(message: String)
+    {
         if (message.isEmpty())
         {
             // データが入力されていなかったので、何もしない。
@@ -1210,7 +1144,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             parent.title = message
 
             // 保存シーケンスを一度走らせる
-            saveData(true)
+            saveData()
 
             // ファイル選択リストの更新
             dataInOutManager.updateFileList(message, parent.supportActionBar)
@@ -1223,10 +1157,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     override fun cancelTextEditDialog() {}
 
-    /**
-     * 接続線
-     *
-     */
     override fun finishSelectLineShape(style: Int, shape: Int, thickness: Int)
     {
         try
@@ -1241,12 +1171,10 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         }
     }
 
-    /**
-     *
-     */
     override fun cancelSelectLineShape() {}
 
-    companion object {
+    companion object
+    {
         private val TAG = MeMoMaListener::class.java.simpleName
     }
 }

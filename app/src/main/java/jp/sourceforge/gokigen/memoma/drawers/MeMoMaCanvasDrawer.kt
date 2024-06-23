@@ -196,7 +196,7 @@ class MeMoMaCanvasDrawer(
      *
      */
     override fun drawOnCanvas(canvas: Canvas) {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::drawOnCanvas()");
+        //Log.v(TAG, "MeMoMaCanvasDrawer::drawOnCanvas()");
         try {
             // 画面全体をクリアする
             //canvas.drawColor(Color.argb(backgroundColorAlfa, backgroundColorRed, backgroundColorGreen, backgroundColorBlue), Mode.CLEAR);
@@ -216,7 +216,6 @@ class MeMoMaCanvasDrawer(
 
             // オブジェクト間の接続線をすべて表示する
             drawConnectionLines(canvas, 0.0f, 0.0f)
-
 
             // オブジェクトをすべて表示
             drawObjects(canvas, 0.0f, 0.0f)
@@ -553,7 +552,6 @@ class MeMoMaCanvasDrawer(
             paint.strokeWidth = `object`.getstrokeWidth()
         }
 
-
         // 図形の形状に合わせて描画する
         val objectShape = RectF(`object`.getRect())
         objectShape.left += offsetX
@@ -643,19 +641,27 @@ class MeMoMaCanvasDrawer(
     /**
      * オブジェクトをすべて表示する
      */
-    private fun drawObjects(canvas: Canvas, offsetX: Float, offsetY: Float) {
-        // オブジェクトの描画 （保持しているものはすべて表示する）
-        val keys = objectHolder.getObjectKeys()
-        if (keys != null)
+    private fun drawObjects(canvas: Canvas, offsetX: Float, offsetY: Float)
+    {
+        try
         {
-            while (keys.hasMoreElements()) {
-                val key = keys.nextElement()
-                val pos = objectHolder.getPosition(key)
-                if (pos != null)
-                {
-                    drawObject(canvas, pos, false, offsetX, offsetY)
+            // オブジェクトの描画 （保持しているものはすべて表示する）
+            val keys = objectHolder.getObjectKeys()
+            if (keys != null)
+            {
+                while (keys.hasMoreElements()) {
+                    val key = keys.nextElement()
+                    val pos = objectHolder.getPosition(key)
+                    if (pos != null)
+                    {
+                        drawObject(canvas, pos, false, offsetX, offsetY)
+                    }
                 }
             }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
@@ -663,78 +669,98 @@ class MeMoMaCanvasDrawer(
      * タッチされたタイミングでの処理
      *
      */
-    private fun onTouchDown(event: MotionEvent): Boolean {
-        // タッチ位置を記憶する
-        downPosX = event.x - drawTransX
-        downPosY = event.y - drawTransY
+    private fun onTouchDown(event: MotionEvent): Boolean
+    {
+        try
+        {
+            // タッチ位置を記憶する
+            downPosX = event.x - drawTransX
+            downPosY = event.y - drawTransY
 
-        // タッチ位置をオブジェクト画像の座標に変換する
-        val x = downPosX / drawScale
-        val y = downPosY / drawScale
+            // タッチ位置をオブジェクト画像の座標に変換する
+            val x = downPosX / drawScale
+            val y = downPosY / drawScale
 
-        // タッチ位置にオブジェクトが存在するか確認する
-        selectedPosition = checkSelectedObject(x, y)
-        if (selectedPosition == null) {
-            // 最初にタップしたときの位置を selectedPositionに設定する
-            val data = selectionReceiver.touchedVacantArea()
-            if (data == OperationModeHolder.OPERATIONMODE_CREATE) {
-                // オブジェクト作成モードのとき...オブジェクトを生成する
-                selectedPosition = objectHolder.createPosition(x, y, objectStyle)
+            // タッチ位置にオブジェクトが存在するか確認する
+            selectedPosition = checkSelectedObject(x, y)
+            if (selectedPosition == null)
+            {
+                // 最初にタップしたときの位置を selectedPositionに設定する
+                val data = selectionReceiver.touchedVacantArea()
+                if (data == OperationModeHolder.OPERATIONMODE_CREATE) {
+                    // オブジェクト作成モードのとき...オブジェクトを生成する
+                    selectedPosition = objectHolder.createPosition(x, y, objectStyle)
 
-
-                // オブジェクトが生成されたことを通知する
-                selectionReceiver.objectCreated()
+                    // オブジェクトが生成されたことを通知する
+                    selectionReceiver.objectCreated()
+                }
+                /*
+                else if (data ==OperationModeHolder.OPERATIONMODE_MOVE)
+                {
+                   // 移動モードのとき
+                }
+                else // if (data ==ChangeDrawMode.OPERATIONMODE_DELETE)
+                {
+                   // 削除モードのとき...何もしない
+                }
+                */
             }
-            /*
-    		else if (data ==OperationModeHolder.OPERATIONMODE_MOVE)
-    		{
-    			// 移動モードのとき
-    		}
-	        else // if (data ==ChangeDrawMode.OPERATIONMODE_DELETE)
-	        {
-	        	// 削除モードのとき...何もしない
-	        }
-*/
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
         return (false)
     }
 
     /**
      * タッチが離されたタイミングでの処理
-     *
      */
-    private fun onTouchUp(event: MotionEvent): Boolean {
-        var longPress = false
-        if (onGestureProcessed) {
-            // ロングタッチ中だった場合...フラグを落とす
-            onGestureProcessed = false
-            longPress = true
-        }
+    private fun onTouchUp(event: MotionEvent): Boolean
+    {
+        try
+        {
+            var longPress = false
+            if (onGestureProcessed)
+            {
+                // ロングタッチ中だった場合...フラグを落とす
+                onGestureProcessed = false
+                longPress = true
+            }
 
-        // タッチ位置をオブジェクト画像の座標に変換する
-        val x = (event.x - drawTransX) / drawScale
-        val y = (event.y - drawTransY) / drawScale
+            // タッチ位置をオブジェクト画像の座標に変換する
+            val x = (event.x - drawTransX) / drawScale
+            val y = (event.y - drawTransY) / drawScale
 
-        if (selectedPosition == null) {
-            val data = selectionReceiver.touchUppedVacantArea()
-            if (data == OperationModeHolder.OPERATIONMODE_DELETE) {
-                if ((tempPosX == Float.MIN_VALUE) || (tempPosY == Float.MIN_VALUE) || (downPosX == Float.MIN_VALUE) || (downPosY == Float.MIN_VALUE)) {
-                    // タッチが２つ揃っていないので、何もしない。
-                    Log.v(
-                        TAG,
-                        "onTouchUp : ($downPosX,$downPosY) [$drawScale] ($tempPosX,$tempPosY) [$drawTransX,$drawTransY]"
+            if (selectedPosition == null)
+            {
+                val data = selectionReceiver.touchUppedVacantArea()
+                if (data == OperationModeHolder.OPERATIONMODE_DELETE)
+                {
+                    if ((tempPosX == Float.MIN_VALUE) || (tempPosY == Float.MIN_VALUE) || (downPosX == Float.MIN_VALUE) || (downPosY == Float.MIN_VALUE)) {
+                        // タッチが２つ揃っていないので、何もしない。
+                        Log.v(
+                            TAG,
+                            "onTouchUp : ($downPosX,$downPosY) [$drawScale] ($tempPosX,$tempPosY) [$drawTransX,$drawTransY]"
+                        )
+                        return (false)
+                    }
+
+                    // タッチが離された位置にオブジェクトがおらず、オブジェクトが非選択だった場合...オブジェクトが繋がっているラインを切断する
+                    disconnectObjects(
+                        (downPosX / drawScale),
+                        (downPosY / drawScale),
+                        ((tempPosX - drawTransX) / drawScale),
+                        ((tempPosY - drawTransY) / drawScale)
                     )
-                    return (false)
+
+                    // 移動位置をクリアする
+                    tempPosX = Float.MIN_VALUE
+                    tempPosY = Float.MIN_VALUE
+                    downPosX = Float.MIN_VALUE
+                    downPosY = Float.MIN_VALUE
+                    return (true)
                 }
-
-                // タッチが離された位置にオブジェクトがおらず、オブジェクトが非選択だった場合...オブジェクトが繋がっているラインを切断する
-                disconnectObjects(
-                    (downPosX / drawScale),
-                    (downPosY / drawScale),
-                    ((tempPosX - drawTransX) / drawScale),
-                    ((tempPosY - drawTransY) / drawScale)
-                )
-
 
                 // 移動位置をクリアする
                 tempPosX = Float.MIN_VALUE
@@ -744,66 +770,68 @@ class MeMoMaCanvasDrawer(
                 return (true)
             }
 
-            // 移動位置をクリアする
-            tempPosX = Float.MIN_VALUE
-            tempPosY = Float.MIN_VALUE
-            downPosX = Float.MIN_VALUE
-            downPosY = Float.MIN_VALUE
-            return (true)
-        }
+            val selectedRect = selectedPosition?.getRect()
+            if ((selectedRect != null)&&(selectedRect.contains(x, y)))
+            {
+                //  タッチが離された位置がタッチしたオブジェクトと同じ位置だった場合......
 
-        val selectedRect = selectedPosition!!.getRect()
-        if (selectedRect.contains(x, y)) {
-            //  タッチが離された位置がタッチしたオブジェクトと同じ位置だった場合......
+                // タッチが離された位置を認識する
+                val diffX =
+                    abs((event.x - drawTransX - downPosX).toDouble()).toFloat()
+                val diffY =
+                    abs((event.y - drawTransY - downPosY).toDouble()).toFloat()
 
-            // タッチが離された位置を認識する
+                // タッチが離された位置が動いていた場合、オブジェクト位置の微調整と判定する。
+                if (((diffX > 2.0f) || (diffY > 2.0f)) || (longPress)) {
+                    // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
+                    Log.v(TAG, "MOVE OBJECT : ($diffX,$diffY)")
+                    moveObjectPosition(x, y)
+                    return (true)
+                }
 
-            val diffX =
-                abs((event.x - drawTransX - downPosX).toDouble()).toFloat()
-            val diffY =
-                abs((event.y - drawTransY - downPosY).toDouble()).toFloat()
+                //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。
+                Log.v(TAG, " ITEM SELECTED :$x,$y")
+                // アイテムが選択されたよ！と教える
+                val isDraw = selectionReceiver.objectSelected(selectedPosition?.getKey())
 
-            // タッチが離された位置が動いていた場合、オブジェクト位置の微調整と判定する。
-            if (((diffX > 2.0f) || (diffY > 2.0f)) || (longPress)) {
-                // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
-                Log.v(TAG, "MOVE OBJECT : ($diffX,$diffY)")
-                moveObjectPosition(x, y)
+                // 移動位置をクリアする
+                tempPosX = Float.MIN_VALUE
+                tempPosY = Float.MIN_VALUE
+                return (isDraw)
+            }
+
+            // タッチが離された位置にオブジェクトがいるかどうかのチェック
+            val position = checkSelectedObject(x, y)
+            if ((position != null) && (!longPress))
+            {
+                // 他のオブジェクトと重なるように操作した、この場合は、オブジェクト間を線をつなげる
+                // （ただし、ボタンを長押ししていなかったとき。）
+                val key = selectedPosition?.getKey()
+                if (key != null)
+                {
+                    lineHolder.setLines(key, position.getKey(), lineStyleHolder)
+                    tempPosX = Float.MIN_VALUE
+                    tempPosY = Float.MIN_VALUE
+                }
                 return (true)
             }
 
-            //  タッチが押された位置と離された位置が同じ位置だった場合......アイテムが選択された、と認識する。
-            Log.v(TAG, " ITEM SELECTED :$x,$y")
-            // アイテムが選択されたよ！と教える
-            val isDraw = selectionReceiver.objectSelected(selectedPosition!!.getKey())
+            // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
+            moveObjectPosition(x, y)
 
-            // 移動位置をクリアする
-            tempPosX = Float.MIN_VALUE
-            tempPosY = Float.MIN_VALUE
-            return (isDraw)
+            /*
+            tempPosX = Float.MIN_VALUE;
+            tempPosY = Float.MIN_VALUE;
+            float positionX = alignPosition(x, (objectSizeX / 2) * (-1));
+            float positionY = alignPosition(y, (objectSizeY / 2) * (-1));
+            selectedPosition.rect = new  android.graphics.RectF(positionX, positionY, (positionX + objectSizeX), (positionY + objectSizeY));
+            // selectedPosition.drawStyle = objectStyle;   // 不要、最初に生成するときだけ必要
+            */
         }
-
-        // タッチが離された位置にオブジェクトがいるかどうかのチェック
-        val position = checkSelectedObject(x, y)
-        if ((position != null) && (!longPress)) {
-            // 他のオブジェクトと重なるように操作した、この場合は、オブジェクト間を線をつなげる
-            // （ただし、ボタンを長押ししていなかったとき。）
-            lineHolder.setLines(selectedPosition!!.getKey(), position.getKey(), lineStyleHolder)
-            tempPosX = Float.MIN_VALUE
-            tempPosY = Float.MIN_VALUE
-            return (true)
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
-
-        // タッチが離された場所にはオブジェクトがなかった場合...オブジェクトをその位置に移動させる
-        moveObjectPosition(x, y)
-
-        /*
-        tempPosX = Float.MIN_VALUE;
-    	tempPosY = Float.MIN_VALUE;
-    	float positionX = alignPosition(x, (objectSizeX / 2) * (-1));
-    	float positionY = alignPosition(y, (objectSizeY / 2) * (-1));
-    	selectedPosition.rect = new  android.graphics.RectF(positionX, positionY, (positionX + objectSizeX), (positionY + objectSizeY));
-    	// selectedPosition.drawStyle = objectStyle;   // 不要、最初に生成するときだけ必要
-    	*/
         return (true)
     }
 
@@ -811,62 +839,78 @@ class MeMoMaCanvasDrawer(
      * オブジェクトの位置を移動させる
      *
      */
-    private fun moveObjectPosition(x: Float, y: Float) {
-        val curRect = selectedPosition!!.getRect()
-        tempPosX = Float.MIN_VALUE
-        tempPosY = Float.MIN_VALUE
-        val sizeX = curRect.right - curRect.left
-        val sizeY = curRect.bottom - curRect.top
-
-        val positionX = alignPosition(x, (sizeX / 2) * (-1))
-        val positionY = alignPosition(y, (sizeY / 2) * (-1))
-        selectedPosition!!.setRect(
-            RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY)))
+    private fun moveObjectPosition(x: Float, y: Float)
+    {
+        try
+        {
+            val curRect = selectedPosition?.getRect()
+            if (curRect != null)
+            {
+                tempPosX = Float.MIN_VALUE
+                tempPosY = Float.MIN_VALUE
+                val sizeX = curRect.right - curRect.left
+                val sizeY = curRect.bottom - curRect.top
+                val positionX = alignPosition(x, (sizeX / 2) * (-1))
+                val positionY = alignPosition(y, (sizeY / 2) * (-1))
+                selectedPosition?.setRect(
+                    RectF(positionX, positionY, (positionX + sizeX), (positionY + sizeY))
+                )
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * onTouchEvent : 画面がタッチした時のイベント処理
      * (true なら、画面描画を実施する)
      */
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+    override fun onTouchEvent(event: MotionEvent): Boolean
+    {
         var isDraw: Boolean
-
-        // スケールジェスチャ(マルチタッチのジェスチャ)を拾う
-        // isDraw = scaleGestureDetector.onTouchEvent(event);
-        if ((onScaling) || (scaleGestureDetector.isInProgress)) {
-            //  マルチタッチ操作中...
-            return (true)
-        }
-
-
-        //  先にジェスチャーを拾ってみよう...
-        isDraw = gestureDetector.onTouchEvent(event)
-        if (isDraw) {
-            Log.v(TAG, "MeMoMaCanvasDrawer::onTouchEvent() : isDraw == true")
-            return (true)
-        }
-
-        val action = event.action
-
-
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onTouchEvent() : " + action);
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                // タッチされたとき
-                isDraw = onTouchDown(event)
+        try
+        {
+            // スケールジェスチャ(マルチタッチのジェスチャ)を拾う
+            // isDraw = scaleGestureDetector.onTouchEvent(event);
+            if ((onScaling) || (scaleGestureDetector.isInProgress)) {
+                //  マルチタッチ操作中...
+                return (true)
             }
-            MotionEvent.ACTION_MOVE -> {
-                // タッチされたまま動かされたときの処理
-                tempPosX = event.x
-                tempPosY = event.y
-                isDraw = true
+
+            //  先にジェスチャーを拾ってみよう...
+            isDraw = gestureDetector.onTouchEvent(event)
+            if (isDraw) {
+                Log.v(TAG, "MeMoMaCanvasDrawer::onTouchEvent() : isDraw == true")
+                return (true)
             }
-            MotionEvent.ACTION_UP -> {
-                // タッチが離されたときの処理...
-                isDraw = onTouchUp(event)
+
+            val action = event.action
+
+            //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onTouchEvent() : " + action);
+            when (action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // タッチされたとき
+                    isDraw = onTouchDown(event)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    // タッチされたまま動かされたときの処理
+                    tempPosX = event.x
+                    tempPosY = event.y
+                    isDraw = true
+                }
+                MotionEvent.ACTION_UP -> {
+                    // タッチが離されたときの処理...
+                    isDraw = onTouchUp(event)
+                }
             }
         }
-
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+            isDraw = true
+        }
         return (isDraw)
     }
 
@@ -874,7 +918,8 @@ class MeMoMaCanvasDrawer(
      * タテヨコ位置を合わせられるよう、調整する。
      *
      */
-    private fun alignPosition(pos: Float, offset: Float): Float {
+    private fun alignPosition(pos: Float, offset: Float): Float
+    {
         // 位置を調整する。
         return (pos + offset)
     }
@@ -882,29 +927,36 @@ class MeMoMaCanvasDrawer(
     /**
      * 位置から判定し、選択したオブジェクトを応答する
      * （オブジェクトが選択されていない場合には、nullを応答する）
-     *
      */
-    private fun checkSelectedObject(x: Float, y: Float): PositionObject? {
-        val keys = objectHolder.getObjectKeys()
-        //Log.v(Main.APP_IDENTIFIER, "CHECK POS "  + x + "," + y);
-        if (keys != null) {
-            while (keys.hasMoreElements()) {
-                val key = keys.nextElement()
-                val pos = objectHolder.getPosition(key)
-                if (pos != null) {
-                    val posRect = pos.getRect()
-                    if (posRect.contains(x, y)) {
-                        Log.v(
-                            TAG,
-                            "SELECTED :" + posRect.centerX() + "," + posRect.centerY() + " KEY :" + key
-                        )
-                        return (pos)
+    private fun checkSelectedObject(x: Float, y: Float): PositionObject?
+    {
+        try
+        {
+            val keys = objectHolder.getObjectKeys()
+            //Log.v(TAG, "CHECK POS "  + x + "," + y);
+            if (keys != null) {
+                while (keys.hasMoreElements()) {
+                    val key = keys.nextElement()
+                    val pos = objectHolder.getPosition(key)
+                    if (pos != null) {
+                        val posRect = pos.getRect()
+                        if (posRect.contains(x, y)) {
+                            Log.v(
+                                TAG,
+                                "SELECTED :" + posRect.centerX() + "," + posRect.centerY() + " KEY :" + key
+                            )
+                            return (pos)
+                        }
                     }
+                    //Log.v(TAG, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
                 }
-                //Log.v(Main.APP_IDENTIFIER, "NOT MATCH :"   + pos.rect.centerX() + "," + pos.rect.centerY());
             }
+            //Log.v(TAG, "RETURN NULL...");
         }
-        //Log.v(Main.APP_IDENTIFIER, "RETURN NULL...");
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
         return (null)
     }
 
@@ -941,7 +993,7 @@ class MeMoMaCanvasDrawer(
                                 )
                             ) {
                                 // 線が交差していた！ 線を切る！
-                                //Log.v(Main.APP_IDENTIFIER, "CUT LINE [" +  from.rect.centerX() + "," +  from.rect.centerY() +"]-[" + to.rect.centerX() + "," + to.rect.centerY() + "]");
+                                //Log.v(TAG, "CUT LINE [" +  from.rect.centerX() + "," +  from.rect.centerY() +"]-[" + to.rect.centerX() + "," + to.rect.centerY() + "]");
                                 lineHolder.disconnectLines(line.getKey())
                             }
                         }
@@ -988,7 +1040,6 @@ class MeMoMaCanvasDrawer(
         val dR = (((y4 - y3) * tempX) - ((x4 - x3) * tempY)) / denominator
         val dS = (((y2 - y1) * tempX) - ((x2 - x1) * tempY)) / denominator
 
-
         // ２直線の交点を求める
         //float crossX, crossY;
         //crossX = x1 + dR * (x2 - x1);
@@ -1002,17 +1053,25 @@ class MeMoMaCanvasDrawer(
      * 並行移動・ズームのサイズをリセットする
      *
      */
-    fun resetScaleAndLocation(zoomBar: SeekBar) {
-        // 並行移動をリセットする
-        drawTransX = 0.0f
-        drawTransY = 0.0f
+    fun resetScaleAndLocation(zoomBar: SeekBar)
+    {
+        try
+        {
+            // 並行移動をリセットする
+            drawTransX = 0.0f
+            drawTransY = 0.0f
 
-        // プログレスバーの位置をリセットする
-        drawScale = 1.0f
-        zoomBar.progress = 50
+            // プログレスバーの位置をリセットする
+            drawScale = 1.0f
+            zoomBar.progress = 50
 
-        // preferenceに状態を記録する
-        recordTranslateAndZoomScale(50)
+            // preferenceに状態を記録する
+            recordTranslateAndZoomScale(50)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -1020,65 +1079,88 @@ class MeMoMaCanvasDrawer(
      */
     private fun zoomScaleChanged(progress: Int)
     {
-        val value = (progress.toFloat() - 50.0f) / 50.0f
+        try
+        {
+            val value = (progress.toFloat() - 50.0f) / 50.0f
 
-        // 前の表示領域サイズを取得
-        val prevSizeWidth = screenWidth * drawScale
-        val prevSizeHeight = screenHeight * drawScale
+            // 前の表示領域サイズを取得
+            val prevSizeWidth = screenWidth * drawScale
+            val prevSizeHeight = screenHeight * drawScale
 
-        //  表示倍率を変更し、倍率を画面に表示する
-        drawScale = Math.round(10.0.pow(value.toDouble()) * 10.0).toFloat() / 10.0f
-        val textview = parent.findViewById<TextView>(R.id.ZoomRate)
-        val showText = "x$drawScale"
-        showText.also { textview.text = it }
+            //  表示倍率を変更し、倍率を画面に表示する
+            drawScale = Math.round(10.0.pow(value.toDouble()) * 10.0).toFloat() / 10.0f
+            val textview = parent.findViewById<TextView>(R.id.ZoomRate)
+            val showText = "x$drawScale"
+            showText.also { textview.text = it }
 
-        // 現在の表示領域サイズを取得
-        val showSizeWidth = screenWidth * drawScale
-        val showSizeHeight = screenHeight * drawScale
+            // 現在の表示領域サイズを取得
+            val showSizeWidth = screenWidth * drawScale
+            val showSizeHeight = screenHeight * drawScale
 
-        // 倍率にあわせて並行移動する場所を調整する
-        drawTransX += (prevSizeWidth - showSizeWidth) / 2.0f
-        drawTransY += (prevSizeHeight - showSizeHeight) / 2.0f
+            // 倍率にあわせて並行移動する場所を調整する
+            drawTransX += (prevSizeWidth - showSizeWidth) / 2.0f
+            drawTransY += (prevSizeHeight - showSizeHeight) / 2.0f
 
-        // preferenceに状態を記録する
-        recordTranslateAndZoomScale(progress)
+            // preferenceに状態を記録する
+            recordTranslateAndZoomScale(progress)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * 平行移動状態と倍率の状態を記憶する
      *
      */
-    private fun recordTranslateAndZoomScale(progress: Int) {
-        //Log.v(Main.APP_IDENTIFIER, "recordTranslateAndZoomScale() : x" + drawScale + " X:" + drawTransX + " Y: " + drawTransY);
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val editor = preferences.edit()
-        editor.putFloat("drawScale", drawScale)
-        editor.putFloat("drawTransX", drawTransX)
-        editor.putFloat("drawTransY", drawTransY)
-        editor.putInt("zoomProgress", progress)
-        editor.apply()
+    private fun recordTranslateAndZoomScale(progress: Int)
+    {
+        try
+        {
+            //Log.v(TAG, "recordTranslateAndZoomScale() : x" + drawScale + " X:" + drawTransX + " Y: " + drawTransY);
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val editor = preferences.edit()
+            editor.putFloat("drawScale", drawScale)
+            editor.putFloat("drawTransX", drawTransX)
+            editor.putFloat("drawTransY", drawTransY)
+            editor.putInt("zoomProgress", progress)
+            editor.apply()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * 平行移動状態と倍率の状態を記憶する
      *
      */
-    private fun restoreTranslateAndZoomScale() {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        drawScale = preferences.getFloat("drawScale", 1.0f)
-        drawTransX = preferences.getFloat("drawTransX", 0.0f)
-        drawTransY = preferences.getFloat("drawTransY", 0.0f)
-        Log.v(
-            TAG,
-            "restoreTranslateAndZoomScale() : x$drawScale X:$drawTransX Y: $drawTransY"
-        )
+    private fun restoreTranslateAndZoomScale()
+    {
+        try
+        {
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            drawScale = preferences.getFloat("drawScale", 1.0f)
+            drawTransX = preferences.getFloat("drawTransX", 0.0f)
+            drawTransY = preferences.getFloat("drawTransY", 0.0f)
+            Log.v(
+                TAG,
+                "restoreTranslateAndZoomScale() : x$drawScale X:$drawTransX Y: $drawTransY"
+            )
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * GestureDetector.OnGestureListener の実装
      */
     override fun onDown(event: MotionEvent): Boolean {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onDown() "  + event.getX()  + "," + event.getY());
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onDown() "  + event.getX()  + "," + event.getY());
         return (false)
     }
 
@@ -1091,28 +1173,35 @@ class MeMoMaCanvasDrawer(
         velocityX: Float,
         velocityY: Float
     ): Boolean {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onFling() "  + velocityX  + "," + velocityY);
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onFling() "  + velocityX  + "," + velocityY);
         return (false)
     }
 
     /**
      * GestureDetector.OnGestureListener の実装
      */
-    override fun onLongPress(event: MotionEvent) {
-        Log.v(TAG, "MeMoMaCanvasDrawer::onLongPress() " + event.x + "," + event.y)
+    override fun onLongPress(event: MotionEvent)
+    {
+        try
+        {
+            Log.v(TAG, "MeMoMaCanvasDrawer::onLongPress() " + event.x + "," + event.y)
 
-        // タッチ位置をオブジェクト画像の座標に変換する
-        val x = (event.x - drawTransX) / drawScale
-        val y = (event.y - drawTransY) / drawScale
+            // タッチ位置をオブジェクト画像の座標に変換する
+            val x = (event.x - drawTransX) / drawScale
+            val y = (event.y - drawTransY) / drawScale
 
-        // タッチ位置にオブジェクトが存在するか確認する
-        val position = checkSelectedObject(x, y)
-        if (position != null) {
-            // 長押し処理を実施していることを記憶する
-            onGestureProcessed = true
-
-            // タッチした場所にオブジェクトが存在した！！
-            selectionReceiver.objectSelectedContext(position.getKey())
+            // タッチ位置にオブジェクトが存在するか確認する
+            val position = checkSelectedObject(x, y)
+            if (position != null) {
+                // 長押し処理を実施していることを記憶する
+                onGestureProcessed = true
+                // タッチした場所にオブジェクトが存在した！！
+                selectionReceiver.objectSelectedContext(position.getKey())
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
     }
 
@@ -1125,7 +1214,7 @@ class MeMoMaCanvasDrawer(
         distanceX: Float,
         distanceY: Float
     ): Boolean {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onScroll() "  + distanceX  + "," + distanceY);
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onScroll() "  + distanceX  + "," + distanceY);
         return (false)
     }
 
@@ -1133,14 +1222,14 @@ class MeMoMaCanvasDrawer(
      * GestureDetector.OnGestureListener の実装
      */
     override fun onShowPress(event: MotionEvent) {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onShowPress() "  + event.getX()  + "," + event.getY());
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onShowPress() "  + event.getX()  + "," + event.getY());
     }
 
     /**
      * GestureDetector.OnGestureListener の実装
      */
     override fun onSingleTapUp(event: MotionEvent): Boolean {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onSingleTapUp() "  + event.getX()  + "," + event.getY());
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onSingleTapUp() "  + event.getX()  + "," + event.getY());
         return (false)
     }
 
@@ -1148,47 +1237,51 @@ class MeMoMaCanvasDrawer(
      * スライドバーを変更された時の処理
      * (SeekBar.OnSeekBarChangeListener の実装)
      */
-    override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-        // Log.v(TAG, "SeekBar::onProgressChanged() : $progress")
+    override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean)
+    {
+        try
+        {
+            // Log.v(TAG, "SeekBar::onProgressChanged() : $progress")
 
-        // 画面描画の倍率を変更する
-        zoomScaleChanged(progress)
+            // 画面描画の倍率を変更する
+            zoomScaleChanged(progress)
 
-        // 画面描画クラスに再描画を指示する
-        val surfaceView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
-        surfaceView.doDraw()
+            // 画面描画クラスに再描画を指示する
+            val surfaceView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
+            surfaceView.doDraw()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    /**
-     * SeekBar.OnSeekBarChangeListener の実装
-     */
-    override fun onStartTrackingTouch(seekBar: SeekBar) {
-        // 何もしない
-    }
-
-    /**
-     * SeekBar.OnSeekBarChangeListener の実装
-     */
-    override fun onStopTrackingTouch(seekBar: SeekBar) {
-        // 何もしない
-    }
+    override fun onStartTrackingTouch(seekBar: SeekBar) {} // SeekBar.OnSeekBarChangeListener の実装
+    override fun onStopTrackingTouch(seekBar: SeekBar) {} // SeekBar.OnSeekBarChangeListener の実装
 
     /**
      * （ScaleGestureDetector.OnScaleGestureListener の実装）
      */
-    override fun onScale(detector: ScaleGestureDetector): Boolean {
-        val scaleFactor = detector.scaleFactor
+    override fun onScale(detector: ScaleGestureDetector): Boolean
+    {
+        try
+        {
+            val scaleFactor = detector.scaleFactor
 
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onScale() : " + scaleFactor + " (" + currentScaleBar + ")");
+            //Log.v(TAG, "MeMoMaCanvasDrawer::onScale() : " + scaleFactor + " (" + currentScaleBar + ")");
 
-        // 画面表示の倍率が変更された！　x < 1 : 縮小、 1 < x : 拡大
-        if (scaleFactor < 1.0f) {
-            currentScaleBar = if ((currentScaleBar == 0)) 0 else currentScaleBar - 1
-        } else if (scaleFactor > 1.0f) {
-            currentScaleBar = if ((currentScaleBar == 100)) 100 else currentScaleBar + 1
+            // 画面表示の倍率が変更された！　x < 1 : 縮小、 1 < x : 拡大
+            if (scaleFactor < 1.0f) {
+                currentScaleBar = if ((currentScaleBar == 0)) 0 else currentScaleBar - 1
+            } else if (scaleFactor > 1.0f) {
+                currentScaleBar = if ((currentScaleBar == 100)) 100 else currentScaleBar + 1
+            }
+            zoomScaleChanged(currentScaleBar)
         }
-        zoomScaleChanged(currentScaleBar)
-
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
         return (onScaling)
     }
 
@@ -1197,7 +1290,7 @@ class MeMoMaCanvasDrawer(
      */
     override fun onScaleBegin(detector: ScaleGestureDetector): Boolean
     {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onScaleBegin() ");
+        //Log.v(TAG, "MeMoMaCanvasDrawer::onScaleBegin() ");
         val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
         currentScaleBar = preferences.getInt("zoomProgress", 50)
         onScaling = true
@@ -1207,17 +1300,26 @@ class MeMoMaCanvasDrawer(
     /**
      * （ScaleGestureDetector.OnScaleGestureListener の実装）
      */
-    override fun onScaleEnd(detector: ScaleGestureDetector) {
-        //Log.v(Main.APP_IDENTIFIER, "MeMoMaCanvasDrawer::onScaleEnd() " + currentScaleBar);
-        onScaling = false
+    override fun onScaleEnd(detector: ScaleGestureDetector)
+    {
+        try
+        {
+            //Log.v(TAG, "MeMoMaCanvasDrawer::onScaleEnd() " + currentScaleBar);
+            onScaling = false
 
-        // シークバーを設定し、値を記憶する
-        val seekbar = parent.findViewById<SeekBar>(R.id.ZoomInOut)
-        seekbar.progress = currentScaleBar
-        zoomScaleChanged(currentScaleBar)
+            // シークバーを設定し、値を記憶する
+            val seekbar = parent.findViewById<SeekBar>(R.id.ZoomInOut)
+            seekbar.progress = currentScaleBar
+            zoomScaleChanged(currentScaleBar)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    companion object {
+    companion object
+    {
         private val TAG = MeMoMaCanvasDrawer::class.java.simpleName
         const val OBJECT_LABEL_MARGIN: Float = 8.0f
         const val OBJECT_LABEL_MARGIN_WIDTH: Float = 24.0f

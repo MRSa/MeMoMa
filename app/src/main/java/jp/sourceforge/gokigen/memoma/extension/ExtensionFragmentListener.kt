@@ -1,6 +1,5 @@
 package jp.sourceforge.gokigen.memoma.extension
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -19,8 +18,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.Main
 import jp.sourceforge.gokigen.memoma.R
@@ -41,9 +38,7 @@ import java.util.Locale
 /**
  * リスト形式で表示・エクスポート
  */
-class ExtensionActivityListener internal constructor(
-    private val parent: AppCompatActivity
-) : View.OnClickListener,
+class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.OnClickListener,
     MeMoMaFileLoadingProcess.IResultReceiver, MeMoMaFileExportCsvProcess.IResultReceiver,
     FileSelectionDialog.IResultReceiver,
     MeMoMaFileImportCsvProcess.IResultReceiver
@@ -53,14 +48,11 @@ class ExtensionActivityListener internal constructor(
     private var isShareExportedData = false
     private var listItems: MutableList<SymbolListArrayItem> = ArrayList()
 
-    /**
-     * 起動時にデータを準備する
-     */
-    fun prepareExtraDatas(myIntent: Intent)
+    fun setDataTitle(title: String)
     {
+        var dataTitle = title
         try
         {
-            var dataTitle = myIntent.getStringExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE)
             val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
             val prefTitleString = preferences.getString("content_data_title", "") ?: ""
             if (prefTitleString.isNotEmpty())
@@ -92,9 +84,6 @@ class ExtensionActivityListener internal constructor(
         }
     }
 
-    /**
-     * がっつりこのクラスにイベントリスナを接続する
-     */
     fun prepareListener()
     {
         try
@@ -109,14 +98,6 @@ class ExtensionActivityListener internal constructor(
         }
     }
 
-    /**
-     * 終了準備
-     */
-    fun finishListener() { }
-
-    /**
-     * スタート準備
-     */
     fun prepareToStart()
     {
         try
@@ -184,7 +165,6 @@ class ExtensionActivityListener internal constructor(
                 return
             }
 
-            // Perform operations on the document using its URI.
             val thread = Thread {
                 try
                 {
@@ -192,11 +172,11 @@ class ExtensionActivityListener internal constructor(
                     importer.importFromCsvFile()
 
                     val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-                    val backgroundUri = preferences.getString("backgroundUri", "")
-                    val userCheckboxString = preferences.getString("userCheckboxString", "")
+                    val backgroundUri = preferences.getString("backgroundUri", "")?:""
+                    val userCheckboxString = preferences.getString("userCheckboxString", "")?:""
 
                     // データの保管メイン
-                    val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
+                    val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
                     val result = savingEngine.saveObjects(objectHolder)
                     parent.runOnUiThread {
                         try
@@ -232,14 +212,13 @@ class ExtensionActivityListener internal constructor(
                 return
             }
 
-            // Perform operations on the document using its URI.
             val thread = Thread {
                 val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-                val backgroundUri = preferences.getString("backgroundUri", "")
-                val userCheckboxString = preferences.getString("userCheckboxString", "")
+                val backgroundUri = preferences.getString("backgroundUri", "")?:""
+                val userCheckboxString = preferences.getString("userCheckboxString", "")?:""
 
                 // データの保管を実施する (現状)
-                val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
+                val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
                 val result0 = savingEngine.saveObjects(objectHolder)
                 Log.v(TAG, "Saved : $result0")
 
@@ -249,10 +228,7 @@ class ExtensionActivityListener internal constructor(
                 // データの保管を実施する (新規)
                 val savingEngine2 = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
                 val result = savingEngine2.saveObjects(objectHolder) + " " + result1
-                Log.v(
-                    TAG,
-                    "=== Data Saved : " + objectHolder.getDataTitle() + " " + result + " " + result1
-                )
+                Log.v(TAG, "=== Data Saved: ${objectHolder.getDataTitle()} result: $result1")
                 parent.runOnUiThread {
                     try
                     {
@@ -789,15 +765,14 @@ class ExtensionActivityListener internal constructor(
 
     /**
      * インポート結果の受信
-     *
      */
-    override fun onImportedResult(detail: String?)
+    override fun onImportedResult(fileName: String)
     {
-        Log.v(TAG, "ExtensionActivityListener::onImportedResult() '${objectHolder.getDataTitle()}' : + $detail")
+        Log.v(TAG, "ExtensionActivityListener::onImportedResult() '${objectHolder.getDataTitle()}' : $fileName")
         try
         {
             // インポートしたことを伝達する
-            val outputMessage = parent.getString(R.string.import_csv) + " " + objectHolder.getDataTitle() + " " + detail
+            val outputMessage = "${parent.getString(R.string.import_csv)}  ${objectHolder.getDataTitle()} : $fileName"
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
 
             // 一覧のリストを作りなおす
@@ -868,7 +843,7 @@ class ExtensionActivityListener internal constructor(
     }
 
     companion object {
-        private val TAG = ExtensionActivityListener::class.java.simpleName
+        private val TAG = ExtensionFragmentListener::class.java.simpleName
         private const val PICK_CSV_FILE = 2020
         private const val PICK_XML_FILE = 2030
 

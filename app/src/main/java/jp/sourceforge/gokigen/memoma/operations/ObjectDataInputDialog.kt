@@ -47,7 +47,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
         resultReceiver = receiver
     }
 
-    fun getDialog(): AlertDialog
+    fun getDialog(objectKey: Int): AlertDialog
     {
         val inflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -133,6 +133,46 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
         colorBorderAreaView?.setTextColor(color)
         colorBorderAreaView?.text = context.getString(R.string.labelTextColorSample)
 
+        val position = objectHolder.getPosition(objectKey)
+        key = objectKey
+        if (position != null)
+        {
+            // 現在のデータを反映させる
+            borderColorView?.progress = convertProgress(position.getObjectColor())
+            boldText?.isChecked = position.getstrokeWidth() == MeMoMaObjectHolder.STROKE_BOLD_WIDTH
+            fillObjectView?.isChecked = Paint.Style.valueOf(position.getPaintStyle()) != Paint.Style.STROKE
+            textFontSize = position.getFontSize() / 2.0f
+            label.setText(position.getLabel())
+            detail.setText(position.getDetail())
+
+            //  設定に記録されているデータを画面に反映させる
+            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+            val userCheckboxTitle = preferences.getString("userCheckboxString", "")
+
+            // 描画スタイルを設定する
+            currentObjectDrawStyle = position.getDrawStyle()
+            updateObjectDrawStyleImageButton(currentObjectDrawStyle)
+
+            // 背景色を設定する
+            try
+            {
+                val colorString = preferences.getString("backgroundColor", "#ff004000")
+                backgroundColor = Color.parseColor(colorString)
+            }
+            catch (e: Exception)
+            {
+                backgroundColor = MeMoMaCanvasDrawer.BACKGROUND_COLOR_DEFAULT
+            }
+            setTextColorSample(
+                borderColorView?.progress?: 0,
+                textFontSize,
+                fillObjectView?.isChecked?: false
+            )
+            userCheckbox?.isEnabled = true
+            userCheckbox?.text = userCheckboxTitle
+            userCheckbox?.isChecked = position.getUserChecked()
+        }
+
         builder.setView(layout)
         builder.setCancelable(false)
         builder.setPositiveButton(
@@ -181,6 +221,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
     /**
      * オブジェクト入力用ダイアログの表示を準備する
      */
+/*
     fun prepareObjectInputDialog(dialog: AlertDialog, objectKey: Int)
     {
         try
@@ -189,6 +230,8 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
             key = objectKey
             if (position != null)
             {
+                Log.v(TAG, "prepareObjectInputDialog [$objectKey] '${position.getLabel()}'")
+
                 // 色を設定する
                 val borderColorProgress = dialog.findViewById<SeekBar>(R.id.borderColorSelectionBar)
                 borderColorProgress?.progress = convertProgress(position.getObjectColor())
@@ -196,6 +239,8 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
                 val boldTextCheck = dialog.findViewById<CheckBox>(R.id.checkBoldText)
                 boldTextCheck?.isChecked =
                     position.getstrokeWidth() == MeMoMaObjectHolder.STROKE_BOLD_WIDTH
+
+
 
                 val fillObjectCheck = dialog.findViewById<CheckBox>(R.id.checkFillObject)
                 fillObjectCheck?.isChecked =
@@ -208,8 +253,12 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
                 val targetLabel = dialog.findViewById<EditText>(R.id.labelInputArea)
                 targetLabel?.setText(position.getLabel())
 
+
+
                 val targetDetail = dialog.findViewById<EditText>(R.id.descriptionInputArea)
                 targetDetail?.setText(position.getDetail())
+
+
 
                 //  設定に記録されているデータを画面に反映させる
                 val preferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -220,10 +269,13 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
                 updateObjectDrawStyleImageButton(currentObjectDrawStyle)
 
                 // 背景色を設定する
-                try {
+                try
+                {
                     val colorString = preferences.getString("backgroundColor", "#ff004000")
                     backgroundColor = Color.parseColor(colorString)
-                } catch (e: Exception) {
+                }
+                catch (e: Exception)
+                {
                     backgroundColor = MeMoMaCanvasDrawer.BACKGROUND_COLOR_DEFAULT
                 }
                 setTextColorSample(
@@ -242,6 +294,7 @@ class ObjectDataInputDialog(private val context: Context, private val objectHold
             e.printStackTrace()
         }
     }
+*/
 
     /**
      * オブジェクトにデータを設定する
