@@ -111,7 +111,9 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
                 // スレッドでファイルを保存する。。。
                 Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : '$dataTitle'")
                 val message = saveFileSynchronous(myObjectHolder)
-                onSavedResult((message.isNotEmpty()), message)
+                parent.runOnUiThread {
+                    onSavedResult((message.isNotEmpty()), message)
+                }
                 Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : $dataTitle : DONE.")
             }
             thread.start()
@@ -157,7 +159,9 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             val outputMessage = "${parent.getString(R.string.save_data)} ${objectHolder.dataTitle} $detail"
             if (isError)
             {
-                Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                parent.runOnUiThread {
+                    Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                }
             }
             Log.v(TAG, outputMessage)
 

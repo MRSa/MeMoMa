@@ -18,6 +18,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.ImageButton
 import android.widget.SeekBar
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog
@@ -46,7 +47,7 @@ import jp.sourceforge.gokigen.memoma.preference.Preference
  *
  * @author MRSa
  */
-class MeMoMaListener internal constructor(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager) :
+class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager) :
     View.OnClickListener, OnTouchListener, View.OnKeyListener,
     IObjectSelectionReceiver, ConfirmationDialog.IResultReceiver,
     ObjectDataInputDialog.IResultReceiver,
@@ -65,6 +66,8 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private var selectedObjectKey = 0
     private var objectKeyToDelete = 0
     private var selectedContextKey = 0
+
+    private lateinit var actionBar : ActionBar
 
     /**
      * コンストラクタ
@@ -529,7 +532,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private fun insertPicture()
     {
         val intent: Intent
-        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
         {
             intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -595,6 +598,9 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         intent.action = ExtensionActivity.MEMOMA_EXTENSION_LAUNCH_ACTIVITY
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_FULLPATH, fullPath)
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE, dataTitle)
+        intent.apply {
+            `package` = parent.packageName
+        }
 
         // データ表示用Activityを起動する
         parent.startActivityForResult(intent, MENU_ID_EXTEND)
@@ -631,6 +637,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         val bar = parent.supportActionBar
         if (bar != null)
         {
+            actionBar = bar
             dataInOutManager.prepare(objectHolder, bar, memomaInfo)
         }
         //dataInOutManager.loadFile((String) parent.getTitle());
@@ -1170,13 +1177,33 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             editor.apply()
 
             // タイトルに設定
+            Log.v(TAG, " - - - SET TITLE : $message - - -")
             parent.title = message
+            objectHolder.dataTitle = message
 
             // 保存シーケンスを一度走らせる
             saveData(true)
 
             // ファイル選択リストの更新
-            dataInOutManager.updateFileList(message, parent.supportActionBar)
+            dataInOutManager.updateFileList(objectHolder.dataTitle, parent.supportActionBar)
+
+/**/
+            try
+            {
+                parent.runOnUiThread {
+                    if (::actionBar.isInitialized)
+                    {
+                        actionBar.title = message
+                    }
+                    parent.supportActionBar?.title = message
+                    Log.v(TAG, " Title : ${parent.supportActionBar?.title} (${message}) ${parent.title}")
+                }
+            }
+            catch (ee: Exception)
+            {
+                ee.printStackTrace()
+            }
+/**/
         }
         catch (e: Exception)
         {

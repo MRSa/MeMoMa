@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="blank"> </string>
-    <string name="app_credit">An idea planner\n http://sourceforge.jp/projects/gokigen/wiki/MeMoMa</string>
+    <string name="app_credit">An idea planner\n  https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/MeMoMa/README.md</string>
     <string name="app_name">めもま</string>
     <string name="extent_name">その他</string>
     <string name="createnew">新規作成</string>
@@ -9,8 +9,8 @@
     <string name="createnew_message">現在までの変更を破棄して、初期状態に戻します。よろしいですか？</string>
     <string name="deleteconfirm_title">削除確認</string>
     <string name="deleteconfirm_message">削除します。よろしいですか？</string>
-    <string name="extend_menu">その他&#8230;</string>
-    <string name="rename_title">タイトル変更&#8230;</string>
+    <string name="extend_menu">オブジェクト一覧&#8230;</string>
+    <string name="rename_title">名前を変えて保存&#8230;</string>
     <string name="load_data">読込&#8230;</string>
     <string name="save_data">保存&#8230;</string>
     <string name="align_data">整列&#8230;</string>
