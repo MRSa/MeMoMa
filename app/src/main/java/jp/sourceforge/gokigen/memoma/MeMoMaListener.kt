@@ -40,6 +40,7 @@ import jp.sourceforge.gokigen.memoma.operations.ObjectAligner.IAlignCallback
 import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog
 import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder
 import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog
+import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog.IResultReceiver
 import jp.sourceforge.gokigen.memoma.preference.Preference
 
 /**
@@ -1021,7 +1022,6 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
 
     /**
      * ダイアログ表示の準備
-     *
      */
     fun onPrepareDialog(id: Int, dialog: Dialog) {
         if (id == R.id.editTextArea) {
@@ -1076,7 +1076,6 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
 
     /**
      * 画面を再描画する
-     *
      */
     private fun redrawSurfaceview() {
         try {
@@ -1089,7 +1088,6 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
 
     /**
      * 不許可。何もしない。
-     *
      */
     override fun rejectConfirmation() {
         Log.v(TAG, "MeMoMaListener::rejectConfirmation()")
@@ -1097,33 +1095,25 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
 
     /**
      * オブジェクトが整列された時の処理
-     *
      */
     override fun objectAligned() {
-        // 画面の再描画を指示する
-        redrawSurfaceview()
+        redrawSurfaceview()  // 画面の再描画を指示する
     }
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
-     *
      */
     override fun finishObjectInput() {
-        // 画面の再描画を指示する
-        redrawSurfaceview()
+        redrawSurfaceview()  // 画面の再描画を指示する
     }
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
-     *
      */
-    override fun cancelObjectInput() {
-        // 何もしない
-    }
+    override fun cancelObjectInput() {}
 
     /**
      * アイテムが選択された！
-     *
      */
     override fun itemSelected(index: Int, itemValue: String) {
         //
@@ -1146,23 +1136,11 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
         }
     }
 
-    /**
-     * (今回未使用)
-     *
-     */
     override fun itemSelectedMulti(items: Array<String>, status: BooleanArray) {}
     override fun canceledSelection() {}
-    fun onSaveInstanceState(outState: Bundle) {
-        /* ここで状態を保存 */
-        Log.v(TAG, "MeMoMaListener::onSaveInstanceState() : $outState")
-    }
 
-    fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        /* ここで状態を復元 */
-        Log.v(TAG, "MeMoMaListener::onRestoreInstanceState() : $savedInstanceState")
-    }
-
-    override fun finishTextEditDialog(message: String) {
+    override fun finishTextEditDialog(message: String)
+    {
         if (message.isEmpty())
         {
             // データが入力されていなかったので、何もしない。
@@ -1177,33 +1155,25 @@ class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOu
             editor.apply()
 
             // タイトルに設定
-            Log.v(TAG, " - - - SET TITLE : $message - - -")
             parent.title = message
-            objectHolder.dataTitle = message
 
-            // 保存シーケンスを一度走らせる
-            saveData(true)
-
-            // ファイル選択リストの更新
-            dataInOutManager.updateFileList(objectHolder.dataTitle, parent.supportActionBar)
-
-/**/
-            try
-            {
-                parent.runOnUiThread {
-                    if (::actionBar.isInitialized)
-                    {
-                        actionBar.title = message
+            // 保存シーケンスを走らせて、タイトルを更新する
+            dataInOutManager.saveFile(parent.title as String, false, object: MeMoMaDataInOutManager.ISaveResultReceiver {
+                override fun onSaved() {
+                    parent.runOnUiThread {
+                        if (::actionBar.isInitialized)
+                        {
+                            Log.v(TAG, " - - - SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, actionBar)
+                        }
+                        else
+                        {
+                            Log.v(TAG, " ------ SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, parent.supportActionBar)
+                        }
                     }
-                    parent.supportActionBar?.title = message
-                    Log.v(TAG, " Title : ${parent.supportActionBar?.title} (${message}) ${parent.title}")
                 }
-            }
-            catch (ee: Exception)
-            {
-                ee.printStackTrace()
-            }
-/**/
+            })
         }
         catch (e: Exception)
         {

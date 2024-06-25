@@ -203,46 +203,6 @@ class Main : AppCompatActivity()
     }
 
     /**
-     *
-     */
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        try
-        {
-            super.onSaveInstanceState(outState)
-            if (::listener.isInitialized)
-            {
-                // ここでActivityの情報を覚える
-                listener.onSaveInstanceState(outState)
-            }
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     *
-     */
-    override fun onRestoreInstanceState(savedInstanceState: Bundle)
-    {
-        super.onRestoreInstanceState(savedInstanceState)
-        try
-        {
-            if (::listener.isInitialized)
-            {
-                // ここでActivityの情報を展開する
-                listener.onRestoreInstanceState(savedInstanceState)
-            }
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
      * ダイアログ表示の準備
      *
      */

@@ -81,6 +81,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
 
                 // タイトルの設定を変更する
                 if ((bar != null) && (index >= 0)) {
+                    Log.v(TAG, " set Bar Title : $index / $titleName")
                     bar.setSelectedNavigationItem(index) // 実験...
                 }
             }
@@ -94,7 +95,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * データの保存を行う (同名のファイルが存在していた場合、 *.BAKにリネーム（上書き）してから保存する)
      */
-    fun saveFile(dataTitle: String, forceOverwrite: Boolean)
+    fun saveFile(dataTitle: String, forceOverwrite: Boolean, saveResult: ISaveResultReceiver? = null)
     {
         try
         {
@@ -114,6 +115,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
                 parent.runOnUiThread {
                     onSavedResult((message.isNotEmpty()), message)
                 }
+                saveResult?.onSaved()
                 Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : $dataTitle : DONE.")
             }
             thread.start()
@@ -394,6 +396,10 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         {
             ex.printStackTrace()
         }
+    }
+    interface ISaveResultReceiver
+    {
+        fun onSaved()
     }
 
     companion object {
