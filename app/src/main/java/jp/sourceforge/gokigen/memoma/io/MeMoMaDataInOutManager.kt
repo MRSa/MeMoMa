@@ -348,6 +348,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             // エクスポートしたことを伝達する
             var outputMessage =
                 parent.getString(R.string.capture_data) + " " + objectHolder.dataTitle + " " + detail
+/*
             if (isShareExportedData)
             {
                 // エクスポートはできない
@@ -355,6 +356,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
                 outputMessage =
                     parent.getString(R.string.exported_picture_not_shared) + " : " + objectHolder.dataTitle + " " + detail
             }
+*/
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
             if (isShareExportedData)
             {
