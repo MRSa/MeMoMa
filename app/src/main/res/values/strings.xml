@@ -9,6 +9,7 @@
     <string name="createnew_message">Discard all changes, OK?</string>
     <string name="deleteconfirm_title">Deleting confirmation</string>
     <string name="deleteconfirm_message">Delete OK?</string>
+    <string name="cannot_delete_itself">The selected file is currently opened, cannot be deleted.</string>
     <string name="extend_menu">Object List&#8230;</string>
     <string name="rename_title">Save as&#8230;</string>
     <string name="load_data">Load&#8230;</string>
