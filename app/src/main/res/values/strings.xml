@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="blank"> </string>
-    <string name="app_credit">An idea planner\n web site: "http://bit.ly/A8c8yv"</string>
+    <string name="app_credit">An idea planner\n  https://github.com/MRSa/GokigenOSDN_documents/blob/main/Applications/MeMoMa/README.md</string>
     <string name="app_name">MeMoMa</string>
     <string name="extent_name">Etc</string>
     <string name="createnew">New</string>
@@ -9,8 +9,9 @@
     <string name="createnew_message">Discard all changes, OK?</string>
     <string name="deleteconfirm_title">Deleting confirmation</string>
     <string name="deleteconfirm_message">Delete OK?</string>
-    <string name="extend_menu">Etc&#8230;</string>
-    <string name="rename_title">Rename Title&#8230;</string>
+    <string name="cannot_delete_itself">The selected file is currently opened, cannot be deleted.</string>
+    <string name="extend_menu">Object List&#8230;</string>
+    <string name="rename_title">Save as&#8230;</string>
     <string name="load_data">Load&#8230;</string>
     <string name="save_data">Save&#8230;</string>
     <string name="align_data">Align&#8230;</string>

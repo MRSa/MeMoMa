@@ -18,6 +18,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import android.widget.ImageButton
 import android.widget.SeekBar
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog
@@ -39,6 +40,7 @@ import jp.sourceforge.gokigen.memoma.operations.ObjectAligner.IAlignCallback
 import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog
 import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder
 import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog
+import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog.IResultReceiver
 import jp.sourceforge.gokigen.memoma.preference.Preference
 
 /**
@@ -46,7 +48,7 @@ import jp.sourceforge.gokigen.memoma.preference.Preference
  *
  * @author MRSa
  */
-class MeMoMaListener internal constructor(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager) :
+class MeMoMaListener(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager) :
     View.OnClickListener, OnTouchListener, View.OnKeyListener,
     IObjectSelectionReceiver, ConfirmationDialog.IResultReceiver,
     ObjectDataInputDialog.IResultReceiver,
@@ -65,6 +67,8 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private var selectedObjectKey = 0
     private var objectKeyToDelete = 0
     private var selectedContextKey = 0
+
+    private lateinit var actionBar : ActionBar
 
     /**
      * コンストラクタ
@@ -529,7 +533,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private fun insertPicture()
     {
         val intent: Intent
-        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
         {
             intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             intent.addCategory(Intent.CATEGORY_OPENABLE)
@@ -595,6 +599,9 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         intent.action = ExtensionActivity.MEMOMA_EXTENSION_LAUNCH_ACTIVITY
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_FULLPATH, fullPath)
         intent.putExtra(ExtensionActivity.MEMOMA_EXTENSION_DATA_TITLE, dataTitle)
+        intent.apply {
+            `package` = parent.packageName
+        }
 
         // データ表示用Activityを起動する
         parent.startActivityForResult(intent, MENU_ID_EXTEND)
@@ -631,6 +638,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         val bar = parent.supportActionBar
         if (bar != null)
         {
+            actionBar = bar
             dataInOutManager.prepare(objectHolder, bar, memomaInfo)
         }
         //dataInOutManager.loadFile((String) parent.getTitle());
@@ -1014,7 +1022,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * ダイアログ表示の準備
-     *
      */
     fun onPrepareDialog(id: Int, dialog: Dialog) {
         if (id == R.id.editTextArea) {
@@ -1069,7 +1076,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * 画面を再描画する
-     *
      */
     private fun redrawSurfaceview() {
         try {
@@ -1082,7 +1088,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * 不許可。何もしない。
-     *
      */
     override fun rejectConfirmation() {
         Log.v(TAG, "MeMoMaListener::rejectConfirmation()")
@@ -1090,33 +1095,25 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 
     /**
      * オブジェクトが整列された時の処理
-     *
      */
     override fun objectAligned() {
-        // 画面の再描画を指示する
-        redrawSurfaceview()
+        redrawSurfaceview()  // 画面の再描画を指示する
     }
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
-     *
      */
     override fun finishObjectInput() {
-        // 画面の再描画を指示する
-        redrawSurfaceview()
+        redrawSurfaceview()  // 画面の再描画を指示する
     }
 
     /**
      * オブジェクト編集ダイアログが閉じられた時の処理
-     *
      */
-    override fun cancelObjectInput() {
-        // 何もしない
-    }
+    override fun cancelObjectInput() {}
 
     /**
      * アイテムが選択された！
-     *
      */
     override fun itemSelected(index: Int, itemValue: String) {
         //
@@ -1139,23 +1136,11 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         }
     }
 
-    /**
-     * (今回未使用)
-     *
-     */
     override fun itemSelectedMulti(items: Array<String>, status: BooleanArray) {}
     override fun canceledSelection() {}
-    fun onSaveInstanceState(outState: Bundle) {
-        /* ここで状態を保存 */
-        Log.v(TAG, "MeMoMaListener::onSaveInstanceState() : $outState")
-    }
 
-    fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        /* ここで状態を復元 */
-        Log.v(TAG, "MeMoMaListener::onRestoreInstanceState() : $savedInstanceState")
-    }
-
-    override fun finishTextEditDialog(message: String) {
+    override fun finishTextEditDialog(message: String)
+    {
         if (message.isEmpty())
         {
             // データが入力されていなかったので、何もしない。
@@ -1172,11 +1157,23 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             // タイトルに設定
             parent.title = message
 
-            // 保存シーケンスを一度走らせる
-            saveData(true)
-
-            // ファイル選択リストの更新
-            dataInOutManager.updateFileList(message, parent.supportActionBar)
+            // 保存シーケンスを走らせて、タイトルを更新する
+            dataInOutManager.saveFile(parent.title as String, false, object: MeMoMaDataInOutManager.ISaveResultReceiver {
+                override fun onSaved() {
+                    parent.runOnUiThread {
+                        if (::actionBar.isInitialized)
+                        {
+                            Log.v(TAG, " - - - SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, actionBar)
+                        }
+                        else
+                        {
+                            Log.v(TAG, " ------ SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, parent.supportActionBar)
+                        }
+                    }
+                }
+            })
         }
         catch (e: Exception)
         {

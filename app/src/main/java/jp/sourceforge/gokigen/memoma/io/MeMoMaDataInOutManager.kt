@@ -81,6 +81,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
 
                 // タイトルの設定を変更する
                 if ((bar != null) && (index >= 0)) {
+                    Log.v(TAG, " set Bar Title : $index / $titleName")
                     bar.setSelectedNavigationItem(index) // 実験...
                 }
             }
@@ -94,7 +95,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * データの保存を行う (同名のファイルが存在していた場合、 *.BAKにリネーム（上書き）してから保存する)
      */
-    fun saveFile(dataTitle: String, forceOverwrite: Boolean)
+    fun saveFile(dataTitle: String, forceOverwrite: Boolean, saveResult: ISaveResultReceiver? = null)
     {
         try
         {
@@ -111,7 +112,10 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
                 // スレッドでファイルを保存する。。。
                 Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : '$dataTitle'")
                 val message = saveFileSynchronous(myObjectHolder)
-                onSavedResult((message.isNotEmpty()), message)
+                parent.runOnUiThread {
+                    onSavedResult((message.isNotEmpty()), message)
+                }
+                saveResult?.onSaved()
                 Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : $dataTitle : DONE.")
             }
             thread.start()
@@ -157,7 +161,9 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             val outputMessage = "${parent.getString(R.string.save_data)} ${objectHolder.dataTitle} $detail"
             if (isError)
             {
-                Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                parent.runOnUiThread {
+                    Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                }
             }
             Log.v(TAG, outputMessage)
 
@@ -342,6 +348,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             // エクスポートしたことを伝達する
             var outputMessage =
                 parent.getString(R.string.capture_data) + " " + objectHolder.dataTitle + " " + detail
+/*
             if (isShareExportedData)
             {
                 // エクスポートはできない
@@ -349,6 +356,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
                 outputMessage =
                     parent.getString(R.string.exported_picture_not_shared) + " : " + objectHolder.dataTitle + " " + detail
             }
+*/
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
             if (isShareExportedData)
             {
@@ -390,6 +398,10 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         {
             ex.printStackTrace()
         }
+    }
+    interface ISaveResultReceiver
+    {
+        fun onSaved()
     }
 
     companion object {

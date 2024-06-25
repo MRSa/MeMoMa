@@ -430,9 +430,33 @@ public class ExtensionActivityListener  implements OnClickListener, MeMoMaFileLo
                 Thread thread = new Thread(() -> {
                     // ファイル削除の実処理
                     String targetFile = parent.getFilesDir() + "/" + fileName;
-                    if (!(new File(targetFile).delete()))
+
+                    try
                     {
-                        Log.v(TAG, "Content Delete Failure : " + fileName);
+                        String currentTitle = objectHolder.getDataTitle() + ".xml";
+                        if (currentTitle.equals(fileName))
+                        {
+                            parent.runOnUiThread(() -> {
+                                // ----- 自分自身は削除できない、と、Toast表示する
+                                try
+                                {
+                                    Toast.makeText(parent, parent.getString(R.string.cannot_delete_itself), Toast.LENGTH_SHORT).show();
+                                }
+                                catch (Exception ee)
+                                {
+                                    ee.printStackTrace();
+                                }
+                            });
+                            return;
+                        }
+                        if (!(new File(targetFile).delete()))
+                        {
+                            Log.v(TAG, "Content Delete Failure : " + fileName);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
                     }
                 });
                 try

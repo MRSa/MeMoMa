@@ -127,14 +127,23 @@ class Main : AppCompatActivity()
                 // Permission Denied
                 if ((param == Manifest.permission.READ_EXTERNAL_STORAGE)&&(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN))
                 {
-                    // この場合は権限付与がされているかどうかの判断を除外 (デバイスが JELLY_BEAN よりも古く、READ_EXTERNAL_STORAGE がない場合）
+                    // この場合は権限付与の判断を除外 (デバイスが JELLY_BEAN よりも古く、READ_EXTERNAL_STORAGE がない場合）
                 }
-                //else if ((param == Manifest.permission.ACCESS_MEDIA_LOCATION)&&(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q))
-                //{
-                //    //　この場合は権限付与がされているかどうかの判断を除外 (デバイスが (10) よりも古く、ACCESS_MEDIA_LOCATION がない場合）
-                //}
+                else if ((param == Manifest.permission.ACCESS_MEDIA_LOCATION)&&(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q))
+                {
+                    //　この場合は権限付与の判断を除外 (デバイスが (10) よりも古く、ACCESS_MEDIA_LOCATION がない場合）
+                }
+                else if ((param == Manifest.permission.READ_EXTERNAL_STORAGE)&&(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU))
+                {
+                    // この場合は、権限付与の判断を除外 (SDK: 34以上はエラーになる...)
+                }
+                else if ((param == Manifest.permission.WRITE_EXTERNAL_STORAGE)&&(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU))
+                {
+                    // この場合は、権限付与の判断を除外 (SDK: 34以上はエラーになる...)
+                }
                 else
                 {
+                    Log.v(TAG, " Permission: $param : ${Build.VERSION.SDK_INT}")
                     result = false
                 }
             }
@@ -142,11 +151,6 @@ class Main : AppCompatActivity()
         return (result)
     }
 
-/*
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-*/
     /**
      * 画面が裏に回ったときの処理
      */
@@ -191,46 +195,6 @@ class Main : AppCompatActivity()
         {
             listener.finishListener()
             super.onDestroy()
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     *
-     */
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        try
-        {
-            super.onSaveInstanceState(outState)
-            if (::listener.isInitialized)
-            {
-                // ここでActivityの情報を覚える
-                listener.onSaveInstanceState(outState)
-            }
-        }
-        catch (e: Exception)
-        {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     *
-     */
-    override fun onRestoreInstanceState(savedInstanceState: Bundle)
-    {
-        super.onRestoreInstanceState(savedInstanceState)
-        try
-        {
-            if (::listener.isInitialized)
-            {
-                // ここでActivityの情報を展開する
-                listener.onRestoreInstanceState(savedInstanceState)
-            }
         }
         catch (e: Exception)
         {
