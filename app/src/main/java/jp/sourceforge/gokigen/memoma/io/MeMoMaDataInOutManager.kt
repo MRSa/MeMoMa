@@ -39,16 +39,16 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         {
             // アクションバーを設定する
             prepareActionBar(bar)
+
+            // タイトルの設定を変更する
+            if ((bar != null) && (index >= 0))
+            {
+                bar.setSelectedNavigationItem(index)
+            }
         }
         catch (e: Exception)
         {
             e.printStackTrace()
-        }
-
-        // タイトルの設定を変更する
-        if ((bar != null) && (index >= 0))
-        {
-            bar.setSelectedNavigationItem(index)
         }
     }
 
@@ -83,7 +83,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * データの保存を行う (同名のファイルが存在していた場合、 *.BAKにリネーム（上書き）してから保存する)
      */
-    fun saveFile(dataTitle: String, forceOverwrite: Boolean)
+    fun saveFile(dataTitle: String, forceOverwrite: Boolean, saveResult: ISaveResultReceiver? = null)
     {
         try
         {
@@ -95,11 +95,18 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
 
             // タイトルをオブジェクトフォルダに記憶させる
             objectHolder.setDataTitle(dataTitle)
-            Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : $dataTitle")
-
-            // 同期型でファイルを保存する。。。
-            val message = saveFileSynchronous()
-            onSavedResult((message.isNotEmpty()), message)
+            val myObjectHolder = objectHolder
+            val thread = Thread {
+                // スレッドでファイルを保存する。。。
+                Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : '$dataTitle'")
+                val message = saveFileSynchronous(myObjectHolder)
+                parent.runOnUiThread {
+                    onSavedResult((message.isNotEmpty()), message)
+                }
+                saveResult?.onSaved()
+                Log.v(TAG, "MeMoMaDataInOutManager::saveFile() : $dataTitle : DONE.")
+            }
+            thread.start()
         }
         catch (e: Exception)
         {
@@ -127,51 +134,57 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * 保存終了時の処理
      */
-    override fun onSavedResult(isError: Boolean, detail: String?) {
-        // 保存したことを伝達する
-        val outputMessage =
-            parent.getString(R.string.save_data) + " " + objectHolder.getDataTitle() + " " + detail
-        if (isError) {
-            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
-        }
-        Log.v(TAG, outputMessage)
+    override fun onSavedResult(isError: Boolean, detail: String?)
+    {
+        try
+        {
+            // 保存したことを伝達する
+            val outputMessage = "${parent.getString(R.string.save_data)} ${objectHolder.getDataTitle()} $detail"
+            if (isError)
+            {
+                parent.runOnUiThread {
+                    Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+            Log.v(TAG, outputMessage)
 
-        // ファイルリスト更新 ... (ここでやっちゃあ、AsyncTaskにしている意味ないなあ...)
-        dataFileHolder.updateFileList(objectHolder.getDataTitle())
+            // ファイルリスト更新 ... (ここでやっちゃあ、AsyncTaskにしている意味ないなあ...)
+            dataFileHolder.updateFileList(objectHolder.getDataTitle())
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * 読み込み終了時の処理
      */
     override fun onLoadedResult(isError: Boolean, detail: String) {
-        // 読み込みしたことを伝達する
-        val outputMessage =
-            parent.getString(R.string.load_data) + " " + objectHolder.getDataTitle() + " " + detail
-        if (isError) {
-            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
-        }
-        Log.v(TAG, outputMessage)
+        try
+        {
+            // 読み込みしたことを伝達する
+            val outputMessage =
+                parent.getString(R.string.load_data) + " " + objectHolder.getDataTitle() + " " + detail
+            if (isError) {
+                Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+            }
+            Log.v(TAG, outputMessage)
 
-        // 画面を再描画する
-        val surfaceview = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
-        surfaceview.doDraw()
+            // 画面を再描画する
+            val surfaceView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
+            surfaceView.doDraw()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * ファイルをロードする途中のバックグラウンド処理...
-     *
      */
-    override fun onLoadingProcess() {
-        // 何もしない...
-    }
-
-    /**
-     * ファイルからデータを読み込む。
-     */
-    fun loadFile(dataTitle: String) {
-        loadFileWithName(dataTitle)
-    }
-
+    override fun onLoadingProcess() { }
 
     /**
      * ファイルからのデータ読み込み処理
@@ -237,14 +250,23 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * ファイルを保存する...同期型で。
      */
-    private fun saveFileSynchronous(): String
+    private fun saveFileSynchronous(copyObjectHolder: MeMoMaObjectHolder): String
     {
-        // 同期型でファイルを保存する。。。
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        val backgroundUri = preferences.getString("backgroundUri", "")
-        val userCheckboxString = preferences.getString("userCheckboxString", "")
-        val saveEngine = MeMoMaFileSavingEngine(parent, backgroundUri!!, userCheckboxString!!)
-        return (saveEngine.saveObjects(objectHolder))
+        try
+        {
+            val myObjectHolder = copyObjectHolder
+            // 同期型でファイルを保存する。。。
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            val backgroundUri = preferences.getString("backgroundUri", "")?: ""
+            val userCheckboxString = preferences.getString("userCheckboxString", "")?: ""
+            val saveEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+            return (saveEngine.saveObjects(myObjectHolder))
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+        return ("")
     }
 
     /**
@@ -257,8 +279,8 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         Log.v(TAG, "onNavigationItemSelected($itemPosition,$itemId) : $data")
 
         // 同期型で現在のファイルを保存する。。。
-        val message = saveFileSynchronous()
-        onSavedResult((message.length != 0), message)
+        val message = saveFileSynchronous(objectHolder)
+        onSavedResult((message.isNotEmpty()), message)
 
         // 選択したファイル名をタイトルに反映し、またPreferenceにも記憶する
         parent.title = data
@@ -296,18 +318,21 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     override fun onCaptureLayoutExportedResult(exportedUri: Uri?, detail: String?, id: Int) {
         Log.v(
             TAG,
-            "MeMoMaDataInOutManager::onCaptureExportedResult() '" + objectHolder.getDataTitle() + "' : " + detail
+            "onCaptureLayoutExportedResult() '${objectHolder.getDataTitle()}' : $detail (${exportedUri}) $isShareExportedData"
         )
-        try {
+        try
+        {
             // エクスポートしたことを伝達する
-            var outputMessage =
-                parent.getString(R.string.capture_data) + " " + objectHolder.getDataTitle() + " " + detail
-            if ((exportedUri == null) && (isShareExportedData)) {
-                // エクスポートはできない
+            val outputMessage = "${parent.getString(R.string.capture_data)} ${objectHolder.getDataTitle()} $detail"
+/*
+            if (isShareExportedData)
+            {
+                // エクスポートはできない、しない
                 isShareExportedData = false
                 outputMessage =
                     parent.getString(R.string.exported_picture_not_shared) + " : " + objectHolder.getDataTitle() + " " + detail
             }
+*/
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
             if ((isShareExportedData)&&(exportedUri != null))
             {
@@ -345,6 +370,10 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
+    }
+    interface ISaveResultReceiver
+    {
+        fun onSaved()
     }
 
     companion object

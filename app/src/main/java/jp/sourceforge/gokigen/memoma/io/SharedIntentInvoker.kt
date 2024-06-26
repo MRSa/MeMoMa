@@ -44,8 +44,10 @@ object SharedIntentInvoker {
             intent.putExtra(Intent.EXTRA_SUBJECT, mailTitle)
             intent.putExtra(Intent.EXTRA_TEXT, mailMessage)
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            try {
-                if ((contentUri != null) && (!fileType.isEmpty())) {
+            try
+            {
+                if ((contentUri != null) && (fileType.isNotEmpty()))
+                {
                     // ファイル類を添付する
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -56,19 +58,15 @@ object SharedIntentInvoker {
                         "Attached :$contentUri"
                     )
                 }
-            } catch (ee: Exception) {
+            }
+            catch (ee: Exception)
+            {
                 Log.v(IDENTIFIER, "attach failure : " + contentUri + "  " + ee.message)
                 ee.printStackTrace()
             }
-
-            try
-            {
-                val launcher = parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
-                launcher.launch(intent)
-            }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
+            if (intent.resolveActivity(parent.applicationContext.packageManager) != null) {
+                Log.v(IDENTIFIER, "----- START ACTIVITY -----")
+                parent.startActivity(intent)
             }
         }
         catch (ex: ActivityNotFoundException)

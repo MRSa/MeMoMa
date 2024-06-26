@@ -17,6 +17,7 @@ import android.widget.SeekBar
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.dialogs.ConfirmationDialog
@@ -37,10 +38,8 @@ import jp.sourceforge.gokigen.memoma.operations.ObjectAligner.IAlignCallback
 import jp.sourceforge.gokigen.memoma.operations.ObjectDataInputDialog
 import jp.sourceforge.gokigen.memoma.operations.ObjectOperationCommandHolder
 import jp.sourceforge.gokigen.memoma.operations.SelectLineShapeDialog
-
 /**
  * メモま！ のメイン画面処理
- *
  */
 class MeMoMaListener internal constructor(private val parent: AppCompatActivity, private val dataInOutManager: MeMoMaDataInOutManager, private val sceneChanger: IChangeScene) :
     View.OnClickListener, OnTouchListener, View.OnKeyListener,
@@ -62,6 +61,8 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private var selectedObjectKey = 0
     private var objectKeyToDelete = 0
     private var selectedContextKey = 0
+
+    private lateinit var actionBar : ActionBar
 
     /**
      * コンストラクタ
@@ -314,11 +315,11 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                     true
                 }
                 R.id.action_share -> {
-                    doCapture(false)
+                    doCapture(true)
                     true
                 }
                 R.id.action_capture -> {
-                    doCapture(true)
+                    doCapture(false)
                     true
                 }
                 R.id.action_undo -> {
@@ -460,6 +461,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
         try
         {
             // 画面のスクリーンショットをとる処理を実行する
+            Log.v(TAG, "-----doCapture($isShare)")
             dataInOutManager.doScreenCapture(
                 parent.title as String,
                 objectHolder,
@@ -1127,11 +1129,23 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             // タイトルに設定
             parent.title = message
 
-            // 保存シーケンスを一度走らせる
-            saveData()
-
-            // ファイル選択リストの更新
-            dataInOutManager.updateFileList(message, parent.supportActionBar)
+            // 保存シーケンスを走らせて、タイトルを更新する
+            dataInOutManager.saveFile(parent.title as String, false, object: MeMoMaDataInOutManager.ISaveResultReceiver {
+                override fun onSaved() {
+                    parent.runOnUiThread {
+                        if (::actionBar.isInitialized)
+                        {
+                            Log.v(TAG, " - - - SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, actionBar)
+                        }
+                        else
+                        {
+                            Log.v(TAG, " ------ SET TITLE : $message - - -")
+                            dataInOutManager.updateFileList(message, parent.supportActionBar)
+                        }
+                    }
+                }
+            })
         }
         catch (e: Exception)
         {
