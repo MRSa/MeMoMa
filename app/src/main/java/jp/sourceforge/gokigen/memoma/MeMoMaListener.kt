@@ -594,16 +594,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                 {
                     e.printStackTrace()
                 }
-                parent.runOnUiThread {
-                    try
-                    {
-                        aligner.finishAlignObject()
-                    }
-                    catch (e: Exception)
-                    {
-                        e.printStackTrace()
-                    }
-                }
             }.start()
         }
         catch (e: Exception)
@@ -832,7 +822,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             e.printStackTrace()
         }
     }
-
 
     /**
      * オブジェクトを拡大する
