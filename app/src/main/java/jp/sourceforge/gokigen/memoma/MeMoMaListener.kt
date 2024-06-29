@@ -923,8 +923,8 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
             Log.v(TAG, "MeMoMaListener::objectSelectedContext(),  key:$key")
             selectedContextKey = key?: 0
 
-            //  ダイアログの準備を行う
-            val dialog = objectDataInputDialog.getDialog(selectedContextKey)
+            // ----- アイテム選択ダイアログを表示する
+            val dialog = itemSelectionDialog.dialog
             dialog.show()
         }
         catch (e: Exception)

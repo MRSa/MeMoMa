@@ -165,13 +165,19 @@ class MeMoMaCanvasDrawer(
     override fun prepareToStart(width: Int, height: Int)
     {
         Log.v(TAG, "MeMoMaCanvasDrawer::prepareToStart() x:$width , y:$height")
+        try
+        {
+            // 背景画像を更新する
+            //updateBackgroundBitmap(backgroundBitmapUri, width, height);
 
-        // 背景画像を更新する
-        //updateBackgroundBitmap(backgroundBitmapUri, width, height);
-
-        // Preferenceを読み出す
-        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-        displayObjectInformation = (preferences.getString("objectPrintData", "1")?:"1").toInt()
+            // Preferenceを読み出す
+            val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+            displayObjectInformation = (preferences.getString("objectPrintData", "1")?:"1").toInt()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -195,9 +201,11 @@ class MeMoMaCanvasDrawer(
      * キャンバスにオブジェクト（と接続線）を表示する
      *
      */
-    override fun drawOnCanvas(canvas: Canvas) {
+    override fun drawOnCanvas(canvas: Canvas)
+    {
         //Log.v(TAG, "MeMoMaCanvasDrawer::drawOnCanvas()");
-        try {
+        try
+        {
             // 画面全体をクリアする
             //canvas.drawColor(Color.argb(backgroundColorAlfa, backgroundColorRed, backgroundColorGreen, backgroundColorBlue), Mode.CLEAR);
             canvas.drawColor(backgroundColor)
@@ -873,7 +881,7 @@ class MeMoMaCanvasDrawer(
         try
         {
             // スケールジェスチャ(マルチタッチのジェスチャ)を拾う
-            // isDraw = scaleGestureDetector.onTouchEvent(event);
+            //isDraw = scaleGestureDetector.onTouchEvent(event);
             if ((onScaling) || (scaleGestureDetector.isInProgress)) {
                 //  マルチタッチ操作中...
                 return (true)
