@@ -15,9 +15,22 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
     private lateinit var listener: MeMoMaListener
 
     fun prepare() {
+        Log.v(TAG, "ChangeScene::prepare()")
         if (!::listener.isInitialized)
         {
             listener = MeMoMaListener(parent, MeMoMaDataInOutManager(parent), this)
+        }
+        if (!::extentionFragment.isInitialized)
+        {
+            extentionFragment = ExtensionFragment.newInstance(parent)
+        }
+        if (!::preferenceFragment.isInitialized)
+        {
+            preferenceFragment = PreferenceFragment.newInstance()
+        }
+        if (!::mainFragment.isInitialized)
+        {
+            mainFragment = MainFragment.newInstance(this, listener)
         }
     }
 
@@ -48,6 +61,7 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
         try
         {
             // ----- オブジェクト一覧画面に遷移させる
+            Log.v(TAG, "ChangeScene::changeSceneToExtension()")
             if (!::extentionFragment.isInitialized)
             {
                 extentionFragment = ExtensionFragment.newInstance(parent)

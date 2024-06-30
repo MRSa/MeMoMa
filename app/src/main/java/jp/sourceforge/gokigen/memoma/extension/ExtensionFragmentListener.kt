@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import jp.sourceforge.gokigen.memoma.AppSingleton
 import jp.sourceforge.gokigen.memoma.Main
 import jp.sourceforge.gokigen.memoma.R
 import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog
@@ -43,10 +44,43 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     FileSelectionDialog.IResultReceiver,
     MeMoMaFileImportCsvProcess.IResultReceiver
 {
-
-    private val objectHolder = MeMoMaObjectHolder(parent)
+    private val objectHolder = AppSingleton.objectHolder
     private var isShareExportedData = false
     private var listItems: MutableList<SymbolListArrayItem> = ArrayList()
+
+    private val pickerLauncherForCSV =
+        parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+            if (result?.resultCode == AppCompatActivity.RESULT_OK) {
+                result.data?.let { resultData ->
+                    try
+                    {
+                        val uri = resultData.data
+                        importObjectFromCsv(uri)
+                    }
+                    catch (e: Exception)
+                    {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
+    private val pickerLauncherForXML =
+        parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+            if (result?.resultCode == AppCompatActivity.RESULT_OK) {
+                result.data?.let { resultData ->
+                    try
+                    {
+                        val uri = resultData.data
+                        importDataFromXml(uri)
+                    }
+                    catch (e: Exception)
+                    {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
 
     fun setDataTitle(title: String)
     {
@@ -61,7 +95,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
                 dataTitle = prefTitleString
             }
             // Intentで拾ったデータを読み出す (初期化データ)
-            objectHolder.setDataTitle(dataTitle?: "")
+            objectHolder.setDataTitle(dataTitle)
         }
         catch (ex: Exception)
         {
@@ -84,13 +118,12 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         }
     }
 
-    fun prepareListener()
+    fun prepareListener(myView : View)
     {
         try
         {
             // フィルタ設定ボタン
-            val filterButton = parent.findViewById<ImageButton>(R.id.SetFilterButton)
-            filterButton.setOnClickListener(this)
+            myView.findViewById<ImageButton>(R.id.SetFilterButton)?.setOnClickListener(this)
         }
         catch (e: Exception)
         {
@@ -178,6 +211,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
                     // データの保管メイン
                     val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
                     val result = savingEngine.saveObjects(objectHolder)
+
                     parent.runOnUiThread {
                         try
                         {
@@ -483,33 +517,17 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
                 intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, path)
             }
 
-            val launcher =
-                parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
-                    if (result?.resultCode == AppCompatActivity.RESULT_OK) {
-                        result.data?.let { resultData ->
-                            try
-                            {
-                                val uri = resultData.data
-                                when (requestCode) {
-                                    PICK_CSV_FILE -> {
-                                        importObjectFromCsv(uri)
-                                    }
-                                    PICK_XML_FILE -> {
-                                        importDataFromXml(uri)
-                                    }
-                                    else -> {
-                                        Log.v(TAG, "========== rc: $requestCode uri: ${uri.toString()}")
-                                    }
-                                }
-                            }
-                            catch (e: Exception)
-                            {
-                                e.printStackTrace()
-                            }
-                        }
-                    }
+            when (requestCode) {
+                PICK_CSV_FILE -> {
+                    pickerLauncherForCSV.launch(intent)
                 }
-            launcher.launch(intent)
+                PICK_XML_FILE -> {
+                    pickerLauncherForXML.launch(intent)
+                }
+                else -> {
+                    Log.v(TAG, "========== requestCode: $requestCode")
+                }
+            }
         }
         catch (e: Exception)
         {
@@ -778,6 +796,9 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
             // 一覧のリストを作りなおす
             onLoadingProcess()
             updateObjectList()
+
+            // -----
+            Log.v(TAG, "imported : '${objectHolder.getDataTitle()}'.")
         }
         catch (e: Exception)
         {

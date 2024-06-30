@@ -51,7 +51,6 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
 {
     private lateinit var objectDrawer: MeMoMaCanvasDrawer
     private val editTextDialog: TextEditDialog = TextEditDialog(parent, R.drawable.icon)
-    private val objectHolder: MeMoMaObjectHolder = MeMoMaObjectHolder(parent)
     private val drawModeHolder: OperationModeHolder = OperationModeHolder(parent)
     private val lineStyleHolder: LineStyleHolder = LineStyleHolder(parent)
     private val confirmationDialog: ConfirmationDialog
@@ -63,12 +62,14 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private var selectedContextKey = 0
 
     private lateinit var actionBar : ActionBar
+    private lateinit var objectHolder: MeMoMaObjectHolder
 
     /**
      * コンストラクタ
      */
     init
     {
+        objectHolder = AppSingleton.objectHolder
         lineStyleHolder.prepare()
 
         // 確認ダイアログ

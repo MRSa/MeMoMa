@@ -14,14 +14,27 @@ import jp.sourceforge.gokigen.memoma.R
 
 class ExtensionFragment : Fragment()
 {
+    private lateinit var parent : AppCompatActivity
     private lateinit var myView : View
     private lateinit var listener: ExtensionFragmentListener
 
-    private fun prepare(activity: AppCompatActivity)
+    private fun prepare(activity : AppCompatActivity)
     {
         try
         {
-            listener = ExtensionFragmentListener(activity)
+            Log.v(TAG, "ExtensionFragment::prepare() : ${activity.title}")
+            try
+            {
+                parent = activity
+                if (!::listener.isInitialized)
+                {
+                    listener = ExtensionFragmentListener(parent)
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
         }
         catch (e: Exception)
         {
@@ -49,8 +62,18 @@ class ExtensionFragment : Fragment()
         super.onCreate(savedInstanceState)
         try
         {
-            Log.v(TAG, "ExtensionActivity::onCreate()")
-
+            Log.v(TAG, "ExtensionFragment::onCreate()")
+            try
+            {
+                if (!::listener.isInitialized)
+                {
+                    listener = ExtensionFragmentListener(parent)
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
             // メニューがあるよ
             setHasOptionsMenu(true)
         }
@@ -82,9 +105,9 @@ class ExtensionFragment : Fragment()
     {
         try
         {
-            if (::listener.isInitialized)
+            if ((::listener.isInitialized)&&(::myView.isInitialized))
             {
-                listener.prepareListener()
+                listener.prepareListener(myView)
             }
         }
         catch (e: Exception)
@@ -144,7 +167,14 @@ class ExtensionFragment : Fragment()
         try
         {
             super.onResume()
-            listener.prepareToStart()
+            if (::listener.isInitialized)
+            {
+                if (::myView.isInitialized)
+                {
+                    listener.prepareListener(myView)
+                }
+                listener.prepareToStart()
+            }
         }
         catch (ex: Exception)
         {

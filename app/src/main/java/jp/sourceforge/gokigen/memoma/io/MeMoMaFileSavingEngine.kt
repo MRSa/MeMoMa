@@ -210,9 +210,11 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
     /**
      * オブジェクトを保存する
      */
-    fun saveObjects(objectHolder: MeMoMaObjectHolder): String {
+    fun saveObjects(objectHolder: MeMoMaObjectHolder): String
+    {
         // データタイトルがない場合...保存処理は行わない。
-        if (objectHolder.getDataTitle().length == 0) {
+        if (objectHolder.getDataTitle().isEmpty())
+        {
             Log.v(
                 TAG,
                 "MeMoMaFileSavingEngine::saveObjects() : specified file name is illegal, save aborted. : " + objectHolder.getDataTitle()
@@ -220,8 +222,10 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
             return ("")
         }
 
-        if (objectHolder.isEmpty()) {
-            try {
+        if (objectHolder.isEmpty())
+        {
+            try
+            {
                 // ファイルの存在を確認
                 val fileName =
                     context.filesDir.toString() + "/" + objectHolder.getDataTitle() + ".xml"
@@ -233,12 +237,17 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
                         return (context.getString(R.string.createnew))
                     }
                 }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception)
+            {
                 e.printStackTrace()
             }
+            Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() EMPTY : ${objectHolder.getDataTitle()}")
+
             // データがない場合は保存しない
             return (context.getString(R.string.none_object))
         }
+        Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() DONE : ${objectHolder.getDataTitle()}")
 
         // データを保管する （ファイル名の設定は、拡張子なし
         return (storeToXmlFile(

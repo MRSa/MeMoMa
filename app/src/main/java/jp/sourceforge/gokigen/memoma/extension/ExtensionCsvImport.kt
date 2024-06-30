@@ -120,11 +120,6 @@ class ExtensionCsvImport(private val context: Context, private val objectHolder:
 
             // オブジェクトのデータを作成する
             val pos = objectHolder.createPosition(left, top, drawStyle)
-            if (pos == null)
-            {
-                Log.v(TAG, "parseRecord() : object create failure.")
-                return
-            }
             pos.setRectRight(left + width)
             pos.setRectBottom(top + height)
             pos.setLabel(label)

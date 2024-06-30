@@ -18,6 +18,19 @@ class Main : AppCompatActivity()
 {
     private val sceneChanger = ChangeScene(this)
 
+    public override fun onStart()
+    {
+        super.onStart()
+        try
+        {
+            sceneChanger.prepare()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
     public override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -31,7 +44,6 @@ class Main : AppCompatActivity()
         try
         {
             // ----- 最初の画面を開く
-            sceneChanger.prepare()
             sceneChanger.changeSceneToMain()
         }
         catch (e: Exception)
