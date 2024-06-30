@@ -6,6 +6,7 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat"
+        android:enableOnBackInvokedCallback="true"
         android:name=".AppSingleton"
         >
         <activity android:name=".Main"

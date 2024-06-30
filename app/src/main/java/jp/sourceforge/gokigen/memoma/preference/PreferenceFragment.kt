@@ -3,6 +3,7 @@ package jp.sourceforge.gokigen.memoma.preference
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
+import android.util.Log
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -45,7 +46,8 @@ class PreferenceFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeL
      */
     override fun onSharedPreferenceChanged(shardPref: SharedPreferences, key: String?)
     {
-        //
+        val value = if (key != null) { shardPref.getString(key, "") } else { "(???)" }
+        Log.v(TAG, "onSharedPreferenceChanged($key) : $value")
     }
 /*
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
