@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources> 
+    <drawable name="mybackground_color">#004000</drawable>
+    <drawable name="color_black">#000000</drawable>
+
+    <color name="mybackground_color">#004000</color>
+    <color name="color_black">#000000</color>
+</resources>

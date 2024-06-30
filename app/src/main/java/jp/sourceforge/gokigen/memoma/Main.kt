@@ -41,6 +41,16 @@ class Main : AppCompatActivity()
         // レイアウトを設定する
         setContentView(R.layout.activity_main)
 
+        // ツールバーの指定を変える
+        try
+        {
+            setSupportActionBar(findViewById(R.id.toolbar))
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+
         try
         {
             // ----- 最初の画面を開く
