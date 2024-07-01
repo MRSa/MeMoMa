@@ -15,4 +15,6 @@
     <color name="background_translucent_dark">#AA555555</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="textColorPrimary">#FFEDEDED</color>
+    <color name="textColorSecondary">#FFDEDEDE</color>
 </resources>

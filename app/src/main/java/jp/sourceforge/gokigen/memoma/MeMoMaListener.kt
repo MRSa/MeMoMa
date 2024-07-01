@@ -62,14 +62,13 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     private var selectedContextKey = 0
 
     private lateinit var actionBar : ActionBar
-    private lateinit var objectHolder: MeMoMaObjectHolder
+    private var objectHolder: MeMoMaObjectHolder = AppSingleton.objectHolder
 
     /**
      * コンストラクタ
      */
     init
     {
-        objectHolder = AppSingleton.objectHolder
         lineStyleHolder.prepare()
 
         // 確認ダイアログ
