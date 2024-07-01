@@ -141,7 +141,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
             val bar = parent.supportActionBar
             if (bar != null)
             {
-                bar.setIcon(R.drawable.icon1)
+                //bar.setIcon(R.drawable.icon1)
                 bar.title = objectHolder.getDataTitle()
                 bar.show()
             }

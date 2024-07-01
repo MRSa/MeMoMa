@@ -36,7 +36,7 @@ class Main : AppCompatActivity()
         super.onCreate(savedInstanceState)
 
         // タイトルバーにアクションバーを出す
-        supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
+        //supportRequestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY)
 
         // レイアウトを設定する
         setContentView(R.layout.activity_main)

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-<!-- アプリケーションのウィンドウタイトルのスタイルを設定する  -->
-<style name="WindowTitle">  
-    <item name="android:singleLine">true</item>
-</style>
-
+    <style name="WindowTitle">
+        <item name="android:singleLine">true</item>
+    </style>
+    <style name="Toolbar.Light.Text" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
 </resources>
