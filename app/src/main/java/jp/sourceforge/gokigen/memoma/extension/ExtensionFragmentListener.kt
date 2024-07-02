@@ -47,6 +47,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     private val objectHolder = AppSingleton.objectHolder
     private var isShareExportedData = false
     private var listItems: MutableList<SymbolListArrayItem> = ArrayList()
+    private var previousTitle = ""
 
     private val pickerLauncherForCSV =
         parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
@@ -135,18 +136,30 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     {
         try
         {
-            Log.v(TAG, "ExtensionActivityListener::prepareToStart() : ${objectHolder.getDataTitle()}")
+            Log.v(TAG, "ExtensionFragmentListener::prepareToStart() : ${objectHolder.getDataTitle()}")
 
             //  アクションバーを表示する
             val bar = parent.supportActionBar
             if (bar != null)
             {
-                Log.v(TAG, "ExtensionActivityListener::prepareToStart() : show toolbar}")
                 //bar.setIcon(R.drawable.icon1)
                 bar.title = objectHolder.getDataTitle()
                 bar.show()
             }
 
+            // ファイルをロードする！
+            loadDataThread()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadDataThread()
+    {
+        try
+        {
             // ファイルをロードする！
             val thread = Thread {
                 try
@@ -158,7 +171,10 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
                     parent.runOnUiThread {
                         try
                         {
+                            Log.v(TAG, "loadDataThread(): ${objectHolder.getDataTitle()}")
+
                             fileLoader.onFinishProcess(result)
+                            previousTitle = objectHolder.getDataTitle()
                         }
                         catch (e: Exception)
                         {
@@ -179,6 +195,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         }
     }
 
+
     /**
      * 詳細データを表示する。
      */
@@ -187,7 +204,10 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         Log.v(TAG, "SELECTED: $first $second $third")
     }
 
-    fun shutdown()  { }
+    fun shutdown()
+    {
+        previousTitle = ""
+    }
 
     private fun importObjectFromCsv(uri: Uri?)
     {
@@ -445,8 +465,10 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     /**
      * データを削除する
      */
-    private fun deleteContent() {
-        try {
+    private fun deleteContent()
+    {
+        try
+        {
             //  データの一覧を取得する
             val dialog =
                 FileSelectionDialog(parent, parent.getString(R.string.delete_content),
@@ -597,6 +619,8 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     {
         try
         {
+            Log.v(TAG, "ExtensionFragmentListener::onLoadingProcess()")
+
             // リストに表示するアイテムを生成する
             listItems = ArrayList()
 
@@ -637,7 +661,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         catch (ex: Exception)
         {
             // 例外発生...ログを吐く
-            Log.v(TAG, "ExtensionActivityListener::onLoadingProcess() : " + ex.message)
+            Log.v(TAG, "ERR>ExtensionFragmentListener::onLoadingProcess() : " + ex.message)
             ex.printStackTrace()
         }
     }
@@ -650,13 +674,11 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     {
         try
         {
-            Log.v(
-                TAG,
-                "ExtensionActivityListener::onLoadedResult() '" + objectHolder.getDataTitle() + "' : " + detail
-            )
+            val title = objectHolder.getDataTitle()
+            Log.v(TAG, "ExtensionFragmentListener::onLoadedResult() '${objectHolder.getDataTitle()}' : $detail")
 
             // 読み込んだファイル名をタイトルに設定する
-            parent.title = objectHolder.getDataTitle()
+            parent.title = title
 
             // オブジェクト一覧を表示する
             updateObjectList()
@@ -664,6 +686,14 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
             // 読み込みしたことを伝達する
             //String outputMessage = parent.getString(R.string.load_data) + " " + objectHolder.getDataTitle() + " " + detail;
             //Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
+
+            // ----- リストの表示を更新する (ファイルをロードする！)
+            Log.v(TAG, "ExtensionFragmentListener::onLoadedResult() '$title' vs $previousTitle")
+            if (previousTitle != title)
+            {
+                loadDataThread()
+                //previousTitle = title
+            }
         }
         catch (e: Exception)
         {
@@ -679,7 +709,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     {
         try
         {
-            Log.v(TAG, "ExtensionActivityListener::onExportedResult() '${objectHolder.getDataTitle()}' : $detail")
+            Log.v(TAG, "ExtensionFragmentListener::onExportedResult() '${objectHolder.getDataTitle()}' : $detail")
 
             // エクスポートしたことを伝達する
             val outputMessage = parent.getString(R.string.export_csv) + " " + objectHolder.getDataTitle() + " " + detail
@@ -777,7 +807,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     override fun selectedFileName(fileName: String?)
     {
         // CSVファイルからオブジェクトをロードするクラスを呼び出す。
-        Log.v(TAG, "ExtensionActivityListener::selectedFileName() : $fileName")
+        Log.v(TAG, "ExtensionFragmentListener::selectedFileName() : $fileName")
         val asyncTask = MeMoMaFileImportCsvProcess(parent, this, fileName)
         asyncTask.execute(objectHolder)
     }
@@ -787,7 +817,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
      */
     override fun onImportedResult(fileName: String)
     {
-        Log.v(TAG, "ExtensionActivityListener::onImportedResult() '${objectHolder.getDataTitle()}' : $fileName")
+        Log.v(TAG, "ExtensionFragmentListener::onImportedResult() '${objectHolder.getDataTitle()}' : $fileName")
         try
         {
             // インポートしたことを伝達する
@@ -812,7 +842,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         try
         {
             val title = objectHolder.getDataTitle()
-            Log.v(TAG, "ExtensionActivityListener::onImportedResultXml() '$title' : $detail")
+            Log.v(TAG, "ExtensionFragmentListener::onImportedResultXml() '$title' : $detail")
 
             // インポート時の注意事項ダイアログを表示する
             parent.runOnUiThread {
@@ -853,7 +883,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
     {
         try
         {
-            Log.v(TAG, "ExtensionActivityListener::onExportedResultXml() '${objectHolder.getDataTitle()}' : $detail")
+            Log.v(TAG, "ExtensionFragmentListener::onExportedResultXml() '${objectHolder.getDataTitle()}' : $detail")
             // エクスポートしたことを伝達する
             val outputMessage = parent.getString(R.string.export_xml) + " " + objectHolder.getDataTitle() + " " + detail
             Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()

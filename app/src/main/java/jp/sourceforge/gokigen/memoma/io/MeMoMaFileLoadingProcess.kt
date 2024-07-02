@@ -200,6 +200,7 @@ class MeMoMaFileLoadingProcess(private val parent: Context, private val receiver
     {
         try
         {
+            Log.v(TAG, "onFinishProcess(): $result")
             if (result.isEmpty())
             {
                 //  エラーが発生していない場合には、読みだしたデータをPreferenceに設定登録...

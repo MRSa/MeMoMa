@@ -160,7 +160,8 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     /**
      * 読み込み終了時の処理
      */
-    override fun onLoadedResult(isError: Boolean, detail: String) {
+    override fun onLoadedResult(isError: Boolean, detail: String)
+    {
         try
         {
             // 読み込みしたことを伝達する
@@ -174,6 +175,11 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             // 画面を再描画する
             val surfaceView : GokigenSurfaceView? = parent.findViewById(R.id.GraphicView)
             surfaceView?.doDraw()
+
+            if (surfaceView == null)
+            {
+                // TODO:  ここで再読み込みの通知？
+            }
         }
         catch (e: Exception)
         {
@@ -191,11 +197,12 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
      */
     private fun loadFileWithName(dataTitle: String)
     {
-        // タイトルをオブジェクトフォルダに記憶させる
-        objectHolder.setDataTitle(dataTitle)
-        Log.v(TAG, "MeMoMaDataInOutManager::loadFile() : $dataTitle")
         try
         {
+            // タイトルをオブジェクトフォルダに記憶させる
+            objectHolder.setDataTitle(dataTitle)
+            Log.v(TAG, "MeMoMaDataInOutManager::loadFile() : $dataTitle")
+
             // ファイルをロードする！
             val thread = Thread {
                 try
