@@ -172,8 +172,8 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
             Log.v(TAG, outputMessage)
 
             // 画面を再描画する
-            val surfaceView = parent.findViewById<GokigenSurfaceView>(R.id.GraphicView)
-            surfaceView.doDraw()
+            val surfaceView : GokigenSurfaceView? = parent.findViewById(R.id.GraphicView)
+            surfaceView?.doDraw()
         }
         catch (e: Exception)
         {

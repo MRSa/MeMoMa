@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
     >
     <PreferenceCategory android:title="@string/userCheckbox">
         <EditTextPreference
@@ -11,6 +10,7 @@
             android:dialogTitle="@string/userCheckboxTitle"
         />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/backgroundPreferences">
         <EditTextPreference
             android:key="backgroundUri"
@@ -31,6 +31,7 @@
             android:dialogTitle="@string/backgroundColorTitle"
         />
     </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/parameterTitle">
         <ListPreference
             android:key="objectPrintData"
@@ -47,4 +48,5 @@
             android:entries="@array/operationMode_entries"
             android:entryValues="@array/operationMode_entryvalues" />
     </PreferenceCategory>
+
 </PreferenceScreen>

@@ -26,7 +26,7 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
         }
         if (!::preferenceFragment.isInitialized)
         {
-            preferenceFragment = PreferenceFragment.newInstance()
+            preferenceFragment = PreferenceFragment.newInstance(parent)
         }
         if (!::mainFragment.isInitialized)
         {
@@ -85,7 +85,7 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
             // ----- 設定画面に遷移させる
             if (!::preferenceFragment.isInitialized)
             {
-                preferenceFragment = PreferenceFragment.newInstance()
+                preferenceFragment = PreferenceFragment.newInstance(parent)
             }
             val transaction: FragmentTransaction = parent.supportFragmentManager.beginTransaction()
             transaction.replace(R.id.fragment1, preferenceFragment)

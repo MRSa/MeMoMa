@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -17,16 +18,46 @@ class PreferenceFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeL
 {
     private val intentCaller = PreferenceIntentCaller.newInstance(this.activity)
     private val SELECT_BACKGROUND_IMAGE = 100
+    private lateinit var parent: AppCompatActivity
+
+    private fun prepare(parent: AppCompatActivity)
+    {
+        this.parent = parent
+    }
 
     override fun onResume()
     {
         super.onResume()
-        preferenceManager.preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        try
+        {
+            if (::parent.isInitialized)
+            {
+                //parent.supportActionBar?.title = parent.getString(R.string.preference_name)
+                parent.supportActionBar?.hide()
+            }
+            preferenceManager.preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
-    override fun onPause() {
+    override fun onPause()
+    {
         super.onPause()
-        preferenceManager.preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
+        try
+        {
+            if (::parent.isInitialized)
+            {
+                parent.supportActionBar?.show()
+            }
+            preferenceManager.preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?)
@@ -136,11 +167,12 @@ class PreferenceFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeL
     companion object
     {
         private val TAG = PreferenceFragment::class.java.simpleName
-        fun newInstance(): PreferenceFragment
+        fun newInstance(activity: AppCompatActivity): PreferenceFragment
         {
             val instance = PreferenceFragment()
             val arguments = Bundle()
             instance.setArguments(arguments)
+            instance.prepare(activity)
             return (instance)
         }
 
