@@ -26,6 +26,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
 
     private var isSaving = false
     private var isShareExportedData = false
+    private var loadResultReceiver : ILoadResultReceiver? = null
 
     fun prepare(objectHolder: MeMoMaObjectHolder, bar: ActionBar?, fileName: String)
     {
@@ -131,6 +132,11 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         return (isSaving)
     }
 
+    fun setLoadResultReceiver(receiver: ILoadResultReceiver?)
+    {
+        loadResultReceiver = receiver
+    }
+
     /**
      * 保存終了時の処理
      */
@@ -178,7 +184,7 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
 
             if (surfaceView == null)
             {
-                // TODO:  ここで再読み込みの通知？
+                loadResultReceiver?.onLoaded()
             }
         }
         catch (e: Exception)
@@ -381,6 +387,11 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
     interface ISaveResultReceiver
     {
         fun onSaved()
+    }
+
+    interface ILoadResultReceiver
+    {
+        fun onLoaded()
     }
 
     companion object

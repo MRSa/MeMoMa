@@ -9,6 +9,7 @@ import jp.sourceforge.gokigen.memoma.preference.PreferenceFragment
 
 class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
 {
+    private val inOutManager = MeMoMaDataInOutManager(parent)
     private lateinit var mainFragment: MainFragment
     private lateinit var preferenceFragment: PreferenceFragment
     private lateinit var extentionFragment: ExtensionFragment
@@ -16,13 +17,14 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
 
     fun prepare() {
         Log.v(TAG, "ChangeScene::prepare()")
+
         if (!::listener.isInitialized)
         {
-            listener = MeMoMaListener(parent, MeMoMaDataInOutManager(parent), this)
+            listener = MeMoMaListener(parent, inOutManager, this)
         }
         if (!::extentionFragment.isInitialized)
         {
-            extentionFragment = ExtensionFragment.newInstance(parent)
+            extentionFragment = ExtensionFragment.newInstance(parent, inOutManager)
         }
         if (!::preferenceFragment.isInitialized)
         {
@@ -64,7 +66,7 @@ class ChangeScene(private val parent: AppCompatActivity) : IChangeScene
             Log.v(TAG, "ChangeScene::changeSceneToExtension()")
             if (!::extentionFragment.isInitialized)
             {
-                extentionFragment = ExtensionFragment.newInstance(parent)
+                extentionFragment = ExtensionFragment.newInstance(parent, inOutManager)
             }
             extentionFragment.setDataTitle(title)
             val transaction: FragmentTransaction = parent.supportFragmentManager.beginTransaction()

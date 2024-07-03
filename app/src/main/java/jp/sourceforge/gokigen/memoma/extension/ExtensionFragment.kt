@@ -11,24 +11,27 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import jp.sourceforge.gokigen.memoma.R
+import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager
 
 class ExtensionFragment : Fragment()
 {
     private lateinit var parent : AppCompatActivity
+    private lateinit var inOutManager: MeMoMaDataInOutManager
     private lateinit var myView : View
     private lateinit var listener: ExtensionFragmentListener
 
-    private fun prepare(activity : AppCompatActivity)
+    private fun prepare(parent : AppCompatActivity, inOutManager: MeMoMaDataInOutManager)
     {
         try
         {
-            Log.v(TAG, "ExtensionFragment::prepare() : ${activity.title}")
+            Log.v(TAG, "ExtensionFragment::prepare() : ${parent.title}")
             try
             {
-                parent = activity
+                this.inOutManager = inOutManager
+                this.parent = parent
                 if (!::listener.isInitialized)
                 {
-                    listener = ExtensionFragmentListener(parent)
+                    listener = ExtensionFragmentListener(parent, inOutManager)
                 }
             }
             catch (e: Exception)
@@ -67,7 +70,7 @@ class ExtensionFragment : Fragment()
             {
                 if (!::listener.isInitialized)
                 {
-                    listener = ExtensionFragmentListener(parent)
+                    listener = ExtensionFragmentListener(parent, inOutManager)
                 }
             }
             catch (e: Exception)
@@ -186,10 +189,10 @@ class ExtensionFragment : Fragment()
     {
         private val TAG = ExtensionFragment::class.java.simpleName
 
-        fun newInstance(activity: AppCompatActivity):ExtensionFragment
+        fun newInstance(activity: AppCompatActivity, inOutManager: MeMoMaDataInOutManager):ExtensionFragment
         {
             val instance = ExtensionFragment()
-            instance.prepare(activity)
+            instance.prepare(activity, inOutManager)
             return (instance)
         }
     }

@@ -24,6 +24,7 @@ import jp.sourceforge.gokigen.memoma.Main
 import jp.sourceforge.gokigen.memoma.R
 import jp.sourceforge.gokigen.memoma.dialogs.FileSelectionDialog
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
+import jp.sourceforge.gokigen.memoma.io.MeMoMaDataInOutManager
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileExportCsvProcess
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileImportCsvProcess
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileLoadingProcess
@@ -39,10 +40,11 @@ import java.util.Locale
 /**
  * リスト形式で表示・エクスポート
  */
-class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.OnClickListener,
+class ExtensionFragmentListener(private val parent: AppCompatActivity, private val inOutManager: MeMoMaDataInOutManager) : View.OnClickListener,
     MeMoMaFileLoadingProcess.IResultReceiver, MeMoMaFileExportCsvProcess.IResultReceiver,
     FileSelectionDialog.IResultReceiver,
-    MeMoMaFileImportCsvProcess.IResultReceiver
+    MeMoMaFileImportCsvProcess.IResultReceiver,
+    MeMoMaDataInOutManager.ILoadResultReceiver
 {
     private val objectHolder = AppSingleton.objectHolder
     private var isShareExportedData = false
@@ -137,6 +139,9 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         try
         {
             Log.v(TAG, "ExtensionFragmentListener::prepareToStart() : ${objectHolder.getDataTitle()}")
+
+            // titleが更新されたときに通知を受ける設定
+            inOutManager.setLoadResultReceiver(this)
 
             //  アクションバーを表示する
             val bar = parent.supportActionBar
@@ -683,10 +688,6 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
             // オブジェクト一覧を表示する
             updateObjectList()
 
-            // 読み込みしたことを伝達する
-            //String outputMessage = parent.getString(R.string.load_data) + " " + objectHolder.getDataTitle() + " " + detail;
-            //Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show();
-
             // ----- リストの表示を更新する (ファイルをロードする！)
             Log.v(TAG, "ExtensionFragmentListener::onLoadedResult() '$title' vs $previousTitle")
             if (previousTitle != title)
@@ -894,6 +895,19 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         }
     }
 
+    override fun onLoaded()
+    {
+        try
+        {
+            Log.v(TAG, "ExtensionFragmentListener::onLoaded()")
+            loadDataThread()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
     companion object {
         private val TAG = ExtensionFragmentListener::class.java.simpleName
         private const val PICK_CSV_FILE = 2020
@@ -906,4 +920,5 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity) : View.On
         private const val MENU_ID_IMPORT_XML = (Menu.FIRST + 5)
         private const val MENU_ID_DELETE = (Menu.FIRST + 6)
     }
+
 }
