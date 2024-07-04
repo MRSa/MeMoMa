@@ -298,7 +298,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                         // タイトルバーの更新...
                         val bar = parent.supportActionBar
                         if (bar != null) {
-                            bar.setIcon(R.drawable.icon1)
+                            //bar.setIcon(R.drawable.icon1)
                             bar.title = objectHolder.getDataTitle()
                             bar.show()
                         }
@@ -537,7 +537,19 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             {
                 intent = Intent(Intent.ACTION_GET_CONTENT)
             }
-            intent.setType("text/*")
+
+            if (requestCode == PICK_CSV_FILE)
+            {
+                intent.setType("text/comma-separated-values")
+            }
+            else if (requestCode == PICK_XML_FILE)
+            {
+                intent.setType("text/xml")
+            }
+            else
+            {
+                intent.setType("text/*")
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
                 val path =

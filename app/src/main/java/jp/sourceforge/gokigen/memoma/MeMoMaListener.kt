@@ -49,6 +49,15 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
     SelectLineShapeDialog.IResultReceiver,
     IListener
 {
+    private val insertPictureRequest =
+        parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
+            if (result?.resultCode == Activity.RESULT_OK) {
+                result.data?.let { data: Intent ->
+                    updateBackgroundUri(data)
+                }
+            }
+        }
+
     private lateinit var objectDrawer: MeMoMaCanvasDrawer
     private val editTextDialog: TextEditDialog = TextEditDialog(parent, R.drawable.icon)
     private val drawModeHolder: OperationModeHolder = OperationModeHolder(parent)
@@ -400,6 +409,7 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                 intent.type = "image/*"
                 intent.action = Intent.ACTION_GET_CONTENT
             }
+/*
             val startForResult =
                 parent.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult? ->
                     if (result?.resultCode == Activity.RESULT_OK) {
@@ -409,6 +419,9 @@ class MeMoMaListener internal constructor(private val parent: AppCompatActivity,
                     }
                 }
             startForResult.launch(intent)
+*/
+            insertPictureRequest.launch(intent)
+
         }
         catch (e: Exception)
         {
