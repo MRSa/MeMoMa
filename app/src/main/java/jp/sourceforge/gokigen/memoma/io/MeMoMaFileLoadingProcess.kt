@@ -181,15 +181,23 @@ class MeMoMaFileLoadingProcess(private val parent: Context, private val receiver
      */
     fun parseObjectFromXml(data: MeMoMaObjectHolder): String
     {
-        // ファイル名の設定 ... (拡張子あり...保存時とは違う)
-        val fileName = parent.filesDir.toString() + "/" + data.getDataTitle() + ".xml"
+        var result = ""
+        try
+        {
+            // ファイル名の設定 ... (拡張子あり...保存時とは違う)
+            val fileName = "${parent.filesDir.toString()}/${data.getDataTitle()}.xml"
 
-        // データを読みだす。
-        val result = restoreFromXmlFile(fileName, data)
+            // データを読みだす。
+            result = restoreFromXmlFile(fileName, data)
 
-        //何か必要な場合、 非同期処理をここで実効
-        receiver.onLoadingProcess()
-        System.gc()
+            //何か必要な場合、 非同期処理をここで実効
+            receiver.onLoadingProcess()
+            System.gc()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
         return (result)
     }
 

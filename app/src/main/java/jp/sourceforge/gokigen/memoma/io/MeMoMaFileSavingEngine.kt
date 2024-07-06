@@ -12,31 +12,25 @@ import java.io.FileWriter
 /**
  * データをファイルに保存するエンジン部分
  */
-class MeMoMaFileSavingEngine//  設定データ読み出し用...。
-
-/**
- * コンストラクタ
- */(
+class MeMoMaFileSavingEngine(
     private val context: Context,
     private val backgroundUri: String,
     private val userCheckboxString: String
 ) {
-    private val TAG = toString()
-
     /**
      * データを(XML形式で)保管する。
-     *
      */
-    private fun storeToXmlFile(fileName: String, objectHolder: MeMoMaObjectHolder): String {
+    private fun storeToXmlFile(fileName: String, objectHolder: MeMoMaObjectHolder): String
+    {
         var resultMessage = ""
-        try {
+        try
+        {
             val writer = FileWriter("$fileName.xml")
             val serializer = Xml.newSerializer()
 
             serializer.setOutput(writer)
             serializer.startDocument("UTF-8", true)
             serializer.startTag(Main.APP_NAMESPACE, "memoma")
-
 
             // タイトルの出力
             serializer.startTag(Main.APP_NAMESPACE, "title")
@@ -66,7 +60,6 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
             serializer.startTag(Main.APP_NAMESPACE, "lineserial")
             serializer.text(objectHolder.getConnectLineHolder().getSerialNumber().toString())
             serializer.endTag(Main.APP_NAMESPACE, "lineserial")
-
 
             // オブジェクトの出力 （保持しているものはすべて表示する）
             val keys = objectHolder.getObjectKeys()
@@ -108,7 +101,7 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
                 serializer.startTag(Main.APP_NAMESPACE, "detail")
                 serializer.text(pos.getDetail())
                 serializer.endTag(Main.APP_NAMESPACE, "detail")
-                /*
+/*
                 serializer.startTag(Main.APP_NAMESPACE, "otherInfoUri");
                 serializer.text(pos.otherInfoUri);
                 serializer. endTag(Main.APP_NAMESPACE, "otherInfoUri");
@@ -175,7 +168,7 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
                 serializer.startTag(Main.APP_NAMESPACE, "lineThickness")
                 serializer.text(line.getLineThickness().toString())
                 serializer.endTag(Main.APP_NAMESPACE, "lineThickness")
-                /*
+/*
                 serializer.startTag(Main.APP_NAMESPACE, "fromShape");
                 serializer.text(Integer.toString(line.fromShape));
                 serializer.endTag(Main.APP_NAMESPACE, "fromShape");
@@ -199,7 +192,9 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
             serializer.endDocument()
             serializer.flush()
             writer.close()
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             resultMessage = " " + e.message
             Log.v(TAG, resultMessage)
             e.printStackTrace()
@@ -242,7 +237,10 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
             {
                 e.printStackTrace()
             }
-            Log.v(TAG, "MeMoMaFileSavingEngine::saveObjects() EMPTY : ${objectHolder.getDataTitle()}")
+            Log.v(
+                TAG,
+                "MeMoMaFileSavingEngine::saveObjects() EMPTY : ${objectHolder.getDataTitle()}"
+            )
 
             // データがない場合は保存しない
             return (context.getString(R.string.none_object))
@@ -254,5 +252,10 @@ class MeMoMaFileSavingEngine//  設定データ読み出し用...。
             context.filesDir.toString() + "/" + objectHolder.getDataTitle(),
             objectHolder
         ))
+    }
+
+    companion object
+    {
+        private val TAG = MeMoMaFileSavingEngine::class.java.simpleName
     }
 }

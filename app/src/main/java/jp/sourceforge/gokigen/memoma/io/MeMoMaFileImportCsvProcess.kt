@@ -1,10 +1,9 @@
 package jp.sourceforge.gokigen.memoma.io
 
 import android.app.ProgressDialog
-import android.content.Context
-import android.os.AsyncTask
-import android.preference.PreferenceManager
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import jp.sourceforge.gokigen.memoma.R
 import jp.sourceforge.gokigen.memoma.holders.MeMoMaObjectHolder
 import jp.sourceforge.gokigen.memoma.io.MeMoMaFileSavingProcess.ISavingStatusHolder
@@ -15,55 +14,100 @@ import java.io.FileReader
  * データをファイルに保存するとき用 アクセスラッパ (非同期処理を実行)
  */
 class MeMoMaFileImportCsvProcess(
-    private val context: Context,
-    resultReceiver: IResultReceiver?,
-    fileName: String?
-) :
-    AsyncTask<MeMoMaObjectHolder?, Int?, String>(), ISavingStatusHolder,
-    MeMoMaFileSavingProcess.IResultReceiver {
-    private val TAG = toString()
-    private var receiver: IResultReceiver? = null
-
-    private var targetFileName: String? = null
+    private val parent: AppCompatActivity,
+    private val resultReceiver: IResultReceiver?,
+    private val targetFileName: String
+) : ISavingStatusHolder, MeMoMaFileSavingProcess.IResultReceiver
+{
     private var fileSavedResult: String? = ""
-    private var importingDialog: ProgressDialog? = null
+    private var importingDialog: ProgressDialog = ProgressDialog(parent)
 
-    private var backgroundUri: String? = null
-    private var userCheckboxString: String? = null
+    private var backgroundUri: String
+    private var userCheckboxString: String
 
     /**
      * コンストラクタ
      */
-    init {
-        receiver = resultReceiver
-        targetFileName = fileName
-
-        //  プログレスダイアログ（「データインポート中...」）を表示する。
-        importingDialog = ProgressDialog(context)
-        importingDialog!!.setProgressStyle(ProgressDialog.STYLE_SPINNER)
-        importingDialog!!.setMessage(context.getString(R.string.dataImporting))
-        importingDialog!!.setIndeterminate(true)
-        importingDialog!!.setCancelable(false)
-        importingDialog!!.show()
-
+    init
+    {
         //  設定読み出し用...あらかじめ、UIスレッドで読みだしておく。
-        val preferences = PreferenceManager.getDefaultSharedPreferences(
-            context
-        )
-        backgroundUri = preferences.getString("backgroundUri", "")
-        userCheckboxString = preferences.getString("userCheckboxString", "")
+        val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+        backgroundUri = preferences.getString("backgroundUri", "") ?: ""
+        userCheckboxString = preferences.getString("userCheckboxString", "") ?: ""
     }
 
-    /**
-     * 非同期処理実施前の前処理
-     */
-    override fun onPreExecute() {
+    private fun prepareExecute()
+    {
+        try
+        {
+            //  プログレスダイアログ（「データインポート中...」）を表示する。
+            importingDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+            importingDialog.setMessage(parent.getString(R.string.dataImporting))
+            importingDialog.setIndeterminate(true)
+            importingDialog.setCancelable(false)
+            importingDialog.show()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    fun execute(data: MeMoMaObjectHolder)
+    {
+        try
+        {
+            val thread = Thread {
+                try
+                {
+                    parent.runOnUiThread {
+                        prepareExecute()
+                    }
+                    val result = doInBackground(data)
+                    parent.runOnUiThread {
+                        finishExecute(result)
+                    }
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+            thread.start()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    private fun finishExecute(result: String)
+    {
+        try
+        {
+            try
+            {
+                resultReceiver?.onImportedResult("$result $fileSavedResult")
+                fileSavedResult = ""
+            }
+            catch (ex: Exception)
+            {
+                Log.v(TAG, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.message)
+            }
+            // プログレスダイアログを消す
+            importingDialog.dismiss()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
      * １レコード分のデータを読み込む。
      */
-    private fun readRecord(buf: BufferedReader): String? {
+    private fun readRecord(buf: BufferedReader): String?
+    {
         var oneRecord: String? = null
         try {
             var oneLine = buf.readLine()
@@ -87,23 +131,21 @@ class MeMoMaFileImportCsvProcess(
     /**
      * 1レコード分のデータを区切る
      */
-    private fun parseRecord(dataLine: String, objectHolder: MeMoMaObjectHolder) {
-        var detailIndex = 0
-        var userCheckIndexTrue = 0
-        var userCheckIndexFalse = 0
-        var nextIndex = 0
-        var label = ""
-        var detail = ""
-        var userChecked = false
-        try {
-            detailIndex = dataLine.indexOf("\",\"")
+    private fun parseRecord(dataLine: String, objectHolder: MeMoMaObjectHolder)
+    {
+        val nextIndex: Int
+        val detail : String
+        val userChecked: Boolean
+        try
+        {
+            val detailIndex = dataLine.indexOf("\",\"")
             if (detailIndex < 0) {
                 Log.v(TAG, "parseRecord() : label wrong : $dataLine")
                 return
             }
-            label = dataLine.substring(1, detailIndex)
-            userCheckIndexTrue = dataLine.indexOf("\",True,", detailIndex)
-            userCheckIndexFalse = dataLine.indexOf("\",False,", detailIndex)
+            val label = dataLine.substring(1, detailIndex)
+            val userCheckIndexTrue = dataLine.indexOf("\",True,", detailIndex)
+            val userCheckIndexFalse = dataLine.indexOf("\",False,", detailIndex)
             if (userCheckIndexFalse > detailIndex) {
                 //
                 detail = dataLine.substring(detailIndex + 3, userCheckIndexFalse)
@@ -120,31 +162,26 @@ class MeMoMaFileImportCsvProcess(
                 return
             }
 
-
             //  残りのデータを切り出す。
-            val datas =
+            val data =
                 dataLine.substring(nextIndex).split(",".toRegex()).dropLastWhile { it.isEmpty() }
                     .toTypedArray()
-            if (datas.size < 6) {
-                Log.v(TAG, "parseRecord() : data size wrong : " + datas.size)
+            if (data.size < 6) {
+                Log.v(TAG, "parseRecord() : data size wrong : " + data.size)
                 return
             }
-            val drawStyle = datas[0].toInt()
-            val paintStyle = datas[1]
-            val centerX = datas[2].toFloat()
-            val centerY = datas[3].toFloat()
-            val width = datas[4].toFloat()
-            val height = datas[5].toFloat()
+            val drawStyle = data[0].toInt()
+            val paintStyle = data[1]
+            val centerX = data[2].toFloat()
+            val centerY = data[3].toFloat()
+            val width = data[4].toFloat()
+            val height = data[5].toFloat()
 
             val left = centerX - (width / 2.0f)
             val top = centerY - (height / 2.0f)
 
             // オブジェクトのデータを作成する
             val pos = objectHolder.createPosition(left, top, drawStyle)
-            if (pos == null) {
-                Log.v(TAG, "parseRecord() : object create failure.")
-                return
-            }
             pos.setRectRight(left + width)
             pos.setRectBottom(top + height)
             pos.setLabel(label)
@@ -156,7 +193,6 @@ class MeMoMaFileImportCsvProcess(
             Log.v(TAG, "parseRecord() $ex")
         }
     }
-
 
     /**
      * (CSV形式の)データを読み込んで格納する。
@@ -186,60 +222,40 @@ class MeMoMaFileImportCsvProcess(
     /**
      * 非同期処理
      * （バックグラウンドで実行する(このメソッドは、UIスレッドと別のところで実行する)）
-     *
      */
-    protected override fun doInBackground(vararg datas: MeMoMaObjectHolder?): String {
-        // ファイル名の設定 ... (拡張子なし)
-        val fileName = context.filesDir.toString() + "/exported/" + targetFileName
+    private fun doInBackground(data: MeMoMaObjectHolder): String
+    {
+        var resultString = ""
+        try
+        {
+            // ファイル名の設定 ... (拡張子なし)
+            val fileName = parent.filesDir.toString() + "/exported/" + targetFileName
 
-        // データを読み込む
-        val result = importFromCsvFile(fileName, datas[0]!!)
+            // データを読み込む
+            val result = importFromCsvFile(fileName, data)
 
-        // データを保存する
-        val savingEngine = MeMoMaFileSavingEngine(
-            context,
-            backgroundUri!!, userCheckboxString!!
-        )
-        val message = savingEngine.saveObjects(datas[0]!!)
-
-        System.gc()
-
-        return ("$result $message")
-    }
-
-    /**
-     * 非同期処理の進捗状況の更新
-     */
-    protected override fun onProgressUpdate(vararg values: Int?) {
-        // 今回は何もしない
-    }
-
-    /**
-     * 非同期処理の後処理
-     * (結果を応答する)
-     */
-    override fun onPostExecute(result: String) {
-        try {
-            receiver?.onImportedResult("$result  $fileSavedResult")
-            fileSavedResult = ""
-        } catch (ex: Exception) {
-            Log.v(TAG, "MeMoMaFileImportCsvProcess::onPostExecute() : " + ex.message)
+            // データを保存する
+            val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+            val message = savingEngine.saveObjects(data)
+            System.gc()
+            resultString = "$result $message"
         }
-        // プログレスダイアログを消す
-        importingDialog!!.dismiss()
-
-        return
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+            resultString = " IMPORT ERRROR "
+        }
+        return (resultString)
     }
 
-    override fun onSavedResult(isError: Boolean, detail: String?) {
+    override fun onSavedResult(isError: Boolean, detail: String?)
+    {
         fileSavedResult = detail
     }
 
     private var savingStatus = false
     override fun getSavingStatus(): Boolean { return false }
-    override fun setSavingStatus(isSaving: Boolean) {
-        savingStatus = isSaving
-    }
+    override fun setSavingStatus(isSaving: Boolean) { savingStatus = isSaving }
 
     /**
      * 結果報告用のインタフェース（積極的に使う予定はないけど...）
@@ -247,5 +263,9 @@ class MeMoMaFileImportCsvProcess(
     interface IResultReceiver
     {
         fun onImportedResult(fileName: String) // 保存結果の報告
+    }
+    companion object
+    {
+        private val TAG = MeMoMaFileImportCsvProcess::class.java.simpleName
     }
 }

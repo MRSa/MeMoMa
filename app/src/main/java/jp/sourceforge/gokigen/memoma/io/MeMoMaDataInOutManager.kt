@@ -62,16 +62,25 @@ class MeMoMaDataInOutManager(private val parent: AppCompatActivity) : ISavingSta
         {
             if (::dataFileHolder.isInitialized)
             {
-                // データファイル一覧を更新する
-                val index = dataFileHolder.updateFileList(titleName)
+                parent.runOnUiThread {
+                    try
+                    {
+                        // データファイル一覧を更新する
+                        val index = dataFileHolder.updateFileList(titleName)
 
-                // タイトルをオブジェクトフォルダに記憶させる
-                objectHolder.setDataTitle(titleName)
+                        // タイトルをオブジェクトフォルダに記憶させる
+                        objectHolder.setDataTitle(titleName)
 
-                // タイトルの設定を変更する
-                if ((bar != null) && (index >= 0))
-                {
-                    bar.setSelectedNavigationItem(index) // 実験...
+                        // タイトルの設定を変更する
+                        if ((bar != null) && (index >= 0))
+                        {
+                            bar.setSelectedNavigationItem(index) // 実験...
+                        }
+                    }
+                    catch (e: Exception)
+                    {
+                        e.printStackTrace()
+                    }
                 }
             }
         }

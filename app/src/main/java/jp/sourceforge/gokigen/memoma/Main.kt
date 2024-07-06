@@ -22,6 +22,7 @@ class Main : AppCompatActivity()
         super.onStart()
         try
         {
+            Log.v(TAG, "Main::onStart()")
             sceneChanger.prepare()
         }
         catch (e: Exception)
@@ -126,6 +127,7 @@ class Main : AppCompatActivity()
             if (allPermissionsGranted())
             {
                 // ----- 権限が有効だった、最初の画面を開く
+                Log.v(TAG, "onRequestPermissionsResult()")
                 sceneChanger.prepare()
                 sceneChanger.changeSceneToMain()
             }

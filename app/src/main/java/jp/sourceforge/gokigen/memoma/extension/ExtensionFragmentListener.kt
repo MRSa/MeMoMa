@@ -87,6 +87,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
 
     fun setDataTitle(title: String)
     {
+        // タイトルを設定する
         var dataTitle = title
         try
         {
@@ -94,7 +95,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             val prefTitleString = preferences.getString("content_data_title", "") ?: ""
             if (prefTitleString.isNotEmpty())
             {
-                // Preferenceに タイトル名が記録されていたら、上書きする
+                // ----- Preferenceに タイトル名が記録されていたら、上書きする
                 dataTitle = prefTitleString
             }
             // Intentで拾ったデータを読み出す (初期化データ)
@@ -125,7 +126,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
     {
         try
         {
-            // フィルタ設定ボタン
+            // フィルタ設定ボタンの設定
             myView.findViewById<ImageButton>(R.id.SetFilterButton)?.setOnClickListener(this)
         }
         catch (e: Exception)
@@ -147,7 +148,6 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             val bar = parent.supportActionBar
             if (bar != null)
             {
-                //bar.setIcon(R.drawable.icon1)
                 bar.title = objectHolder.getDataTitle()
                 bar.show()
             }
@@ -199,7 +199,6 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             e.printStackTrace()
         }
     }
-
 
     /**
      * 詳細データを表示する。
@@ -273,41 +272,34 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             }
 
             val thread = Thread {
-                val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
-                val backgroundUri = preferences.getString("backgroundUri", "")?:""
-                val userCheckboxString = preferences.getString("userCheckboxString", "")?:""
+                try
+                {
+                    val preferences = PreferenceManager.getDefaultSharedPreferences(parent)
+                    val backgroundUri = preferences.getString("backgroundUri", "")?:""
+                    val userCheckboxString = preferences.getString("userCheckboxString", "")?:""
 
-                // データの保管を実施する (現状)
-                val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
-                val result0 = savingEngine.saveObjects(objectHolder)
-                Log.v(TAG, "Saved : $result0")
+                    // ----- データの保管を実施する (現状)
+                    //val savingEngine = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+                    //val result0 = savingEngine.saveObjects(objectHolder)
+                    //Log.v(TAG, "Saved : $result0")
 
-                val importer = ExtensionXmlImport(parent, objectHolder, uri)
-                val result1 = importer.importFromXmlFile()
+                    // ----- インポート前にデータを全部消す
+                    objectHolder.removeAllPositions()
+                    val lineHolder = objectHolder.getConnectLineHolder()
+                    lineHolder.removeAllLines()
 
-                // データの保管を実施する (新規)
-                val savingEngine2 = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
-                val result = savingEngine2.saveObjects(objectHolder) + " " + result1
-                Log.v(TAG, "=== Data Saved: ${objectHolder.getDataTitle()} result: $result1")
-                parent.runOnUiThread {
-                    try
-                    {
-                        // 読み込んだファイル名をタイトルに設定する
-                        parent.title = objectHolder.getDataTitle()
+                    val importer = ExtensionXmlImport(parent, objectHolder, uri)
+                    val result1 = importer.importFromXmlFile()
 
-                        // タイトルバーの更新...
-                        val bar = parent.supportActionBar
-                        if (bar != null) {
-                            //bar.setIcon(R.drawable.icon1)
-                            bar.title = objectHolder.getDataTitle()
-                            bar.show()
-                        }
-                        onImportedResultXml(result)
-                    }
-                    catch (e: Exception)
-                    {
-                        e.printStackTrace()
-                    }
+                    // データの保管を実施する (新規)
+                    val savingEngine2 = MeMoMaFileSavingEngine(parent, backgroundUri, userCheckboxString)
+                    val result = savingEngine2.saveObjects(objectHolder) + " " + result1
+                    Log.v(TAG, "=== Data Saved: ${objectHolder.getDataTitle()} result: $result1")
+                    onImportedResultXml(result)
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
                 }
             }
             thread.start()
@@ -342,7 +334,8 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
      */
     fun onCreateOptionsMenu(menu: Menu): Menu
     {
-        try {
+        try
+        {
             var menuItem =
                 menu.add(Menu.NONE, MENU_ID_SHARE, Menu.NONE, parent.getString(R.string.export_csv))
             menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
@@ -392,7 +385,9 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             )
             menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
             menuItem.setIcon(android.R.drawable.ic_menu_delete)
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             e.printStackTrace()
         }
         return (menu)
@@ -425,44 +420,51 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
      */
     fun onOptionsItemSelected(item: MenuItem): Boolean
     {
-        val result: Boolean
-        when (item.itemId) {
-            MENU_ID_EXPORT -> {
-                // 表示中データのエクスポート
-                exportAsCsv(false)
-                result = true
-            }
+        var result = false
+        try
+        {
+            when (item.itemId) {
+                MENU_ID_EXPORT -> {
+                    // 表示中データのエクスポート
+                    exportAsCsv(false)
+                    result = true
+                }
 
-            MENU_ID_EXPORT_XML -> {
-                // 表示中データのエクスポート
-                exportAsXml()
-                result = true
-            }
+                MENU_ID_EXPORT_XML -> {
+                    // 表示中データのエクスポート
+                    exportAsXml()
+                    result = true
+                }
 
-            MENU_ID_SHARE -> {
-                exportAsCsv(true)
-                result = true
-            }
+                MENU_ID_SHARE -> {
+                    exportAsCsv(true)
+                    result = true
+                }
 
-            MENU_ID_IMPORT -> {
-                // データのインポート(CSV形式)
-                callPickImportObject(PICK_CSV_FILE)
-                result = true
-            }
+                MENU_ID_IMPORT -> {
+                    // データのインポート(CSV形式)
+                    callPickImportObject(PICK_CSV_FILE)
+                    result = true
+                }
 
-            MENU_ID_IMPORT_XML -> {
-                // データのインポート(XML形式)
-                callPickImportObject(PICK_XML_FILE)
-                result = true
-            }
+                MENU_ID_IMPORT_XML -> {
+                    // データのインポート(XML形式)
+                    callPickImportObject(PICK_XML_FILE)
+                    result = true
+                }
 
-            MENU_ID_DELETE -> {
-                // データの削除
-                deleteContent()
-                result = true
-            }
+                MENU_ID_DELETE -> {
+                    // データの削除
+                    deleteContent()
+                    result = true
+                }
 
-            else -> result = false
+                else -> result = false
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
         }
         return (result)
     }
@@ -475,40 +477,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         try
         {
             //  データの一覧を取得する
-            val dialog =
-                FileSelectionDialog(parent, parent.getString(R.string.delete_content),
-                    ".xml"
-                ) { fileName: String? ->
-                    // fileNameのファイルを削除する...
-                    val thread = Thread {
-                        try
-                        {
-                            // ファイル削除の実処理
-                            val targetFile = parent.filesDir.toString() + "/" + fileName
-                            if (!(File(targetFile).delete())) {
-                                Log.v(TAG, "Content Delete Failure : $fileName")
-                            }
-                        }
-                        catch (e: Exception)
-                        {
-                            e.printStackTrace()
-                        }
-                    }
-                    try
-                    {
-                        // 削除実処理の実行
-                        thread.start()
-                        parent.runOnUiThread {
-                            val outputMessage =
-                                parent.getString(R.string.delete_content) + " " + fileName
-                            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    catch (e: Exception)
-                    {
-                        e.printStackTrace()
-                    }
-                }
+            val dialog = FileSelectionDialog(parent, parent.getString(R.string.delete_content), ".xml") { fileName: String? -> run{ deleteConfirm(fileName) } }
             dialog.prepare()
             dialog.dialog?.show()
         }
@@ -516,6 +485,91 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         {
             e.printStackTrace()
         }
+    }
+
+    private fun deleteConfirm(fileName : String?)
+    {
+        if (fileName == null)
+        {
+
+            return
+        }
+        try
+        {
+            // 本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
+            val alertDialogBuilder = AlertDialog.Builder(parent)
+            alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
+            alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
+            alertDialogBuilder.setMessage(parent.getString(R.string.deleteconfirm_message))
+
+            // OKボタンの生成
+            alertDialogBuilder.setPositiveButton(
+                parent.getString(R.string.confirmYes)
+            ) { _, _ -> //  削除モードの時... 確認後削除だけど、今は確認なしで削除を行う。
+                try
+                {
+                    deleteContentImpl(fileName)
+                }
+                catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
+
+            // Cancelボタンの生成
+            alertDialogBuilder.setNegativeButton(
+                parent.getString(R.string.confirmNo)
+            ) { dialog, _ -> dialog.cancel() }
+
+            // ダイアログはキャンセル可能に設定する
+            alertDialogBuilder.setCancelable(true)
+
+            // ダイアログを表示する
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    private fun deleteContentImpl(fileName: String)
+    {
+        // fileNameのファイルを削除する...
+        val thread = Thread {
+            try
+            {
+                // ファイル削除の実処理
+                val targetFile = parent.filesDir.toString() + "/" + fileName
+                if (!(File(targetFile).delete()))
+                {
+                    Log.v(TAG, "Content Delete Failure : $fileName")
+                }
+
+                // 一覧の情報を更新する
+                inOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
+                parent.runOnUiThread {
+                    val outputMessage =
+                        parent.getString(R.string.delete_content) + " " + fileName
+                    Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+            catch (e: Exception)
+            {
+                e.printStackTrace()
+            }
+        }
+        try
+        {
+            // 削除実処理の実行
+            thread.start()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+
     }
 
     /**
@@ -538,17 +592,17 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                 intent = Intent(Intent.ACTION_GET_CONTENT)
             }
 
-            if (requestCode == PICK_CSV_FILE)
+            when (requestCode)
             {
-                intent.setType("text/comma-separated-values")
-            }
-            else if (requestCode == PICK_XML_FILE)
-            {
-                intent.setType("text/xml")
-            }
-            else
-            {
-                intent.setType("text/*")
+                PICK_CSV_FILE -> {
+                    intent.setType("text/comma-separated-values")
+                }
+                PICK_XML_FILE -> {
+                    intent.setType("text/xml")
+                }
+                else -> {
+                    intent.setType("text/*")
+                }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             {
@@ -583,11 +637,18 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
      */
     private fun exportAsCsv(isShare: Boolean)
     {
-        isShareExportedData = isShare
+        try
+        {
+            isShareExportedData = isShare
 
-        // AsyncTaskを使ってデータをエクスポートする
-        val asyncTask = MeMoMaFileExportCsvProcess(parent, this)
-        asyncTask.execute(objectHolder)
+            // データを(CSV形式で)エクスポートする
+            val csvExportTask = MeMoMaFileExportCsvProcess(parent, this)
+            csvExportTask.execute(objectHolder)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -645,34 +706,34 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             val keys = objectHolder.getObjectKeys()
             if (keys != null)
             {
-            while (keys.hasMoreElements())
-            {
-                val key = keys.nextElement()
-                val pos = objectHolder.getPosition(key)
-
-                if (pos != null)
+                while (keys.hasMoreElements())
                 {
-                    // アイコンの決定
-                    val objectStyleIcon =
-                        MeMoMaObjectHolder.getObjectDrawStyleIcon(pos.getDrawStyle())
+                    val key = keys.nextElement()
+                    val pos = objectHolder.getPosition(key)
 
-                    // ユーザチェックの有無表示
-                    val userCheckedIcon =
-                        if ((pos.getUserChecked())) R.drawable.btn_checked else R.drawable.btn_notchecked
+                    if (pos != null)
+                    {
+                        // アイコンの決定
+                        val objectStyleIcon =
+                            MeMoMaObjectHolder.getObjectDrawStyleIcon(pos.getDrawStyle())
 
-                    // TODO: アイテム選択時の情報エリアは(ArrayItem側には)用意しているが未使用。
-                    val listItem =
-                        SymbolListArrayItem(
-                            userCheckedIcon,
-                            pos.getLabel(),
-                            pos.getDetail(),
-                            "",
-                            objectStyleIcon
-                        )
+                        // ユーザチェックの有無表示
+                        val userCheckedIcon =
+                            if ((pos.getUserChecked())) R.drawable.btn_checked else R.drawable.btn_notchecked
 
-                    listItems.add(listItem)
+                        // TODO: アイテム選択時の情報エリアは(ArrayItem側には)用意しているが未使用。
+                        val listItem =
+                            SymbolListArrayItem(
+                                userCheckedIcon,
+                                pos.getLabel(),
+                                pos.getDetail(),
+                                "",
+                                objectStyleIcon
+                            )
+
+                        listItems.add(listItem)
+                    }
                 }
-            }
             }
         }
         catch (ex: Exception)
@@ -691,21 +752,10 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
     {
         try
         {
-            val title = objectHolder.getDataTitle()
             Log.v(TAG, "ExtensionFragmentListener::onLoadedResult() '${objectHolder.getDataTitle()}' : $detail")
-
-            // 読み込んだファイル名をタイトルに設定する
-            parent.title = title
-
-            // オブジェクト一覧を表示する
-            updateObjectList()
-
-            // ----- リストの表示を更新する (ファイルをロードする！)
-            Log.v(TAG, "ExtensionFragmentListener::onLoadedResult() '$title' vs $previousTitle")
-            if (previousTitle != title)
-            {
-                loadDataThread()
-                //previousTitle = title
+            parent.runOnUiThread {
+                // オブジェクト一覧を表示する
+                updateObjectList()
             }
         }
         catch (e: Exception)
@@ -821,8 +871,15 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
     {
         // CSVファイルからオブジェクトをロードするクラスを呼び出す。
         Log.v(TAG, "ExtensionFragmentListener::selectedFileName() : $fileName")
-        val asyncTask = MeMoMaFileImportCsvProcess(parent, this, fileName)
-        asyncTask.execute(objectHolder)
+        try
+        {
+            val asyncTask = MeMoMaFileImportCsvProcess(parent, this, fileName?:"")
+            asyncTask.execute(objectHolder)
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -833,16 +890,21 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         Log.v(TAG, "ExtensionFragmentListener::onImportedResult() '${objectHolder.getDataTitle()}' : $fileName")
         try
         {
-            // インポートしたことを伝達する
-            val outputMessage = "${parent.getString(R.string.import_csv)}  ${objectHolder.getDataTitle()} : $fileName"
-            Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+            parent.runOnUiThread {
+                // インポートしたことを伝達する
+                val outputMessage = "${parent.getString(R.string.import_csv)}  ${objectHolder.getDataTitle()} : $fileName"
+                Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
 
-            // 一覧のリストを作りなおす
-            onLoadingProcess()
-            updateObjectList()
+                // 一覧のリストを作りなおす
+                onLoadingProcess()
+                updateObjectList()
 
-            // -----
-            Log.v(TAG, "imported : '${objectHolder.getDataTitle()}'.")
+                // 一覧の情報を更新する
+                inOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
+
+                // -----
+                Log.v(TAG, "imported : '${objectHolder.getDataTitle()}'.")
+            }
         }
         catch (e: Exception)
         {
@@ -861,6 +923,16 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             parent.runOnUiThread {
                 try
                 {
+                    // 読み込んだファイル名をタイトルに設定する
+                    parent.title = objectHolder.getDataTitle()
+
+                    // タイトルバーの更新...
+                    val bar = parent.supportActionBar
+                    if (bar != null) {
+                        bar.title = objectHolder.getDataTitle()
+                        bar.show()
+                    }
+
                     //  ダイアログで情報を表示する。
                     AlertDialog.Builder(parent)
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -873,18 +945,22 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                     val outputMessage =
                         parent.getString(R.string.import_xml) + " " + objectHolder.getDataTitle() + " " + detail
                     Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+
+                    // タイトルを更新
+                    setPreferenceString(title)
+
+                    // 一覧のリストを作りなおす
+                    onLoadingProcess()
+                    updateObjectList()
+
+                    // 一覧の情報を更新する
+                    inOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
                 }
                 catch (e: Exception)
                 {
                     e.printStackTrace()
                 }
             }
-            // タイトルを更新
-            setPreferenceString(title)
-
-            // 一覧のリストを作りなおす
-            onLoadingProcess()
-            updateObjectList()
         }
         catch (e: Exception)
         {
@@ -932,5 +1008,4 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         private const val MENU_ID_IMPORT_XML = (Menu.FIRST + 5)
         private const val MENU_ID_DELETE = (Menu.FIRST + 6)
     }
-
 }
