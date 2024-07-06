@@ -153,7 +153,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
             }
 
             // ファイルをロードする！
-            loadDataThread()
+            //loadDataThread()
         }
         catch (e: Exception)
         {
@@ -208,7 +208,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         Log.v(TAG, "SELECTED: $first $second $third")
     }
 
-    fun shutdown()
+    fun onPause()
     {
         previousTitle = ""
     }
@@ -494,13 +494,23 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
 
             return
         }
+        val dataTitle = objectHolder.getDataTitle()
+        if (fileName == "$dataTitle.xml")
+        {
+            // 今開いているファイルは削除できません、と、表示する
+            parent.runOnUiThread {
+                val outputMessage = "${parent.getString(R.string.cannot_delete_itself)}: $dataTitle"
+                Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
         try
         {
-            // 本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
+            // 選択したファイルを本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
             val alertDialogBuilder = AlertDialog.Builder(parent)
             alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
             alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-            alertDialogBuilder.setMessage(parent.getString(R.string.deleteconfirm_message))
+            alertDialogBuilder.setMessage("$fileName : ${parent.getString(R.string.deleteconfirm_message)}")
 
             // OKボタンの生成
             alertDialogBuilder.setPositiveButton(

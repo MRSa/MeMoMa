@@ -155,9 +155,10 @@ class ExtensionFragment : Fragment()
         try
         {
             super.onPause()
+            Log.v(TAG, "ExtensionFragment::onPause()")
 
             // 動作を止めるようイベント処理クラスに指示する
-            listener.shutdown()
+            listener.onPause()
         }
         catch (ex: Exception)
         {
@@ -170,6 +171,7 @@ class ExtensionFragment : Fragment()
         try
         {
             super.onResume()
+            Log.v(TAG, "ExtensionFragment::onResume()")
             if (::listener.isInitialized)
             {
                 if (::myView.isInitialized)

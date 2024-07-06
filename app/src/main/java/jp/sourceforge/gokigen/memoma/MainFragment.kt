@@ -82,6 +82,7 @@ class MainFragment: Fragment()
         super.onResume()
         try
         {
+            Log.v(TAG, "MainFragment::onResume()")
             listener.prepareToStart(myView)
             listener.updateContentList()
         }
@@ -96,6 +97,7 @@ class MainFragment: Fragment()
         super.onPause()
         try
         {
+            Log.v(TAG, "MainFragment::onPause()")
             listener.shutdown()
         }
         catch (e: Exception)
