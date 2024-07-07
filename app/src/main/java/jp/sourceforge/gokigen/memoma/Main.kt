@@ -5,10 +5,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 
 /**
  * メイン画面の処理
@@ -53,6 +57,15 @@ class Main : AppCompatActivity()
 
         try
         {
+            setupWindowInset(findViewById(R.id.base_layout))
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+
+        try
+        {
             // ----- 最初の画面を開く
             sceneChanger.changeSceneToMain()
         }
@@ -75,6 +88,32 @@ class Main : AppCompatActivity()
         }
 
         Log.v(TAG, " START MeMoMa...")
+    }
+
+    private fun setupWindowInset(view: View)
+    {
+        try
+        {
+            // Display cutout insets
+            //   https://developer.android.com/develop/ui/views/layout/edge-to-edge
+            ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+                val bars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()
+                            or WindowInsetsCompat.Type.displayCutout()
+                )
+                v.updatePadding(
+                    left = bars.left,
+                    top = bars.top,
+                    right = bars.right,
+                    bottom = bars.bottom,
+                )
+                WindowInsetsCompat.CONSUMED
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
     }
 
     private fun allPermissionsGranted() : Boolean
