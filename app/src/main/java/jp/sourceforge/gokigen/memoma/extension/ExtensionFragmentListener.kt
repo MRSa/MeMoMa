@@ -506,11 +506,14 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         }
         try
         {
+            // タイトルのみにする
+            val targetTitle = fileName.replace(".xml", "")
+
             // 選択したファイルを本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
             val alertDialogBuilder = AlertDialog.Builder(parent)
             alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
             alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-            alertDialogBuilder.setMessage("$fileName : ${parent.getString(R.string.deleteconfirm_message)}")
+            alertDialogBuilder.setMessage("$targetTitle : ${parent.getString(R.string.deleteconfirm_message)}")
 
             // OKボタンの生成
             alertDialogBuilder.setPositiveButton(
