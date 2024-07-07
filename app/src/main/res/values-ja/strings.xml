@@ -9,13 +9,13 @@
     <string name="deleteconfirm_title">削除確認</string>
     <string name="deleteconfirm_message">削除します。よろしいですか？</string>
     <string name="cannot_delete_itself">現在開いているファイルは削除できません。</string>
-    <string name="extend_menu">オブジェクト一覧&#8230;</string>
-    <string name="rename_title">名前を変えて保存&#8230;</string>
+    <string name="extend_menu">オブジェクト一覧</string>
+    <string name="rename_title">名前を付けて保存&#8230;</string>
     <string name="load_data">読込&#8230;</string>
     <string name="save_data">保存&#8230;</string>
-    <string name="align_data">整列&#8230;</string>
-    <string name="capture_data">画像として保存&#8230;</string>
-    <string name="export_csv">CSV形式で保存&#8230;</string>
+    <string name="align_data">整列</string>
+    <string name="capture_data">画像として保存</string>
+    <string name="export_csv">CSV形式で保存</string>
     <string name="import_csv">CSVファイルから追加&#8230;</string>
     <string name="background_data">背景画像&#8230;</string>
     <string name="dialogtitle_selectcsv">追加するCSVファイルを選択</string>
@@ -77,7 +77,7 @@
     <string name="permission_not_granted">許可が得られませんでした。</string>
     <string name="permission_capture_error">許可を得るタイミングでエラーが発生しました。</string>
     <string name="import_xml">XMLファイルから取り込み&#8230;</string>
-    <string name="export_xml">XMLファイルとして出力&#8230;</string>
+    <string name="export_xml">XMLファイルとして出力</string>
     <string name="delete_content">データの削除&#8230;</string>
     <string name="none_object">図形がないため、保存しません</string>
     <string name="import_xml_information">XMLファイルから取り込みしたデータは、メイン画面で改めて選択をお願いします。</string>

@@ -351,7 +351,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
         try
         {
             var menuItem =
-                menu.add(Menu.NONE, MENU_ID_SHARE, Menu.NONE, parent.getString(R.string.export_csv))
+                menu.add(Menu.NONE, MENU_ID_SHARE, Menu.NONE, parent.getString(R.string.shareContent))
             menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             menuItem.setIcon(android.R.drawable.ic_menu_share)
 
@@ -359,7 +359,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                 Menu.NONE,
                 MENU_ID_EXPORT,
                 Menu.NONE,
-                parent.getString(R.string.shareContent)
+                parent.getString(R.string.export_csv)
             )
             menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
             menuItem.setIcon(android.R.drawable.ic_menu_save)

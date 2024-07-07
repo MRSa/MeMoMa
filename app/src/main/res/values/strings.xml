@@ -9,13 +9,13 @@
     <string name="deleteconfirm_title">Deleting confirmation</string>
     <string name="deleteconfirm_message">Delete OK?</string>
     <string name="cannot_delete_itself">The selected file is currently opened, cannot be deleted.</string>
-    <string name="extend_menu">Object List&#8230;</string>
+    <string name="extend_menu">Object List</string>
     <string name="rename_title">Save as&#8230;</string>
     <string name="load_data">Load&#8230;</string>
     <string name="save_data">Save&#8230;</string>
-    <string name="align_data">Align&#8230;</string>
-    <string name="capture_data">Save as Picture&#8230;</string>
-    <string name="export_csv">Export as CSV&#8230;</string>
+    <string name="align_data">Align</string>
+    <string name="capture_data">Save as Picture</string>
+    <string name="export_csv">Export as CSV</string>
     <string name="import_csv">Append from CSV&#8230;</string>
     <string name="background_data">Select Background&#8230;</string>
     <string name="dialogtitle_selectcsv">Select a CSV to append</string>
@@ -77,7 +77,7 @@
     <string name="permission_not_granted">Permissions not granted by the user.</string>
     <string name="permission_capture_error">Error Occurs at the request permission sequence.</string>
     <string name="import_xml">Import from XML&#8230;</string>
-    <string name="export_xml">Export to XML&#8230;</string>
+    <string name="export_xml">Export to XML</string>
     <string name="delete_content">Delete Content&#8230;</string>
     <string name="none_object">Object is empty, not saved.</string>
     <string name="import_xml_information">Please select again the data imported from the XML file on the main screen.</string>
