@@ -152,8 +152,22 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                 bar.show()
             }
 
-            // ファイルをロードする！
-            //loadDataThread()
+            // ---- 画面のオブジェクト一覧表示を更新する
+            refreshObjectListScreen()
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+        }
+    }
+
+    private fun refreshObjectListScreen()
+    {
+        try
+        {
+            // 一覧のリストを作りなおす...この関数名２つを使う、は、わからん。。。
+            onLoadingProcess()
+            updateObjectList()
         }
         catch (e: Exception)
         {
@@ -511,9 +525,9 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
 
             // 選択したファイルを本当に消して良いか、確認をするダイアログを表示して、OKが押されたら消す。
             val alertDialogBuilder = AlertDialog.Builder(parent)
-            alertDialogBuilder.setTitle(parent.getString(R.string.deleteconfirm_title))
+            alertDialogBuilder.setTitle("$targetTitle: ${parent.getString(R.string.deleteconfirm_title)}")
             alertDialogBuilder.setIcon(android.R.drawable.ic_dialog_alert)
-            alertDialogBuilder.setMessage("$targetTitle : ${parent.getString(R.string.deleteconfirm_message)}")
+            alertDialogBuilder.setMessage(parent.getString(R.string.deleteconfirm_message))
 
             // OKボタンの生成
             alertDialogBuilder.setPositiveButton(
@@ -909,8 +923,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                 Toast.makeText(parent, outputMessage, Toast.LENGTH_SHORT).show()
 
                 // 一覧のリストを作りなおす
-                onLoadingProcess()
-                updateObjectList()
+                refreshObjectListScreen()
 
                 // 一覧の情報を更新する
                 inOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
@@ -963,8 +976,7 @@ class ExtensionFragmentListener(private val parent: AppCompatActivity, private v
                     setPreferenceString(title)
 
                     // 一覧のリストを作りなおす
-                    onLoadingProcess()
-                    updateObjectList()
+                    refreshObjectListScreen()
 
                     // 一覧の情報を更新する
                     inOutManager.updateFileList(objectHolder.getDataTitle(), parent.supportActionBar)
